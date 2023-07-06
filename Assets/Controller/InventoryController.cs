@@ -15,7 +15,7 @@ public class InventoryController : MonoBehaviour
 
 
     [SerializeField, HideInInspector]
-    private List<InventoryInitializer> prevIntializeInventory;
+    private List<InventoryInitializer> previousInventoryTracker;
 
 
     [SerializeField] private GameObject inventoryUIObject;
@@ -45,26 +45,64 @@ public class InventoryController : MonoBehaviour
     }
     public void InitializeInventories()
     {
-
-        ItemManager.Clear();
-        foreach (Item item in items)
-        {
-            ItemManager.Add(item.GetItemType(), item);
-        }
-
-
         AllignDictionaries();
-        List<GameObject> toremove= new List<GameObject>();
-        foreach (InventoryInitializer initializer in prevIntializeInventory)
+        InitializeItems();
+        RemoveDeletedInventories();
+        InitializeNewInventories();
+        UpdateInventoryTracker();
+    }
+    public Inventory GetInventory(string name)
+    {
+        return InventoryManager[name];
+    }
+    private void UpdateInventoryTracker()
+    {
+        previousInventoryTracker.Clear();
+        for (int i = 0; i < intializeInventory.Count; i++)
         {
-            if(!intializeInventory.Contains(initializer))
+            InventoryInitializer InitilizerCopy = new InventoryInitializer();
+            InitilizerCopy.Copy(intializeInventory[i]);
+            previousInventoryTracker.Add(InitilizerCopy);
+        }
+    }
+    private void InitializeNewInventories()
+    {
+        foreach (InventoryInitializer initializer in intializeInventory)
+        {
+            if (!previousInventoryTracker.Contains(initializer))
             {
-                foreach(GameObject UI in allInventoryUI)
+                GameObject tempinventoryUI = Instantiate(inventoryUIObject, transform.position, Quaternion.identity, UI);
+                allInventoryUI.Add(tempinventoryUI);
+
+                string inventoryName = initializer.GetInventoryName();
+                int InventorySize = initializer.GetRow() * initializer.GetCol();
+                Inventory curInventory = new Inventory(tempinventoryUI,inventoryName, InventorySize);
+
+                InventoryManager.Add(inventoryName, curInventory);
+
+                InventoryUI inventoryUI = tempinventoryUI.GetComponent<InventoryUI>();
+                inventoryUI.SetInventory(ref curInventory);
+
+                inventoryUI.SetRowCol(initializer.GetRow(), initializer.GetCol());
+                inventoryUI.SetInventoryName(initializer.GetInventoryName());
+                inventoryUI.UpdateInventoryDisplay();
+            }
+        }
+    }
+    private void RemoveDeletedInventories()
+    {
+
+        List<GameObject> toremove = new List<GameObject>();
+        foreach (InventoryInitializer initializer in previousInventoryTracker)
+        {
+            if (!intializeInventory.Contains(initializer))
+            {
+                foreach (GameObject UI in allInventoryUI)
                 {
                     InventoryUI UIInstance = UI.GetComponent<InventoryUI>();
                     print(UIInstance.GetInventoryName());
                     if (UIInstance.GetInventoryName() == initializer.GetInventoryName())
-                    {                        
+                    {
                         toremove.Add(UI);
                         InventoryManager.Remove(UIInstance.GetInventoryName());
                     }
@@ -78,38 +116,14 @@ public class InventoryController : MonoBehaviour
             DestroyImmediate(remove);
 
         }
-
-        foreach (InventoryInitializer initializer in intializeInventory)
-        {
-            if (!prevIntializeInventory.Contains(initializer))
-            {
-                GameObject tempinventoryUI = Instantiate(inventoryUIObject, transform.position, Quaternion.identity, UI);
-
-                allInventoryUI.Add(tempinventoryUI);
-                InventoryUI inventoryUI = tempinventoryUI.GetComponent<InventoryUI>();
-                string inventoryName = initializer.GetInventoryName();
-                int InventorySize = initializer.GetRow() * initializer.GetCol();
-                Inventory curInventory = new Inventory(inventoryName, InventorySize);
-                curInventory.setManager(tempinventoryUI);
-                InventoryManager.Add(inventoryName, curInventory);
-                inventoryUI.SetInventory(ref curInventory);
-
-                inventoryUI.SetRowCol(initializer.GetRow(), initializer.GetCol());
-                inventoryUI.SetInventoryName(initializer.GetInventoryName());
-                inventoryUI.UpdateInventoryDisplay();
-            }
-        }
-        prevIntializeInventory.Clear();
-        for (int i = 0; i < intializeInventory.Count; i++)
-        {
-            InventoryInitializer InitilizerCopy = new InventoryInitializer();
-            InitilizerCopy.Copy(intializeInventory[i]);
-            prevIntializeInventory.Add(InitilizerCopy);
-        }
     }
-    public Inventory GetInventory(string name)
+    private void InitializeItems()
     {
-        return InventoryManager[name];
+        ItemManager.Clear();
+        foreach (Item item in items)
+        {
+            ItemManager.Add(item.GetItemType(), item);
+        }
     }
     public void AddItem(string inventoryName, string itemType)
     {
@@ -121,7 +135,7 @@ public class InventoryController : MonoBehaviour
     {
         InventoryManager.Clear();
         ItemManager.Clear();
-        prevIntializeInventory.Clear();
+        previousInventoryTracker.Clear();
         foreach (Item item in items)
         {
             ItemManager.Add(item.GetItemType(), item);

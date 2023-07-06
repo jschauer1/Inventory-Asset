@@ -12,10 +12,4 @@ public class AddItem : MonoBehaviour
     {
         InventoryController.instance.AddItem(inventory, item);
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }

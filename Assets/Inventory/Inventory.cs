@@ -7,22 +7,23 @@ using UnityEngine;
 [System.Serializable]
 public class Inventory 
 {
-    Dictionary<string, List<int>> itemPositions;
+    private Dictionary<string, List<int>> itemPositions;
 
     [SerializeField, HideInInspector]
-    List<Item> items;
+    private List<Item> items;
 
     [SerializeField, HideInInspector]
-    private string name;
+    private string inventoryName;
 
     [SerializeField, HideInInspector]
-    GameObject manager;
-    int curInventoryLoc;
-    public Inventory(string name,int size)
+    private GameObject InventoryUIManager;
+    private int curInventoryLoc;
+    public Inventory(GameObject InventoryUIManager,string name,int size)
     {
-        this.name = name;
-        itemPositions = new Dictionary<string, List<int>>();
+        this.InventoryUIManager = InventoryUIManager;
+        this.inventoryName = name;
         items = new List<Item>(size);
+        itemPositions = new Dictionary<string, List<int>>();
         FillInventory(size);
     }
     public void AddItem(Item item)
@@ -38,7 +39,7 @@ public class Inventory
         {
             items[curInventoryLoc] = item;
         }*/
-        manager.GetComponent<InventoryUI>().UpdateSlot(curInventoryLoc);
+        InventoryUIManager.GetComponent<InventoryUI>().UpdateSlot(curInventoryLoc);
         curInventoryLoc++;
 
     }
@@ -59,11 +60,11 @@ public class Inventory
     }
     public string getName()
     {
-        return name;
+        return inventoryName;
     }
     public void setManager(GameObject manager)
     {
-        this.manager= manager;
+        this.InventoryUIManager= manager;
     }
     public List<Item> getList()
     {
