@@ -100,7 +100,6 @@ public class InventoryController : MonoBehaviour
                 foreach (GameObject UI in allInventoryUI)
                 {
                     InventoryUI UIInstance = UI.GetComponent<InventoryUI>();
-                    print(UIInstance.GetInventoryName());
                     if (UIInstance.GetInventoryName() == initializer.GetInventoryName())
                     {
                         toremove.Add(UI);

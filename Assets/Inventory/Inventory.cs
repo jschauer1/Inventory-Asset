@@ -18,13 +18,24 @@ public class Inventory
     [SerializeField, HideInInspector]
     private GameObject InventoryUIManager;
     private int curInventoryLoc;
+
+    int size;
     public Inventory(GameObject InventoryUIManager,string name,int size)
     {
         this.InventoryUIManager = InventoryUIManager;
         this.inventoryName = name;
         items = new List<Item>(size);
         itemPositions = new Dictionary<string, List<int>>();
+        this.size = size;
         FillInventory(size);
+    }
+    public void ReSize(int newSize)
+    {
+        for(int i = size; i < newSize; i++)
+        {
+            Item filler = new Item(true);
+            items.Add(filler);
+        }
     }
     public void AddItem(Item item)
     {
@@ -47,7 +58,7 @@ public class Inventory
     {
         for(int i = 0; i < size; i ++)
         {
-            Item filler = new Item(false);
+            Item filler = new Item(true);
             items.Add(filler);
         }
     }

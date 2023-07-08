@@ -8,7 +8,8 @@ public class Item
     [SerializeField] string ItemType;
     [SerializeField] private Sprite itemImage;
     [SerializeField] private int maxStackAmount;
-    [SerializeField] private bool isNull;
+    [SerializeField,HideInInspector] 
+    private bool isNull = false;
 
     public Item(bool isNull)
     {

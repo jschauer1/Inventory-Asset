@@ -14,7 +14,7 @@ public class Slot : MonoBehaviour
     private void Start()
     {
         item = transform.parent.GetComponent<InventoryUI>().GetInventoryItem(position);
-        if (item.GetIsNull())
+        if (!item.GetIsNull())
         {
             slotChild.SetActive(true);
 
@@ -47,10 +47,8 @@ public class Slot : MonoBehaviour
     {
 
         item = transform.parent.GetComponent<InventoryUI>().GetInventoryItem(position);
-        if (item.GetIsNull())
+        if (!item.GetIsNull())
         {
-            print("At Slot UPdate");
-
             slotChild.SetActive(true);
 
             image.sprite = item.GetItemImage();

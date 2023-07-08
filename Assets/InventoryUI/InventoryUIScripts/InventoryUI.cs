@@ -47,6 +47,8 @@ public class InventoryUI : MonoBehaviour
     {
         if (CheckEditorChange())
         {
+            inventory.ReSize(row*col);
+
             InventoryUIReset();
 
             createSlots();
