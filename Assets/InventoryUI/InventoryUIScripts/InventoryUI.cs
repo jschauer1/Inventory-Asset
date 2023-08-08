@@ -92,7 +92,7 @@ public class InventoryUI : MonoBehaviour
         }
         RectTransform rectTransform = backGround.GetComponent<RectTransform>();
         Vector2 backGroundArea = slotsvec[0] - slotsvec[slotsvec.Count - 1];
-        rectTransform.sizeDelta = new Vector2((Mathf.Abs(backGroundArea.x) + slotGap.x + backGroundBoarder.x), Mathf.Abs(backGroundArea.y) + slotGap.y + backGroundBoarder.y);
+        rectTransform.sizeDelta = new Vector2((Mathf.Abs(backGroundArea.x) +backGroundBoarder.x), Mathf.Abs(backGroundArea.y) + backGroundBoarder.y);
         backGround.transform.position = new Vector2(inventoryPosition.transform.position.x, inventoryPosition.transform.position.y);
     }
     private void createSlots()
