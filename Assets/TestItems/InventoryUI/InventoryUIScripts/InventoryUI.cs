@@ -16,6 +16,8 @@ public class InventoryUI : MonoBehaviour
     [SerializeField] private Vector2 slotOffSet;
     [SerializeField] private Vector2 backGroundBoarder;
 
+    Transform UI;
+
     [SerializeField, HideInInspector]
     private Inventory inventory;
 
@@ -41,6 +43,7 @@ public class InventoryUI : MonoBehaviour
 
     public void Start()
     {
+        UI = InventoryController.instance.GetUI();
         UpdateInventoryDisplay();
     }
     public void UpdateInventoryDisplay()
@@ -216,6 +219,10 @@ public class InventoryUI : MonoBehaviour
     public void UpdateSlot(int location)
     {
         slotPos[location].GetComponent<Slot>().UpdateSlot();
+    }
+    public Transform GetUI()
+    {
+        return UI;
     }
     private void OnDestroy()
     {

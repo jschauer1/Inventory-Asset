@@ -23,7 +23,7 @@ public class InventoryController : MonoBehaviour
     [SerializeField, HideInInspector]
     private List<GameObject> allInventoryUI = new List<GameObject>();
     [SerializeField, HideInInspector]
-    private SerializableDictionary<string, Inventory> InventoryManager= new SerializableDictionary<string, Inventory>();
+    private Dictionary<string, Inventory> InventoryManager= new Dictionary<string, Inventory>();
     [SerializeField, HideInInspector]
     private Dictionary<string, Item> ItemManager = new Dictionary<string, Item>();
     public static InventoryController instance;
@@ -45,11 +45,12 @@ public class InventoryController : MonoBehaviour
     }
     public void InitializeInventories()
     {
-        AllignDictionaries();
-        InitializeItems();
+
         RemoveDeletedInventories();
         InitializeNewInventories();
         UpdateInventoryTracker();
+        AllignDictionaries();
+        InitializeItems();
     }
     public Inventory GetInventory(string name)
     {
@@ -87,6 +88,10 @@ public class InventoryController : MonoBehaviour
                 inventoryUI.SetInventoryName(initializer.GetInventoryName());
                 inventoryUI.UpdateInventoryDisplay();
             }
+        }
+        foreach(GameObject inObjects in allInventoryUI)
+        {
+            inObjects.GetComponent<InventoryUI>().UpdateInventoryDisplay();
         }
     }
     private void RemoveDeletedInventories()
@@ -153,6 +158,10 @@ public class InventoryController : MonoBehaviour
             InventoryUI inventoryInstance = inventories.GetComponent<InventoryUI>();
             InventoryManager.Add(inventoryInstance.GetInventoryName(), inventoryInstance.GetInventory());
         }
+    }
+    public Transform GetUI()
+    {
+        return UI;
     }
 
 }

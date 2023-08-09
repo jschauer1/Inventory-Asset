@@ -10,19 +10,29 @@ public class Slot : MonoBehaviour
     [SerializeField]private int position;
     [SerializeField]private Item item;
     [SerializeField]private Image image;
-    [SerializeField]private GameObject slotChild;
+    [SerializeField] private GameObject slotChildPrefab;
+
+    [SerializeField]private GameObject slotChildInstance;
+    private InventoryUI InvUI;
+    private Vector3 initialSlotChildPosition;
+    private void Awake()
+    {
+        InvUI = transform.parent.GetComponent<InventoryUI>();
+        initialSlotChildPosition = slotChildInstance.transform.position;
+
+    }
     private void Start()
     {
-        item = transform.parent.GetComponent<InventoryUI>().GetInventoryItem(position);
+        item = InvUI.GetInventoryItem(position);
         if (!item.GetIsNull())
         {
-            slotChild.SetActive(true);
+            slotChildInstance.SetActive(true);
 
             image.sprite = item.GetItemImage();
         }
         else
         {
-            slotChild.SetActive(false);
+            slotChildInstance.SetActive(false);
 
         }
     }
@@ -49,15 +59,27 @@ public class Slot : MonoBehaviour
         item = transform.parent.GetComponent<InventoryUI>().GetInventoryItem(position);
         if (!item.GetIsNull())
         {
-            slotChild.SetActive(true);
+            slotChildInstance.SetActive(true);
 
             image.sprite = item.GetItemImage();
         }
         else
         {
-            slotChild.SetActive(false);
+            slotChildInstance.SetActive(false);
 
         }
+    }
+    public void ResetSlotChild()
+    {
+        GameObject newInstance = Instantiate(slotChildPrefab, initialSlotChildPosition,Quaternion.identity);
+        newInstance.transform.SetParent(transform);
+        slotChildInstance = newInstance;
+        slotChildInstance.SetActive(false);
+
+    }
+    public InventoryUI GetInventoryUI()
+    {
+        return InvUI;
     }
 
 }
