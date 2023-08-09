@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Drawing;
 using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
@@ -54,6 +55,16 @@ public class Inventory
         curInventoryLoc++;
 
     }
+    public void AddItem(Item item, int position)
+    {
+        items[position] = item;
+        InventoryUIManager.GetComponent<InventoryUI>().UpdateSlot(position);
+    }
+    public void ResetPosition(int position)
+    {
+        Item filler = new Item(true);
+        items[position] = filler;
+    }
     void FillInventory(int size)
     {
         for(int i = 0; i < size; i ++)
@@ -61,9 +72,6 @@ public class Inventory
             Item filler = new Item(true);
             items.Add(filler);
         }
-    }
-    public void AddItem(Item item, int position)
-    {
     }
     public Item InventoryGetItem(int index)
     {

@@ -9,17 +9,17 @@ public class Slot : MonoBehaviour
 {
     [SerializeField]private int position;
     [SerializeField]private Item item;
-    [SerializeField]private Image image;
     [SerializeField] private GameObject slotChildPrefab;
 
     [SerializeField]private GameObject slotChildInstance;
+    Vector3 initalScale;
     private InventoryUI InvUI;
     private Vector3 initialSlotChildPosition;
     private void Awake()
     {
         InvUI = transform.parent.GetComponent<InventoryUI>();
         initialSlotChildPosition = slotChildInstance.transform.position;
-
+        initalScale = slotChildInstance.transform.localScale;
     }
     private void Start()
     {
@@ -27,8 +27,7 @@ public class Slot : MonoBehaviour
         if (!item.GetIsNull())
         {
             slotChildInstance.SetActive(true);
-
-            image.sprite = item.GetItemImage();
+            slotChildInstance.GetComponent<Image>().sprite = item.GetItemImage();
         }
         else
         {
@@ -39,7 +38,8 @@ public class Slot : MonoBehaviour
     public void SetItem(Item item)
     {
         this.item = item;
-        image.sprite = item.GetItemImage();
+        slotChildInstance.GetComponent<Image>().sprite = item.GetItemImage();
+
     }
     public Item GetItem()
     {
@@ -60,8 +60,8 @@ public class Slot : MonoBehaviour
         if (!item.GetIsNull())
         {
             slotChildInstance.SetActive(true);
-
-            image.sprite = item.GetItemImage();
+            slotChildInstance.GetComponent<DragItem>().SetItem(item);
+            slotChildInstance.GetComponent<Image>().sprite = item.GetItemImage();
         }
         else
         {
@@ -71,8 +71,10 @@ public class Slot : MonoBehaviour
     }
     public void ResetSlotChild()
     {
+        InvUI.GetInventory().ResetPosition(position); 
         GameObject newInstance = Instantiate(slotChildPrefab, initialSlotChildPosition,Quaternion.identity);
         newInstance.transform.SetParent(transform);
+        newInstance.transform.localScale = initalScale;
         slotChildInstance = newInstance;
         slotChildInstance.SetActive(false);
 

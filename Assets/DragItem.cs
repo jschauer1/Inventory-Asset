@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -9,18 +10,14 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
     // Start is called before the first frame update
     private Image image;
     private Slot CurSlot;
+    private Item item;
 
     void Awake()
     {
         CurSlot = transform.parent.GetComponent<Slot>();
-        image = GetComponent<Image>();
     }
 
     // Update is called once per frame
-    void Update()
-    {
-        
-    }
     public void OnDrag(PointerEventData eventData)
     {
         Canvas canvas = GameObject.Find("UI").GetComponent<Canvas>();
@@ -51,6 +48,27 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
 
     public void OnEndDrag(PointerEventData eventData)
     {
-      //  throw new System.NotImplementedException();
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventData, results);
+
+        GameObject slot;
+        foreach (RaycastResult result in results)
+        {
+            if(result.gameObject.tag == "Slot")
+            {
+                slot = result.gameObject;
+                slot.GetComponent<Slot>().GetInventoryUI().GetInventory().AddItem(item, slot.GetComponent<Slot>().GetPosition());
+                print(item.GetItemType());
+                Destroy(gameObject);
+                break;
+            }
+        }
+        
+        
+        //  throw new System.NotImplementedException();
+    }
+    public void SetItem(Item item)
+    {
+        this.item = item;
     }
 }
