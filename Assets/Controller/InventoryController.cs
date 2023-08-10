@@ -3,16 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Events;
 using static UnityEditor.Progress;
 
 public class InventoryController : MonoBehaviour
 {
 
     [SerializeField] private Transform UI;
-    [SerializeField] private List<Item> items;
+    [SerializeField] public List<Item> items;
     [SerializeField] private List<InventoryInitializer> intializeInventory;
-
-
 
     [SerializeField, HideInInspector]
     private List<InventoryInitializer> previousInventoryTracker;
@@ -26,10 +25,12 @@ public class InventoryController : MonoBehaviour
     private Dictionary<string, Inventory> InventoryManager= new Dictionary<string, Inventory>();
     [SerializeField, HideInInspector]
     private Dictionary<string, Item> ItemManager = new Dictionary<string, Item>();
+
     public static InventoryController instance;
 
 
     [SerializeField] private bool isInstance;
+
 
     private void Awake()
     {
@@ -163,5 +164,8 @@ public class InventoryController : MonoBehaviour
     {
         return UI;
     }
-
+    public List<Item> GetItems()
+    {
+        return items;
+    }
 }

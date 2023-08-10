@@ -2,15 +2,23 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine;
+using UnityEngine.Events;
+using static UnityEditor.Progress;
+
 [System.Serializable]
 public class Item
 {
-    [SerializeField] string ItemType;
+    [SerializeField] string itemType;
     [SerializeField] private Sprite itemImage;
     [SerializeField] private int maxStackAmount;
+
+
+    public bool highlightable;
+    [SerializeField, HideInInspector]
+    private UnityEvent myEvent;
+
     [SerializeField,HideInInspector] 
     private bool isNull = false;
-
     public Item(bool isNull)
     {
         this.isNull = isNull;
@@ -25,7 +33,7 @@ public class Item
     }
     public string GetItemType()
     {
-        return ItemType;
+        return itemType;
     }
     public Sprite GetItemImage()
     {
@@ -34,5 +42,10 @@ public class Item
     public int GetItemStackAmount()
     {
         return maxStackAmount;
+    }
+    public void Selected()
+    {
+/*        if (myEvent != null)
+            myEvent.Invoke();*/
     }
 }

@@ -9,13 +9,15 @@ public class InventoryControllerReact : Editor
         DrawDefaultInspector(); // for other non-HideInInspector fields
 
         InventoryController script = (InventoryController)target;
-        if (GUILayout.Button("Initialize Inventories")) // Button
+
+        if (GUILayout.Button("Initialize Inventories"))
         {
-            script.InitializeInventories(); // Call the method in CustomEditorButton
+            script.InitializeInventories();
         }
-        if (GUILayout.Button("Reset")) // Button
+        if (GUILayout.Button("Reset"))
         {
-            script.ResetInventory(); // Call the method in CustomEditorButton
+            script.ResetInventory();
         }
+
     }
 }

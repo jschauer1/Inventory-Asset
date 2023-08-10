@@ -6,6 +6,8 @@ using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 public class InventoryUI : MonoBehaviour
 {
+    private GameObject previouslyHighlighted;
+
     [SerializeField] private string inventoryName;
     [SerializeField] private int col, row;
     [SerializeField] private GameObject slot;
@@ -228,5 +230,23 @@ public class InventoryUI : MonoBehaviour
     {
         inventory= null;
     }
+    public void SetHightlighted(GameObject slot)
+    {
+        Slot slotInstance = slot.GetComponent<Slot>();
+        if (previouslyHighlighted != null)
+        {
+            Slot prevSlotInstance = previouslyHighlighted.GetComponent<Slot>();
 
+            if (previouslyHighlighted == slot)
+            {
+                return;
+            }
+            prevSlotInstance.GetSlotImage().color = Color.black;
+            //prevSlotInstance.GetItem().UnSelected();
+
+        }
+        slotInstance.GetSlotImage().color = Color.grey;
+        //slotInstance.GetItem().Selected();
+        previouslyHighlighted = slot;
+    }
 }

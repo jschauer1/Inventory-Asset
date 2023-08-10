@@ -63,7 +63,7 @@ public class Inventory
     public void ResetPosition(int position)
     {
         Item filler = new Item(true);
-        items[position] = filler;
+        AddItem(filler, position);
     }
     void FillInventory(int size)
     {
