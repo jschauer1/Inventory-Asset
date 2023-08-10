@@ -18,7 +18,9 @@ public class ItemPropertyDrawer : PropertyDrawer
         makeUIComp(ref position, property, "itemType", "itemType", 1);
 
         makeUIComp(ref position, property, "itemImage", "itemImage", 1);
-        makeUIComp(ref position, property, "highlightable", "HighLight",1);
+        makeUIComp(ref position, property, "draggable", "Draggable", 1);
+
+        makeUIComp(ref position, property, "highlightable", "Highlightable",1);
         if (property.FindPropertyRelative("highlightable").boolValue)
         {
             makeUIComp(ref position, property, "myEvent", "Choose Function",5);
@@ -39,6 +41,7 @@ public class ItemPropertyDrawer : PropertyDrawer
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
         float height = 0;
+        height += EditorGUIUtility.singleLineHeight;
         height += EditorGUIUtility.singleLineHeight;
         height += EditorGUIUtility.singleLineHeight;
         height += EditorGUIUtility.singleLineHeight;

@@ -20,9 +20,9 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
     // Update is called once per frame
     public void OnDrag(PointerEventData eventData)
     {
+        if (draggable()) return;
         Canvas canvas = GameObject.Find("UI").GetComponent<Canvas>();
         transform.parent.gameObject.transform.SetSiblingIndex(100);
-
         PointerEventData pointerData = eventData;
         Vector2 position;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
@@ -32,6 +32,8 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+        if (draggable()) return;
+
         if (CurSlot != null)
         {
             transform.SetParent(CurSlot.GetInventoryUI().GetUI());
@@ -48,6 +50,7 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
 
     public void OnEndDrag(PointerEventData eventData)
     {
+        if (draggable()) return;
         List<RaycastResult> results = new List<RaycastResult>();
         EventSystem.current.RaycastAll(eventData, results);
 
@@ -66,6 +69,15 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
         
         
         //  throw new System.NotImplementedException();
+    }
+    private bool draggable()
+    {
+        if(CurSlot != null)
+        {
+            return (!item.GetDraggable() || !CurSlot.GetInventoryUI().GetDraggable());
+        }
+        return false;
+
     }
     public void SetItem(Item item)
     {

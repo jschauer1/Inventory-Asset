@@ -17,6 +17,8 @@ public class InventoryUI : MonoBehaviour
     [SerializeField] private Vector2 slotGap;
     [SerializeField] private Vector2 slotOffSet;
     [SerializeField] private Vector2 backGroundBoarder;
+    [SerializeField] private bool draggable;
+    [SerializeField] private bool highlightable;
 
     Transform UI;
 
@@ -226,6 +228,18 @@ public class InventoryUI : MonoBehaviour
     {
         return UI;
     }
+    public void SetDraggable(bool draggable)
+    {
+        this.draggable = draggable;
+    }
+    public void SetHighlightable(bool highlightable)
+    {
+        this.highlightable = highlightable;
+    }
+    public bool GetDraggable()
+    {
+        return draggable;
+    }
     private void OnDestroy()
     {
         inventory= null;
@@ -233,20 +247,22 @@ public class InventoryUI : MonoBehaviour
     public void SetHightlighted(GameObject slot)
     {
         Slot slotInstance = slot.GetComponent<Slot>();
-        if (previouslyHighlighted != null)
+        Item item = slotInstance.GetItem();
+        if(item.GetHighlightable() && highlightable)
         {
-            Slot prevSlotInstance = previouslyHighlighted.GetComponent<Slot>();
-
-            if (previouslyHighlighted == slot)
+            if (previouslyHighlighted != null)
             {
-                return;
-            }
-            prevSlotInstance.GetSlotImage().color = Color.black;
-            //prevSlotInstance.GetItem().UnSelected();
+                Slot prevSlotInstance = previouslyHighlighted.GetComponent<Slot>();
 
+                if (previouslyHighlighted == slot)
+                {
+                    return;
+                }
+                prevSlotInstance.GetSlotImage().color = Color.black;
+            }
+            slotInstance.GetSlotImage().color = Color.grey;
+            slotInstance.GetItem().Selected();
+            previouslyHighlighted = slot;
         }
-        slotInstance.GetSlotImage().color = Color.grey;
-        //slotInstance.GetItem().Selected();
-        previouslyHighlighted = slot;
     }
 }

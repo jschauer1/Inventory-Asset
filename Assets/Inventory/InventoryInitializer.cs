@@ -8,6 +8,9 @@ public class InventoryInitializer
     [SerializeField] private string inventoryName;
     [SerializeField] private int row;
     [SerializeField] private int col;
+    [SerializeField] private bool highlightable;
+    [SerializeField] private bool draggable;
+
 
     public string GetInventoryName()
     {
@@ -20,6 +23,14 @@ public class InventoryInitializer
     public int GetCol()
     {
         return col;
+    }
+    public bool GetHightlightable()
+    {
+        return highlightable;
+    }
+    public bool GetDraggable()
+    {
+        return draggable;
     }
     public void SetRow(int row)
     {

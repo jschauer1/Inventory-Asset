@@ -31,6 +31,8 @@ public class Slot : MonoBehaviour, IPointerClickHandler
         {
             slotChildInstance.SetActive(true);
             slotChildInstance.GetComponent<Image>().sprite = item.GetItemImage();
+            slotChildInstance.GetComponent<DragItem>().SetItem(item);
+
         }
         else
         {
@@ -88,8 +90,7 @@ public class Slot : MonoBehaviour, IPointerClickHandler
     }
     public void OnPointerClick(PointerEventData eventData)
     {
-        print("Here");
-        if (item.GetIsNull())
+        if (item.GetIsNull() || !item.GetHighlightable())
         {
             return;
         }

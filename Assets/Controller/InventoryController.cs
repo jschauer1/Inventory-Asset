@@ -84,7 +84,8 @@ public class InventoryController : MonoBehaviour
 
                 InventoryUI inventoryUI = tempinventoryUI.GetComponent<InventoryUI>();
                 inventoryUI.SetInventory(ref curInventory);
-
+                inventoryUI.SetHighlightable(initializer.GetHightlightable());
+                inventoryUI.SetDraggable(initializer.GetDraggable());
                 inventoryUI.SetRowCol(initializer.GetRow(), initializer.GetCol());
                 inventoryUI.SetInventoryName(initializer.GetInventoryName());
                 inventoryUI.UpdateInventoryDisplay();

@@ -12,8 +12,8 @@ public class Item
     [SerializeField] private Sprite itemImage;
     [SerializeField] private int maxStackAmount;
 
-
-    public bool highlightable;
+    [SerializeField]private bool draggable;
+    [SerializeField]private bool highlightable;
     [SerializeField, HideInInspector]
     private UnityEvent myEvent;
 
@@ -45,7 +45,15 @@ public class Item
     }
     public void Selected()
     {
-/*        if (myEvent != null)
-            myEvent.Invoke();*/
+        if (myEvent != null)
+            myEvent.Invoke();
+    }
+    public bool GetHighlightable()
+    {
+        return highlightable; 
+    }
+    public bool GetDraggable()
+    {
+        return draggable;
     }
 }
