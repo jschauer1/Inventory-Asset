@@ -4,6 +4,8 @@ using System.Linq;
 using System.Security;
 using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
+using static UnityEditor.Progress;
+
 public class InventoryUI : MonoBehaviour
 {
     private GameObject previouslyHighlighted;
@@ -34,7 +36,6 @@ public class InventoryUI : MonoBehaviour
 
 
     private GameObject slotObjectInstance;
-
 
     [SerializeField, HideInInspector]
     private List<GameObject> slots = new List<GameObject>();

@@ -11,5 +11,6 @@ public class AddItem : MonoBehaviour
     void Start()
     {
         InventoryController.instance.AddItem(inventory, item);
+        Destroy(gameObject);
     }
 }
