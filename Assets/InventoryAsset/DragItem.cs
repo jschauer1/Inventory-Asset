@@ -54,21 +54,16 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
         List<RaycastResult> results = new List<RaycastResult>();
         EventSystem.current.RaycastAll(eventData, results);
 
-        GameObject slot;
         foreach (RaycastResult result in results)
         {
             if(result.gameObject.tag == "Slot")
             {
-                slot = result.gameObject;
-                slot.GetComponent<Slot>().GetInventoryUI().GetInventory().AddItem(item, slot.GetComponent<Slot>().GetPosition());
-                print(item.GetItemType());
+                Slot slot = result.gameObject.GetComponent<Slot>();
+                InventoryController.instance.AddItem(slot.GetInventoryUI().GetInventoryName(), item.GetItemType(), slot.GetPosition()); 
                 Destroy(gameObject);
                 break;
             }
-        }
-        
-        
-        //  throw new System.NotImplementedException();
+        }        
     }
     private bool draggable()
     {

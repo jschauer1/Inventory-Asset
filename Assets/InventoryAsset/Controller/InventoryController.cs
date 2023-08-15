@@ -6,30 +6,36 @@ using UnityEngine;
 using UnityEngine.Events;
 using static UnityEditor.Progress;
 
+/*
+ * This class defines an inventory controller, which allows for creating new inventories and defining valid types of objects.
+ * Only one InventoryController should be instantiated within a project. Multiple inventories can be created from one controller.
+ * This Controller controls all information between the inventories.
+ */
+
 public class InventoryController : MonoBehaviour
 {
-
-    [SerializeField] private Transform UI;
-    [SerializeField] public List<Item> items;
-    [SerializeField] private List<InventoryInitializer> intializeInventory;
+    [SerializeField] 
+    private Transform UI; // UI canvas to build inventories on.
+    [SerializeField] 
+    public List<Item> items; // Accepted items that can be added by name to the inventory.
+    [SerializeField] 
+    private List<InventoryInitializer> initializeInventory; // Information about the inventory specified through the manager.
 
     [SerializeField, HideInInspector]
-    private List<InventoryInitializer> previousInventoryTracker;
+    private List<InventoryInitializer> prevInventoryTracker; // Previously initialized inventories, so they are not initialized again.
 
 
-    [SerializeField] private GameObject inventoryUIObject;
+    [SerializeField] private GameObject inventoryManagerObj; // Prefab for the inventory manager.
 
     [SerializeField, HideInInspector]
     private List<GameObject> allInventoryUI = new List<GameObject>();
-    [SerializeField, HideInInspector]
     private Dictionary<string, Inventory> InventoryManager= new Dictionary<string, Inventory>();
-    [SerializeField, HideInInspector]
     private Dictionary<string, Item> ItemManager = new Dictionary<string, Item>();
 
     public static InventoryController instance;
 
 
-    [SerializeField] private bool isInstance;
+    [SerializeField] private bool isInstance = false;
 
 
     private void Awake()
@@ -59,21 +65,23 @@ public class InventoryController : MonoBehaviour
     }
     private void UpdateInventoryTracker()
     {
-        previousInventoryTracker.Clear();
-        for (int i = 0; i < intializeInventory.Count; i++)
+        prevInventoryTracker.Clear();
+        for (int i = 0; i < initializeInventory.Count; i++)
         {
             InventoryInitializer InitilizerCopy = new InventoryInitializer();
-            InitilizerCopy.Copy(intializeInventory[i]);
-            previousInventoryTracker.Add(InitilizerCopy);
+            InitilizerCopy.Copy(initializeInventory[i]);
+            prevInventoryTracker.Add(InitilizerCopy);
         }
     }
     private void InitializeNewInventories()
     {
-        foreach (InventoryInitializer initializer in intializeInventory)
+        foreach (InventoryInitializer initializer in initializeInventory)
         {
-            if (!previousInventoryTracker.Contains(initializer))
+            if (!prevInventoryTracker.Contains(initializer))
             {
-                GameObject tempinventoryUI = Instantiate(inventoryUIObject, transform.position, Quaternion.identity, UI);
+                GameObject tempinventoryUI = Instantiate(inventoryManagerObj, transform.position, Quaternion.identity, UI);
+                tempinventoryUI.SetActive(true);
+                tempinventoryUI.name = initializer.GetInventoryName();
                 allInventoryUI.Add(tempinventoryUI);
 
                 string inventoryName = initializer.GetInventoryName();
@@ -83,6 +91,7 @@ public class InventoryController : MonoBehaviour
                 InventoryManager.Add(inventoryName, curInventory);
 
                 InventoryUI inventoryUI = tempinventoryUI.GetComponent<InventoryUI>();
+               
                 inventoryUI.SetInventory(ref curInventory);
                 inventoryUI.SetHighlightable(initializer.GetHightlightable());
                 inventoryUI.SetDraggable(initializer.GetDraggable());
@@ -100,9 +109,9 @@ public class InventoryController : MonoBehaviour
     {
 
         List<GameObject> toremove = new List<GameObject>();
-        foreach (InventoryInitializer initializer in previousInventoryTracker)
+        foreach (InventoryInitializer initializer in prevInventoryTracker)
         {
-            if (!intializeInventory.Contains(initializer))
+            if (!initializeInventory.Contains(initializer))
             {
                 foreach (GameObject UI in allInventoryUI)
                 {
@@ -137,11 +146,17 @@ public class InventoryController : MonoBehaviour
         Item item = ItemManager[itemType];
         inventory.AddItem(item);
     }
+    public void AddItem(string inventoryName, string itemType, int position)
+    {
+        Inventory inventory = InventoryManager[inventoryName];
+        Item item = ItemManager[itemType];
+        inventory.AddItem(item, position);
+    }
     public void ResetInventory()
     {
         InventoryManager.Clear();
         ItemManager.Clear();
-        previousInventoryTracker.Clear();
+        prevInventoryTracker.Clear();
         foreach (Item item in items)
         {
             ItemManager.Add(item.GetItemType(), item);
