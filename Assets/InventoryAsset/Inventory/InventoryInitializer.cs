@@ -10,8 +10,8 @@ public class InventoryInitializer
     [SerializeField] private int col;
     [SerializeField] private bool highlightable;
     [SerializeField] private bool draggable;
-
-
+    [SerializeField, HideInInspector]
+    private bool initialized = false;
     public string GetInventoryName()
     {
         return inventoryName;
@@ -44,8 +44,14 @@ public class InventoryInitializer
     {
         this.inventoryName = inventoryName;
     }
-
-
+    public bool GetInitialized()
+    {
+        return initialized;
+    }
+    public void SetInitialized(bool initialized)
+    {
+        this.initialized = initialized;
+    }
     public override int GetHashCode()
     {
         return HashCode.Combine(inventoryName, row, col);

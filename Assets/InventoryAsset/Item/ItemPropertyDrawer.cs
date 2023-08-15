@@ -6,27 +6,26 @@ using UnityEngine.UIElements;
 [CustomPropertyDrawer(typeof(Item))]
 public class ItemPropertyDrawer : PropertyDrawer
 {
-    Vector2 savePos = new Vector2();
+    int count = 0;
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
+        count = 0;
         EditorGUI.BeginProperty(position, label, property);
+        SerializedProperty endProperty = property.GetEndProperty();
+        SerializedProperty currentProperty = property.Copy();
+        bool enterChildren = true;
 
-        Rect labelRect = new Rect(position.x, position.y, position.width, EditorGUIUtility.singleLineHeight);
-        EditorGUI.LabelField(labelRect, label);
-        EditorGUI.indentLevel++;
-        position.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing; // Move position down for next control
-        makeUIComp(ref position, property, "itemType", "itemType", 1);
+        while (currentProperty.NextVisible(enterChildren)&&!SerializedProperty.EqualContents(currentProperty, endProperty))
+        {
+            EditorGUI.PropertyField(position, currentProperty, true);
+            position.y += EditorGUI.GetPropertyHeight(currentProperty) + EditorGUIUtility.standardVerticalSpacing;
+            count++;
+        }
 
-        makeUIComp(ref position, property, "itemImage", "itemImage", 1);
-        makeUIComp(ref position, property, "draggable", "Draggable", 1);
-
-        makeUIComp(ref position, property, "highlightable", "Highlightable",1);
         if (property.FindPropertyRelative("highlightable").boolValue)
         {
-            makeUIComp(ref position, property, "myEvent", "Choose Function",5);
+            makeUIComp(ref position, property, "myEvent", "Choose Function on Highlight", 5);
         }
-        EditorGUI.indentLevel = 0;
-
         EditorGUI.EndProperty();
     }
 
@@ -41,12 +40,10 @@ public class ItemPropertyDrawer : PropertyDrawer
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
         float height = 0;
-        height += EditorGUIUtility.singleLineHeight;
-        height += EditorGUIUtility.singleLineHeight;
-        height += EditorGUIUtility.singleLineHeight;
-        height += EditorGUIUtility.singleLineHeight;
-        height += EditorGUIUtility.singleLineHeight;
-        height += EditorGUIUtility.singleLineHeight;
+        for(int i = 0; i < count+1; i++)
+        {
+            height += EditorGUIUtility.singleLineHeight;
+        }
 
         if (property.FindPropertyRelative("highlightable").boolValue)
         {

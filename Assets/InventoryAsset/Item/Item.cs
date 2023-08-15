@@ -11,7 +11,6 @@ public class Item
     [SerializeField] string itemType;
     [SerializeField] private Sprite itemImage;
     [SerializeField] private int maxStackAmount;
-
     [SerializeField]private bool draggable;
     [SerializeField]private bool highlightable;
     [SerializeField, HideInInspector]

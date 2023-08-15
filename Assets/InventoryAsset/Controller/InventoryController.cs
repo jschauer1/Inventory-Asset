@@ -79,6 +79,7 @@ public class InventoryController : MonoBehaviour
         {
             if (!prevInventoryTracker.Contains(initializer))
             {
+                initializer.SetInitialized(true);
                 GameObject tempinventoryUI = Instantiate(inventoryManagerObj, transform.position, Quaternion.identity, UI);
                 tempinventoryUI.SetActive(true);
                 tempinventoryUI.name = initializer.GetInventoryName();
