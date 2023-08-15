@@ -94,6 +94,10 @@ public class InventoryUI : MonoBehaviour
     }
     private void setBackground()
     {
+        if(backGround == null)
+        {
+            return;
+        }
         if (slotsvec.Count <= 0)
         {
             return;

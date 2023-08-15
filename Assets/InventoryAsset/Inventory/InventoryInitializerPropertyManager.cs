@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 [CustomPropertyDrawer(typeof(InventoryInitializer))]
-public class InventoryInitializerPropertyManager : PropertyDrawer
+public class InventoryInitializerPropertyManager
 {
-    int count = 0;
+/*    int count = 0;
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
         count = 0;
@@ -47,6 +47,6 @@ public class InventoryInitializerPropertyManager : PropertyDrawer
             height += EditorGUIUtility.singleLineHeight;
         }
         return height;
-    }
+    }*/
 }
 
