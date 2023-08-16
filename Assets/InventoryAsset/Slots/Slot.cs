@@ -10,7 +10,7 @@ public class Slot : MonoBehaviour, IPointerClickHandler
 {
     [SerializeField]private int position;
     [SerializeField]private Item item;
-    [SerializeField] private GameObject slotChildPrefab;
+    [SerializeField]private GameObject slotChildPrefab;
     [SerializeField]private GameObject slotChildInstance;
 
     private Color color;

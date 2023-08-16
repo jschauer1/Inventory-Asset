@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security;
 using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
+using UnityEngine.UIElements;
 using static UnityEditor.Progress;
 
 public class InventoryUI : MonoBehaviour
@@ -22,6 +23,15 @@ public class InventoryUI : MonoBehaviour
     [SerializeField] private bool draggable;
     [SerializeField] private bool highlightable;
     [SerializeField] private char EnableDisableOnPress;
+    [SerializeField] List<PressableSlot> highLightOnPress;
+    Dictionary<string, int> slotPress = new Dictionary<string, int>();
+
+    [System.Serializable]
+    private struct PressableSlot
+    {
+        public int position;
+        public char buttonPress;
+    }
 
 
     Transform UI;
@@ -44,10 +54,10 @@ public class InventoryUI : MonoBehaviour
     private List<Vector2> slotsvec = new List<Vector2>();
     private Dictionary<Vector2, GameObject> slotPositionsVec = new Dictionary<Vector2, GameObject>();
     private Dictionary<int, GameObject> slotPos = new Dictionary<int, GameObject>();
-
-
-
-
+    public void Awake()
+    {
+        createSlots();
+    }
     public void Start()
     {
         UI = InventoryController.instance.GetUI();
@@ -94,6 +104,7 @@ public class InventoryUI : MonoBehaviour
         slotsvec.Clear();
         slotPositionsVec.Clear();
         slotPos.Clear();
+        slotPress.Clear();
     }
     private void setBackground()
     {
@@ -113,7 +124,7 @@ public class InventoryUI : MonoBehaviour
     private void createSlots()
     {
         InventoryUIReset();
-
+        InitPressableDict();
         Vector2 inventoryPosVec = inventoryPosition.transform.position;
         Vector2 placeMentPos = new Vector2(inventoryPosVec.x,inventoryPosVec.y);
 
@@ -250,7 +261,7 @@ public class InventoryUI : MonoBehaviour
     }
     private void OnDestroy()
     {
-        inventory= null;
+        inventory = null;
     }
     public void SetHightlighted(GameObject slot)
     {
@@ -271,6 +282,38 @@ public class InventoryUI : MonoBehaviour
             slotInstance.GetSlotImage().color = Color.grey;
             slotInstance.GetItem().Selected();
             previouslyHighlighted = slot;
+        }
+    }
+    private void Update()
+    {
+        DisableEnableOnKeyInput();
+    }
+    private void DisableEnableOnKeyInput()
+    {
+        if (Input.anyKeyDown)
+        {
+            print("KeyDown");
+            string input = Input.inputString;
+            if (slotPress.ContainsKey(input))
+            {
+                int position = slotPress[input];
+                SetHightlighted(slotPos[position]);
+            }
+        }
+    }
+    private void InitPressableDict()
+    {
+        foreach (PressableSlot press in highLightOnPress)
+        {
+            if (!slotPress.ContainsKey(press.buttonPress.ToString()))
+            {
+                slotPress.Add(press.buttonPress.ToString(), press.position);
+
+            }
+            else
+            {
+                Debug.LogWarning("Each press position must be unique");
+            }
         }
     }
     public void SetEnableDisable(string EnableDisableOnPress)
