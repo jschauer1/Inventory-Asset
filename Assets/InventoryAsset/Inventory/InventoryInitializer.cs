@@ -10,6 +10,7 @@ public class InventoryInitializer
     [SerializeField] private int col;
     [SerializeField] private bool highlightable;
     [SerializeField] private bool draggable;
+    [SerializeField] private char EnableDisableOnPress;
     [SerializeField, HideInInspector]
     private bool initialized = false;
     public string GetInventoryName()
@@ -51,6 +52,14 @@ public class InventoryInitializer
     public void SetInitialized(bool initialized)
     {
         this.initialized = initialized;
+    }
+    public void SetEnableDisable(string EnableDisableOnPress)
+    {
+        this.EnableDisableOnPress = EnableDisableOnPress.ToCharArray()[0];
+    }
+    public string GetEnableDisable()
+    {
+        return EnableDisableOnPress.ToString();
     }
     public override int GetHashCode()
     {

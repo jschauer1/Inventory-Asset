@@ -21,6 +21,8 @@ public class InventoryUI : MonoBehaviour
     [SerializeField] private Vector2 backGroundBoarder;
     [SerializeField] private bool draggable;
     [SerializeField] private bool highlightable;
+    [SerializeField] private char EnableDisableOnPress;
+
 
     Transform UI;
 
@@ -51,6 +53,7 @@ public class InventoryUI : MonoBehaviour
         UI = InventoryController.instance.GetUI();
         UpdateInventoryDisplay();
     }
+
     public void UpdateInventoryDisplay()
     {
         if (CheckEditorChange())
@@ -263,11 +266,19 @@ public class InventoryUI : MonoBehaviour
                 {
                     return;
                 }
-                prevSlotInstance.GetSlotImage().color = Color.black;
+                prevSlotInstance.GetSlotImage().color = prevSlotInstance.GetColor();
             }
             slotInstance.GetSlotImage().color = Color.grey;
             slotInstance.GetItem().Selected();
             previouslyHighlighted = slot;
         }
+    }
+    public void SetEnableDisable(string EnableDisableOnPress)
+    {
+        this.EnableDisableOnPress = EnableDisableOnPress.ToCharArray()[0];
+    }
+    public string GetEnableDisable()
+    {
+        return EnableDisableOnPress.ToString();
     }
 }

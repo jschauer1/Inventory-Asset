@@ -12,6 +12,8 @@ public class Slot : MonoBehaviour, IPointerClickHandler
     [SerializeField]private Item item;
     [SerializeField] private GameObject slotChildPrefab;
     [SerializeField]private GameObject slotChildInstance;
+
+    private Color color;
     Vector3 initalScale;
     private Image slotImage;
 
@@ -20,6 +22,8 @@ public class Slot : MonoBehaviour, IPointerClickHandler
     private void Awake()
     {
         slotImage = GetComponent<Image>();
+        color = slotImage.color;
+
         InvUI = transform.parent.GetComponent<InventoryUI>();
         initialSlotChildPosition = slotChildInstance.transform.position;
         initalScale = slotChildInstance.transform.localScale;
@@ -100,5 +104,8 @@ public class Slot : MonoBehaviour, IPointerClickHandler
     {
         return InvUI;
     }
-
+    public Color GetColor()
+    {
+        return color;
+    }
 }

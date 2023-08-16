@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
+using static System.Runtime.CompilerServices.RuntimeHelpers;
 using static UnityEditor.Progress;
 
 /*
@@ -14,29 +15,31 @@ using static UnityEditor.Progress;
 
 public class InventoryController : MonoBehaviour
 {
-    [SerializeField] 
+    [SerializeField]
     private Transform UI; // UI canvas to build inventories on.
-    [SerializeField] 
+    [SerializeField]
     public List<Item> items; // Accepted items that can be added by name to the inventory.
-    [SerializeField] 
+    [Header("Once Initialized Edit Inventory Under UI.")]
+    [SerializeField]
     private List<InventoryInitializer> initializeInventory; // Information about the inventory specified through the manager.
 
     [SerializeField, HideInInspector]
     private List<InventoryInitializer> prevInventoryTracker; // Previously initialized inventories, so they are not initialized again.
 
 
-    [SerializeField] 
+    [SerializeField]
     private GameObject inventoryManagerObj; // Prefab for the inventory manager.
 
     [SerializeField, HideInInspector]
     private List<GameObject> allInventoryUI = new List<GameObject>(); // Holds all inventory UI instances for each inventory created.
-    private Dictionary<string, Inventory> inventoryManager= new Dictionary<string, Inventory>(); // Dictionary to map inventory names to their objects.
+    private Dictionary<string, Inventory> inventoryManager = new Dictionary<string, Inventory>(); // Dictionary to map inventory names to their objects.
     private Dictionary<string, Item> itemManager = new Dictionary<string, Item>(); // Dictionary to map item names to their objects.
+    private Dictionary<string, List<GameObject>> EnableDisableDict = new Dictionary<string, List<GameObject>>();
 
     public static InventoryController instance; // Shared instance of the InventoryController to enforce only one being created.
 
     // TODO: rename this
-    [SerializeField] 
+    [SerializeField]
     private bool isInstance = false; // Whether to use this object as the sole instance of InventoryController (cannot have multiple set to true).
 
     /// <summary>
@@ -53,7 +56,12 @@ public class InventoryController : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        InitializeInventories();
+        AllignDictionaries();
+        InitializeItems();
+    }
+    private void Update()
+    {
+        DisableEnableOnKeyInput();
     }
 
     /// <summary>
@@ -100,7 +108,8 @@ public class InventoryController : MonoBehaviour
                 inventoryManager.Add(inventoryName, curInventory);
 
                 InventoryUI inventoryUI = tempinventoryUI.GetComponent<InventoryUI>();
-               
+
+                inventoryUI.SetEnableDisable(initializer.GetEnableDisable());
                 inventoryUI.SetInventory(ref curInventory);
                 inventoryUI.SetHighlightable(initializer.GetHightlightable());
                 inventoryUI.SetDraggable(initializer.GetDraggable());
@@ -151,9 +160,26 @@ public class InventoryController : MonoBehaviour
     }
     public void AddItem(string inventoryName, string itemType)
     {
-        Inventory inventory = inventoryManager[inventoryName];
-        Item item = itemManager[itemType];
-        inventory.AddItem(item);
+        if(inventoryManager.ContainsKey(inventoryName))
+        {
+            Inventory inventory = inventoryManager[inventoryName];
+            if (itemManager.ContainsKey(itemType))
+            {
+                Item item = itemManager[itemType];
+                inventory.AddItem(item);
+
+            }
+            else
+            {
+                Debug.LogError("No Initialized Item with item Type: " + itemType);
+
+            }
+        }
+        else
+        {
+            Debug.LogError("No Initialized Inventory with Name: " + inventoryName);
+        }
+
     }
     public void AddItem(string inventoryName, string itemType, int position)
     {
@@ -183,6 +209,37 @@ public class InventoryController : MonoBehaviour
         {
             InventoryUI inventoryInstance = inventories.GetComponent<InventoryUI>();
             inventoryManager.Add(inventoryInstance.GetInventoryName(), inventoryInstance.GetInventory());
+            if(EnableDisableDict.ContainsKey(inventoryInstance.GetEnableDisable()))
+            {
+                EnableDisableDict[inventoryInstance.GetEnableDisable()].Add(inventories);
+            }
+            else
+            {
+                EnableDisableDict.Add(inventoryInstance.GetEnableDisable(), new List<GameObject>());
+                EnableDisableDict[inventoryInstance.GetEnableDisable()].Add(inventories);
+            }
+        }
+    }
+    private void DisableEnableOnKeyInput()
+    {
+        if (Input.anyKeyDown)
+        {
+            string input = Input.inputString;
+            if (EnableDisableDict.ContainsKey(input))
+            {
+                List<GameObject> inventoryUIs = EnableDisableDict[input];
+                foreach (GameObject inventoryUI in inventoryUIs)
+                {
+                    if (inventoryUI.active)
+                    {
+                        inventoryUI.SetActive(false);
+                    }
+                    else
+                    {
+                        inventoryUI.SetActive(true);
+                    }
+                }
+            }
         }
     }
     public Transform GetUI()
