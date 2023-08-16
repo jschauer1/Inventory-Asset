@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-[CustomPropertyDrawer(typeof(Item))]
+[CustomPropertyDrawer(typeof(ItemInitializer))]
 public class ItemPropertyDrawer : PropertyDrawer
 {
     int count = 0;

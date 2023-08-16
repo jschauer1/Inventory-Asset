@@ -31,18 +31,7 @@ public class Slot : MonoBehaviour, IPointerClickHandler
     private void Start()
     {
         item = InvUI.GetInventoryItem(position);
-        if (!item.GetIsNull())
-        {
-            slotChildInstance.SetActive(true);
-            slotChildInstance.GetComponent<Image>().sprite = item.GetItemImage();
-            slotChildInstance.GetComponent<DragItem>().SetItem(item);
-
-        }
-        else
-        {
-            slotChildInstance.SetActive(false);
-
-        }
+        UpdateSlot();
     }
     public void SetItem(Item item)
     {
@@ -71,6 +60,7 @@ public class Slot : MonoBehaviour, IPointerClickHandler
             slotChildInstance.SetActive(true);
             slotChildInstance.GetComponent<DragItem>().SetItem(item);
             slotChildInstance.GetComponent<Image>().sprite = item.GetItemImage();
+            slotChildInstance.GetComponent<DragItem>()._SetText();
         }
         else
         {

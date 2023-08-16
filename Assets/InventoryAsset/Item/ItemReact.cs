@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting.FullSerializer;
 using static UnityEditor.Progress;
 
-[CustomEditor(typeof(Item))]
+[CustomEditor(typeof(ItemInitializer))]
 public class ItemReact : Editor
 {
     SerializedProperty Checked;

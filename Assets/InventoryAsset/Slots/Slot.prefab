@@ -61,16 +61,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   position: 0
-  item:
-    itemType: 
-    itemImage: {fileID: 0}
-    maxStackAmount: 0
-    draggable: 0
-    highlightable: 0
-    myEvent:
-      m_PersistentCalls:
-        m_Calls: []
-    isNull: 0
   slotChildPrefab: {fileID: 2957332009402564875, guid: 1c44132505c5b1f42b38381654fa5f6e, type: 3}
   slotChildInstance: {fileID: 7933237219257899859}
 --- !u!114 &1737852865971321178
@@ -114,6 +104,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ItemImage
       objectReference: {fileID: 0}
+    - target: {fileID: 2957332009402564875, guid: 1c44132505c5b1f42b38381654fa5f6e, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4077669631640692813, guid: 1c44132505c5b1f42b38381654fa5f6e, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -144,11 +138,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4077669631640692813, guid: 1c44132505c5b1f42b38381654fa5f6e, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 30
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 4077669631640692813, guid: 1c44132505c5b1f42b38381654fa5f6e, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 30
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 4077669631640692813, guid: 1c44132505c5b1f42b38381654fa5f6e, type: 3}
       propertyPath: m_LocalPosition.x

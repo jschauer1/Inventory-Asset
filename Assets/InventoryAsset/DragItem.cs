@@ -1,6 +1,7 @@
 using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -11,8 +12,9 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
     private Image image;
     private Slot CurSlot;
     private Item item;
+    [SerializeField] TextMeshProUGUI text;
 
-    void Awake()
+    void Start()
     {
         CurSlot = transform.parent.GetComponent<Slot>();
     }
@@ -33,7 +35,8 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
     public void OnBeginDrag(PointerEventData eventData)
     {
         if (draggable()) return;
-
+        Debug.Log("adding 1");
+        item.SetAmount(item.GetAmount() + 1);
         if (CurSlot != null)
         {
             transform.SetParent(CurSlot.GetInventoryUI().GetUI());
@@ -59,7 +62,7 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
             if(result.gameObject.tag == "Slot")
             {
                 Slot slot = result.gameObject.GetComponent<Slot>();
-                InventoryController.instance.AddItem(slot.GetInventoryUI().GetInventoryName(), item.GetItemType(), slot.GetPosition()); 
+                InventoryController.instance.AddItem(slot.GetInventoryUI().GetInventoryName(), item, slot.GetPosition()); 
                 Destroy(gameObject);
                 break;
             }
@@ -78,4 +81,12 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
     {
         this.item = item;
     }
+    public void _SetText()
+    {
+        if (!item.GetIsNull())
+        {
+            text.SetText(item.GetAmount().ToString());
+        }
+    }
+
 }

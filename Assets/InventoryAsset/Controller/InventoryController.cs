@@ -18,7 +18,7 @@ public class InventoryController : MonoBehaviour
     [SerializeField]
     private Transform UI; // UI canvas to build inventories on.
     [SerializeField]
-    public List<Item> items; // Accepted items that can be added by name to the inventory.
+    public List<ItemInitializer> items; // Accepted items that can be added by name to the inventory.
     [Header("Once Initialized Edit Inventory Under UI.")]
     [SerializeField]
     private List<InventoryInitializer> initializeInventory; // Information about the inventory specified through the manager.
@@ -153,9 +153,10 @@ public class InventoryController : MonoBehaviour
     private void InitializeItems()
     {
         itemManager.Clear();
-        foreach (Item item in items)
+        foreach (ItemInitializer item in items)
         {
-            itemManager.Add(item.GetItemType(), item);
+            Item newItem = new Item(item);
+            itemManager.Add(item.GetItemType(), newItem);
         }
     }
     public void AddItem(string inventoryName, string itemType)
@@ -181,10 +182,10 @@ public class InventoryController : MonoBehaviour
         }
 
     }
-    public void AddItem(string inventoryName, string itemType, int position)
+    public void AddItem(string inventoryName, Item itemType, int position)
     {
         Inventory inventory = inventoryManager[inventoryName];
-        Item item = itemManager[itemType];
+        Item item = itemType;
         inventory.AddItem(item, position);
     }
     public void ResetInventory()
@@ -192,9 +193,9 @@ public class InventoryController : MonoBehaviour
         inventoryManager.Clear();
         itemManager.Clear();
         prevInventoryTracker.Clear();
-        foreach (Item item in items)
+        foreach (ItemInitializer item in items)
         {
-            itemManager.Add(item.GetItemType(), item);
+            itemManager.Add(item.GetItemType(), new Item(item));
         }
         foreach (GameObject obj in allInventoryUI)
         {
@@ -208,6 +209,7 @@ public class InventoryController : MonoBehaviour
         foreach (GameObject inventories in allInventoryUI)
         {
             InventoryUI inventoryInstance = inventories.GetComponent<InventoryUI>();
+            inventoryInstance.GetInventory().init();
             inventoryManager.Add(inventoryInstance.GetInventoryName(), inventoryInstance.GetInventory());
             if(EnableDisableDict.ContainsKey(inventoryInstance.GetEnableDisable()))
             {
@@ -246,7 +248,7 @@ public class InventoryController : MonoBehaviour
     {
         return UI;
     }
-    public List<Item> GetItems()
+    public List<ItemInitializer> GetItems()
     {
         return items;
     }
