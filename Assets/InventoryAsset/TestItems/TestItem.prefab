@@ -44,5 +44,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c547242c9060d0b46bbd99a72cbb4b6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inventory: MyInv
+  inventory: MainInventory
   item: Circle

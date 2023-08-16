@@ -4,6 +4,7 @@ using System.Data;
 using System.Drawing;
 using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
+using static UnityEditor.Progress;
 
 [System.Serializable]
 public class Inventory 
@@ -40,8 +41,16 @@ public class Inventory
     }
     public void AddItem(Item item)
     {
-        items[curInventoryLoc] = item;
+        for(int i = 0; i < items.Count; i++)
+        {
+            if (items[i].GetIsNull())
+            {
+                items[i] = item;
+                InventoryUIManager.GetComponent<InventoryUI>().UpdateSlot(i);
+                break;
 
+            }
+        }
 /*        if (!itemPositions.ContainsKey(item.GetItemType()))
         {
             itemPositions.Add(item.GetItemType(), new List<int>());
@@ -51,19 +60,20 @@ public class Inventory
         {
             items[curInventoryLoc] = item;
         }*/
-        InventoryUIManager.GetComponent<InventoryUI>().UpdateSlot(curInventoryLoc);
-        curInventoryLoc++;
-
     }
     public void AddItem(Item item, int position)
     {
-        items[position] = item;
-        InventoryUIManager.GetComponent<InventoryUI>().UpdateSlot(position);
+        if (items[position].GetIsNull())
+        {
+            items[position] = item;
+            InventoryUIManager.GetComponent<InventoryUI>().UpdateSlot(position);
+        }
     }
     public void ResetPosition(int position)
     {
         Item filler = new Item(true);
-        AddItem(filler, position);
+        items[position] = filler;
+        InventoryUIManager.GetComponent<InventoryUI>().UpdateSlot(position);
     }
     void FillInventory(int size)
     {

@@ -63,7 +63,10 @@ public class InventoryUI : MonoBehaviour
         UI = InventoryController.instance.GetUI();
         UpdateInventoryDisplay();
     }
-
+    private void Update()
+    {
+        HighLightOnButtonPress();
+    }
     public void UpdateInventoryDisplay()
     {
         if (CheckEditorChange())
@@ -284,15 +287,10 @@ public class InventoryUI : MonoBehaviour
             previouslyHighlighted = slot;
         }
     }
-    private void Update()
-    {
-        DisableEnableOnKeyInput();
-    }
-    private void DisableEnableOnKeyInput()
+    private void HighLightOnButtonPress()
     {
         if (Input.anyKeyDown)
         {
-            print("KeyDown");
             string input = Input.inputString;
             if (slotPress.ContainsKey(input))
             {

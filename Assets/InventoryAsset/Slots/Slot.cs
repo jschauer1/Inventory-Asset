@@ -9,10 +9,10 @@ using UnityEngine.UI;
 public class Slot : MonoBehaviour, IPointerClickHandler
 {
     [SerializeField]private int position;
-    [SerializeField]private Item item;
     [SerializeField]private GameObject slotChildPrefab;
     [SerializeField]private GameObject slotChildInstance;
 
+    private Item item;
     private Color color;
     Vector3 initalScale;
     private Image slotImage;
