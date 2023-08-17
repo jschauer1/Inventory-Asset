@@ -1,13 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security;
-using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
-using UnityEngine.UIElements;
-using static UnityEditor.Progress;
 
-public class InventoryUI : MonoBehaviour
+
+public class InventoryUIManager : MonoBehaviour
 {
     private GameObject previouslyHighlighted;
 
@@ -232,7 +227,7 @@ public class InventoryUI : MonoBehaviour
     }
     public string GetInventoryName()
     {
-        return inventory.getName();
+        return inventory.GetName();
 
     }
     public ref Inventory GetInventory()

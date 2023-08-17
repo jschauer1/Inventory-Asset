@@ -9,68 +9,82 @@ using UnityEngine.UI;
 public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
 {
     // Start is called before the first frame update
-    private Image image;
-    private Slot CurSlot;
+    private Slot CurrentSlot;
     private Item item;
     [SerializeField] TextMeshProUGUI text;
 
     void Start()
     {
-        CurSlot = transform.parent.GetComponent<Slot>();
+        CurrentSlot = transform.parent.GetComponent<Slot>();
     }
 
     // Update is called once per frame
     public void OnDrag(PointerEventData eventData)
     {
-        if (draggable()) return;
+        if (Draggable()) return;
         Canvas canvas = GameObject.Find("UI").GetComponent<Canvas>();
         transform.parent.gameObject.transform.SetSiblingIndex(100);
-        PointerEventData pointerData = eventData;
         Vector2 position;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            (RectTransform)canvas.transform, pointerData.position, canvas.worldCamera, out position);
+            (RectTransform)canvas.transform, eventData.position, canvas.worldCamera, out position);
         transform.position = canvas.transform.TransformPoint(position);
     }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        if (draggable()) return;
-        if (CurSlot != null)
+        if (Draggable()) return;
+        if (CurrentSlot != null)
         {
-            transform.SetParent(CurSlot.GetInventoryUI().GetUI());
-            CurSlot.ResetSlotChild();
-            CurSlot = null;
-
+            transform.SetParent(CurrentSlot.GetInventoryUI().GetUI());
+            CurrentSlot.ResetSlotChild();
         }
         else
         {
-            Debug.Log("No Slot");
+            Debug.LogWarning("No Slot");
+            return;
         }
 
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        if (draggable()) return;
+        if (Draggable()) return;
         List<RaycastResult> results = new List<RaycastResult>();
         EventSystem.current.RaycastAll(eventData, results);
-
+        bool foundSlot = false;
         foreach (RaycastResult result in results)
         {
             if(result.gameObject.tag == "Slot")
             {
                 Slot slot = result.gameObject.GetComponent<Slot>();
-                InventoryController.instance.AddItem(slot.GetInventoryUI().GetInventoryName(), item, slot.GetPosition()); 
-                Destroy(gameObject);
+                if(slot.GetItem().GetIsNull())
+                {
+                    InventoryController.instance.AddItem(slot.GetInventoryUI().GetInventoryName(), item, slot.GetPosition());
+                    Destroy(gameObject);
+                }
+                else
+                {
+                    Return();
+                }
+                foundSlot = true;
                 break;
             }
-        }        
-    }
-    private bool draggable()
-    {
-        if(CurSlot != null)
+        }       
+        if(!foundSlot)
         {
-            return (!item.GetDraggable() || !CurSlot.GetInventoryUI().GetDraggable());
+            Return();
+        }
+    }
+    private void Return()
+    {
+        InventoryController.instance.AddItem(CurrentSlot.GetInventoryUI().GetInventoryName(), item, CurrentSlot.GetPosition());
+        Destroy(gameObject);
+    }
+    private bool Draggable()
+    {
+        if(CurrentSlot != null)
+        {
+            return (!item.GetDraggable() || !CurrentSlot.GetInventoryUI().GetDraggable());
         }
         return false;
 

@@ -6,7 +6,7 @@ using UnityEngine.Events;
 
 public class Item 
 {
-    private int amount = 1;
+    private int amount;
 
     string itemType;
     private Sprite itemImage;
@@ -17,7 +17,7 @@ public class Item
     private bool isNull = false;
     public Item(ItemInitializer init)
     {
-        this.amount = init.GetAmount();
+        this.amount = 1;
         this.itemType = init.GetItemType();
         this.itemImage = init.GetItemImage();
         this.maxStackAmount = init.GetItemStackAmount();
@@ -55,6 +55,7 @@ public class Item
 
     public Item(bool isNull)
     {
+        amount = 1;
         this.isNull = isNull;
     }
     public void SetIsNull(bool isNull)

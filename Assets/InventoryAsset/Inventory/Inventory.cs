@@ -1,12 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
-using UnityEngine.UIElements;
-using static UnityEditor.Progress;
 
 [System.Serializable]
 public class Inventory 
@@ -17,10 +10,10 @@ public class Inventory
 
     [SerializeField, HideInInspector]
     private string inventoryName;
-
+    [SerializeField, HideInInspector]
+    InventoryUIManager InventoryUIManagerInstance;
     [SerializeField, HideInInspector]
     private GameObject InventoryUIManager;
-    private int curInventoryLoc;
     [SerializeField, HideInInspector]
     int size;
     public Inventory(GameObject InventoryUIManager,string name,int size)
@@ -30,6 +23,7 @@ public class Inventory
         items = new List<Item>(size);
         this.size = size;
         FillInventory(size);
+        InventoryUIManagerInstance = InventoryUIManager.GetComponent<InventoryUIManager>();
     }
     public void Init()
     {
@@ -39,6 +33,7 @@ public class Inventory
     }
     public void Resize(int newSize)
     {
+        size = newSize; 
         if (items == null)
         {
             return;
@@ -58,16 +53,16 @@ public class Inventory
                 int position = itemPositions[item.GetItemType()][i];
                 if (items[position].GetItemStackAmount() > items[position].GetAmount())
                 {
-                    items[position].SetAmount(items[position].GetAmount() + 1);
-                    InventoryUIManager.GetComponent<InventoryUI>().UpdateSlot(position);
+                    items[position].SetAmount(items[position].GetAmount() + item.GetAmount());
+                    InventoryUIManager.GetComponent<InventoryUIManager>().UpdateSlot(position);
                     return;
                 }
             }
-            newItemInit(item);
+            AddNewItem(item);
         }
         else
         {
-            newItemInit(item);
+            AddNewItem(item);
         }
 
     }
@@ -75,11 +70,11 @@ public class Inventory
     {
         if (items == null)
         {
+            Debug.LogError("Items List Not Set Correctly");
             return;
         }
         if (items[position].GetIsNull())
         {
-
             if (itemPositions.ContainsKey(item.GetItemType()))
             {
                 itemPositions[item.GetItemType()].Add(position);
@@ -88,38 +83,38 @@ public class Inventory
             {
                 itemPositions.Add(item.GetItemType(), new List<int> { position });
             }    
-
-
             items[position] = item;
-            InventoryUIManager.GetComponent<InventoryUI>().UpdateSlot(position);
+            InventoryUIManagerInstance.UpdateSlot(position);
         }
     }
-    private void newItemInit(Item item)
+    private void AddNewItem(Item item)
     {
+
         for (int i = 0; i < items.Count; i++)
         {
 
             if (items[i].GetIsNull())
             {
+
                 Item newItem = new Item(item);
                 items[i] = newItem;
                 if(itemPositions.ContainsKey(item.GetItemType()))
                 {
                     itemPositions[item.GetItemType()].Add(i);
-                    InventoryUIManager.GetComponent<InventoryUI>().UpdateSlot(i);
+                    InventoryUIManagerInstance.UpdateSlot(i);
                 }
                 else
                 {
                     itemPositions.Add(item.GetItemType(), new List<int>());
                     itemPositions[item.GetItemType()].Add(i);
-                    InventoryUIManager.GetComponent<InventoryUI>().UpdateSlot(i);
+                    InventoryUIManagerInstance.UpdateSlot(i);
                 }
                 break;
             }
         }
-    }
+    }  
 
-    public void ResetPosition(int position)
+    public void ResetConnectedSlot(int position)
     {
         if (!items[position].GetIsNull())
         {
@@ -134,7 +129,7 @@ public class Inventory
         }
         Item filler = new Item(true);
         items[position] = filler;
-        InventoryUIManager.GetComponent<InventoryUI>().UpdateSlot(position);
+        InventoryUIManagerInstance.UpdateSlot(position);
     }
     void FillInventory(int size)
     {
@@ -157,15 +152,15 @@ public class Inventory
         }
         return items[index];
     }
-    public string getName()
+    public string GetName()
     {
         return inventoryName;
     }
-    public void setManager(GameObject manager)
+    public void SetManager(GameObject manager)
     {
         this.InventoryUIManager= manager;
     }
-    public List<Item> getList()
+    public List<Item> GetList()
     {
         return items;
     }

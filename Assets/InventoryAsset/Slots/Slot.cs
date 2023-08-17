@@ -17,14 +17,14 @@ public class Slot : MonoBehaviour, IPointerClickHandler
     Vector3 initalScale;
     private Image slotImage;
 
-    private InventoryUI InvUI;
+    private InventoryUIManager InvUI;
     private Vector3 initialSlotChildPosition;
     private void Awake()
     {
         slotImage = GetComponent<Image>();
         color = slotImage.color;
 
-        InvUI = transform.parent.GetComponent<InventoryUI>();
+        InvUI = transform.parent.GetComponent<InventoryUIManager>();
         initialSlotChildPosition = slotChildInstance.transform.position;
         initalScale = slotChildInstance.transform.localScale;
     }
@@ -54,7 +54,7 @@ public class Slot : MonoBehaviour, IPointerClickHandler
     public void UpdateSlot()
     {
 
-        item = transform.parent.GetComponent<InventoryUI>().GetInventoryItem(position);
+        item = transform.parent.GetComponent<InventoryUIManager>().GetInventoryItem(position);
         if (!item.GetIsNull())
         {
             slotChildInstance.SetActive(true);
@@ -74,7 +74,7 @@ public class Slot : MonoBehaviour, IPointerClickHandler
         newInstance.transform.SetParent(transform);
         newInstance.transform.localScale = initalScale;
         slotChildInstance = newInstance;
-        InvUI.GetInventory().ResetPosition(position);
+        InvUI.GetInventory().ResetConnectedSlot(position);
         slotChildInstance.SetActive(false);
 
     }
@@ -88,9 +88,9 @@ public class Slot : MonoBehaviour, IPointerClickHandler
         {
             return;
         }
-        InvUI.GetComponent<InventoryUI>().SetHightlighted(gameObject);
+        InvUI.GetComponent<InventoryUIManager>().SetHightlighted(gameObject);
     }
-    public InventoryUI GetInventoryUI()
+    public InventoryUIManager GetInventoryUI()
     {
         return InvUI;
     }

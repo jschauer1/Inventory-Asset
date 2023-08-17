@@ -1,11 +1,6 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using UnityEngine.Events;
-using static System.Runtime.CompilerServices.RuntimeHelpers;
-using static UnityEditor.Progress;
+
 
 /*
  * This class defines an inventory controller, which allows for creating new inventories and defining valid types of objects.
@@ -111,7 +106,7 @@ public class InventoryController : MonoBehaviour
 
                 inventoryManager.Add(inventoryName, curInventory);
 
-                InventoryUI inventoryUI = tempinventoryUI.GetComponent<InventoryUI>();
+                InventoryUIManager inventoryUI = tempinventoryUI.GetComponent<InventoryUIManager>();
 
                 inventoryUI.SetEnableDisable(initializer.GetEnableDisable());
                 inventoryUI.SetInventory(ref curInventory);
@@ -124,7 +119,7 @@ public class InventoryController : MonoBehaviour
         }
         foreach(GameObject inObjects in allInventoryUI)
         {
-            inObjects.GetComponent<InventoryUI>().UpdateInventoryDisplay();
+            inObjects.GetComponent<InventoryUIManager>().UpdateInventoryDisplay();
         }
     }
     private void RemoveDeletedInventories()
@@ -137,7 +132,7 @@ public class InventoryController : MonoBehaviour
             {
                 foreach (GameObject UI in allInventoryUI)
                 {
-                    InventoryUI UIInstance = UI.GetComponent<InventoryUI>();
+                    InventoryUIManager UIInstance = UI.GetComponent<InventoryUIManager>();
                     if (UIInstance.GetInventoryName() == initializer.GetInventoryName())
                     {
                         toremove.Add(UI);
@@ -212,7 +207,7 @@ public class InventoryController : MonoBehaviour
         inventoryManager.Clear();
         foreach (GameObject inventories in allInventoryUI)
         {
-            InventoryUI inventoryInstance = inventories.GetComponent<InventoryUI>();
+            InventoryUIManager inventoryInstance = inventories.GetComponent<InventoryUIManager>();
             inventoryInstance.GetInventory().Init();
             inventoryManager.Add(inventoryInstance.GetInventoryName(), inventoryInstance.GetInventory());
             if(EnableDisableDict.ContainsKey(inventoryInstance.GetEnableDisable()))

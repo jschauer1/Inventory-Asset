@@ -1,11 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine.UI;
 using UnityEngine;
 using UnityEngine.Events;
-using static UnityEditor.Progress;
-using System.Collections.Concurrent;
-using System;
 
 [System.Serializable]
 public class ItemInitializer

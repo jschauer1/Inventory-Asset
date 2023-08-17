@@ -1,7 +1,5 @@
-using System.Reflection.Emit;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 [CustomPropertyDrawer(typeof(ItemInitializer))]
 public class ItemPropertyDrawer : PropertyDrawer

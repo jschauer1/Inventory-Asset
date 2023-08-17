@@ -1,13 +1,13 @@
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(InventoryUI))]
+[CustomEditor(typeof(InventoryUIManager))]
 public class InventoryUIReact : Editor
 {
     public override void OnInspectorGUI()
     {
         // Reference to the InventoryUI script.
-        InventoryUI inventoryUI = (InventoryUI)target;
+        InventoryUIManager inventoryUI = (InventoryUIManager)target;
 
         // Draw default inspector content.
         DrawDefaultInspector();
