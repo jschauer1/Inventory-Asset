@@ -35,8 +35,6 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
     public void OnBeginDrag(PointerEventData eventData)
     {
         if (draggable()) return;
-        Debug.Log("adding 1");
-        item.SetAmount(item.GetAmount() + 1);
         if (CurSlot != null)
         {
             transform.SetParent(CurSlot.GetInventoryUI().GetUI());

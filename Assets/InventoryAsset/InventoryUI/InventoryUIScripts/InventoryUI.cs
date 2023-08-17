@@ -60,6 +60,11 @@ public class InventoryUI : MonoBehaviour
     }
     public void Start()
     {
+        if (!InventoryController.instance.CheckSetup())
+        {
+            Destroy(gameObject);
+            return;
+        }
         UI = InventoryController.instance.GetUI();
         UpdateInventoryDisplay();
     }
@@ -71,7 +76,7 @@ public class InventoryUI : MonoBehaviour
     {
         if (CheckEditorChange())
         {
-            inventory.ReSize(row*col);
+            inventory.Resize(row*col);
 
             InventoryUIReset();
 

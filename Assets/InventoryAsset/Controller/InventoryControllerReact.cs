@@ -12,12 +12,11 @@ public class InventoryControllerReact : Editor
 
         if (GUILayout.Button("Initialize Inventories"))
         {
-            script.InitializeInventories();
+            EditorApplication.delayCall += script.InitializeInventories;
         }
-        if (GUILayout.Button("Reset"))
+        else if (GUILayout.Button("Reset"))
         {
-            script.ResetInventory();
+            EditorApplication.delayCall += script.ResetInventory;
         }
-
     }
 }

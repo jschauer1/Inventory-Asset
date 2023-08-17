@@ -56,6 +56,7 @@ public class InventoryController : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        if (!CheckSetup()) return;
         AllignDictionaries();
         InitializeItems();
     }
@@ -69,6 +70,9 @@ public class InventoryController : MonoBehaviour
     /// </summary>
     public void InitializeInventories()
     {
+
+        if (!CheckSetup()) return;
+
         RemoveDeletedInventories();
         InitializeNewInventories();
         UpdateInventoryTracker();
@@ -209,7 +213,7 @@ public class InventoryController : MonoBehaviour
         foreach (GameObject inventories in allInventoryUI)
         {
             InventoryUI inventoryInstance = inventories.GetComponent<InventoryUI>();
-            inventoryInstance.GetInventory().init();
+            inventoryInstance.GetInventory().Init();
             inventoryManager.Add(inventoryInstance.GetInventoryName(), inventoryInstance.GetInventory());
             if(EnableDisableDict.ContainsKey(inventoryInstance.GetEnableDisable()))
             {
@@ -232,7 +236,7 @@ public class InventoryController : MonoBehaviour
                 List<GameObject> inventoryUIs = EnableDisableDict[input];
                 foreach (GameObject inventoryUI in inventoryUIs)
                 {
-                    if (inventoryUI.active)
+                    if (inventoryUI.activeSelf)
                     {
                         inventoryUI.SetActive(false);
                     }
@@ -243,6 +247,47 @@ public class InventoryController : MonoBehaviour
                 }
             }
         }
+    }
+    public bool CheckSetup()
+    {
+        if (UI == null)
+        {
+            Debug.LogError("UI Canvas Not Set Correctly");
+            return false;
+        }
+        if (inventoryManagerObj == null)
+        {
+            Debug.LogError("Inventory Manager Object Not Set Correclty.");
+            return false;
+        }
+        for (int i = 0; i < initializeInventory.Count; i++)
+        {
+            int countInstance = 0;
+
+            for (int j = 0; j < initializeInventory.Count; j++)
+            {
+                if (initializeInventory[i].GetInventoryName().Equals(initializeInventory[j].GetInventoryName()))
+                {
+                    countInstance++;
+                }
+                if(countInstance > 1)
+                {
+                    Debug.LogError("You can only have one of each inventory name");
+
+                    return false;
+                }
+            }
+
+        }
+        foreach (GameObject inventories in allInventoryUI)
+        {
+            if (inventories == null)
+            {
+                Debug.LogError("Inventories Are Null, Try Unpacking IventoryController");
+                return false;
+            }
+        }
+        return true;
     }
     public Transform GetUI()
     {

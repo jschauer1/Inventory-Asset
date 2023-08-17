@@ -31,13 +31,13 @@ public class Inventory
         this.size = size;
         FillInventory(size);
     }
-    public void init()
+    public void Init()
     {
         itemPositions = new Dictionary<string, List<int>>();
         items = new List<Item>(size);
         FillInventory(size);
     }
-    public void ReSize(int newSize)
+    public void Resize(int newSize)
     {
         if (items == null)
         {
@@ -79,6 +79,17 @@ public class Inventory
         }
         if (items[position].GetIsNull())
         {
+
+            if (itemPositions.ContainsKey(item.GetItemType()))
+            {
+                itemPositions[item.GetItemType()].Add(position);
+            }
+            else
+            {
+                itemPositions.Add(item.GetItemType(), new List<int> { position });
+            }    
+
+
             items[position] = item;
             InventoryUIManager.GetComponent<InventoryUI>().UpdateSlot(position);
         }
@@ -110,6 +121,17 @@ public class Inventory
 
     public void ResetPosition(int position)
     {
+        if (!items[position].GetIsNull())
+        {
+            if (itemPositions.ContainsKey(items[position].GetItemType()))
+            {
+                itemPositions[items[position].GetItemType()].Remove(position);
+            }
+            else
+            {
+                Debug.LogWarning("ItemPositions Dictitonary Setup Incorrectly");
+            }
+        }
         Item filler = new Item(true);
         items[position] = filler;
         InventoryUIManager.GetComponent<InventoryUI>().UpdateSlot(position);
@@ -128,6 +150,11 @@ public class Inventory
     }
     public Item InventoryGetItem(int index)
     {
+        if(items == null)
+        {
+            Debug.LogError("Items List Not Set Correctly");
+            return null;
+        }
         return items[index];
     }
     public string getName()
