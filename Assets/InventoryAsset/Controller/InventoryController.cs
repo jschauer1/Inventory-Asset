@@ -51,7 +51,9 @@ public class InventoryController : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        if (!CheckSetup()) return;
+        if (!TestSetup()) return;
+        if (!TestInstance()) return;
+        TestChildObject();
         AllignDictionaries();
         InitializeItems();
     }
@@ -60,13 +62,14 @@ public class InventoryController : MonoBehaviour
         DisableEnableOnKeyInput();
     }
 
+
     /// <summary>
     /// 
     /// </summary>
     public void InitializeInventories()
     {
 
-        if (!CheckSetup()) return;
+        if (!TestSetup()) return;
 
         RemoveDeletedInventories();
         InitializeNewInventories();
@@ -114,12 +117,12 @@ public class InventoryController : MonoBehaviour
                 inventoryUI.SetDraggable(initializer.GetDraggable());
                 inventoryUI.SetRowCol(initializer.GetRow(), initializer.GetCol());
                 inventoryUI.SetInventoryName(initializer.GetInventoryName());
-                inventoryUI.UpdateInventoryDisplay();
+                inventoryUI.UpdateInventoryUI();
             }
         }
         foreach(GameObject inObjects in allInventoryUI)
         {
-            inObjects.GetComponent<InventoryUIManager>().UpdateInventoryDisplay();
+            inObjects.GetComponent<InventoryUIManager>().UpdateInventoryUI();
         }
     }
     private void RemoveDeletedInventories()
@@ -243,18 +246,38 @@ public class InventoryController : MonoBehaviour
             }
         }
     }
-    public bool CheckSetup()
+    public bool TestSetup()
     {
-        if (UI == null)
+        return TestInventoryUI()
+            && TestinventoryManagerObjSetup()
+            && TestInveInitializerListSetup()
+            && TestUISetup();
+            
+
+    }
+    private bool TestInventoryUI()
+    {
+        foreach (GameObject inventories in allInventoryUI)
         {
-            Debug.LogError("UI Canvas Not Set Correctly");
-            return false;
+            if (inventories == null)
+            {
+                Debug.LogError("Inventories Are Null, Try Unpacking IventoryController");
+                return false;
+            }
         }
+        return true;
+    }
+    public bool TestinventoryManagerObjSetup()
+    {
         if (inventoryManagerObj == null)
         {
             Debug.LogError("Inventory Manager Object Not Set Correclty.");
             return false;
         }
+        return true;
+    }
+    private bool TestInveInitializerListSetup()
+    {
         for (int i = 0; i < initializeInventory.Count; i++)
         {
             int countInstance = 0;
@@ -265,7 +288,7 @@ public class InventoryController : MonoBehaviour
                 {
                     countInstance++;
                 }
-                if(countInstance > 1)
+                if (countInstance > 1)
                 {
                     Debug.LogError("You can only have one of each inventory name");
 
@@ -274,15 +297,43 @@ public class InventoryController : MonoBehaviour
             }
 
         }
-        foreach (GameObject inventories in allInventoryUI)
+        return true;
+    }
+    private bool TestUISetup()
+    {
+        if (UI == null)
         {
-            if (inventories == null)
-            {
-                Debug.LogError("Inventories Are Null, Try Unpacking IventoryController");
-                return false;
-            }
+            Debug.LogError("UI Canvas Not Set Correctly");
+            return false;
         }
         return true;
+    }
+    public bool TestInstance()
+    {
+        if (instance == null)
+        {
+            Debug.LogError("You must choose ONE InventoryController instance by clicking the bool isInstance inside InventoryController script");
+            return false;
+        }
+        return true;
+    }
+    private void TestChildObject()
+    {
+        InventoryUIManager manager = transform.GetComponentInChildren<InventoryUIManager>();
+
+        if (manager != null)
+        {
+            if (manager.gameObject.activeSelf)
+            {
+                Debug.LogWarning("The Child of Inventory Controller, InventoryUIManager is active. Disabling it now.");
+                manager.gameObject.SetActive(false);
+            }
+        }
+        else
+        {
+            if(transform.childCount == 0)
+            Debug.LogWarning("Inventory Controller Does Not Have Child Object with InventoryUIManager");
+        }
     }
     public Transform GetUI()
     {

@@ -16,7 +16,7 @@ public class InventoryUIReact : Editor
         if (GUI.changed)
         {
             // Apply changes to inventory display.
-            inventoryUI.UpdateInventoryDisplay();
+            inventoryUI.UpdateInventoryUI();
 
             // Mark object as dirty.
             EditorUtility.SetDirty(inventoryUI);

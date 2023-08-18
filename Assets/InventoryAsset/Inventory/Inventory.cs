@@ -70,7 +70,7 @@ public class Inventory
     {
         if (items == null)
         {
-            Debug.LogError("Items List Not Set Correctly");
+            Debug.LogError("Items List Null");
             return;
         }
         if (items[position].GetIsNull())
@@ -147,7 +147,7 @@ public class Inventory
     {
         if(items == null)
         {
-            Debug.LogError("Items List Not Set Correctly");
+            Debug.LogError("Items List Null");
             return null;
         }
         return items[index];
