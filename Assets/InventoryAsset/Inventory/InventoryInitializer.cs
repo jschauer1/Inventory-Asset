@@ -8,8 +8,9 @@ public class InventoryInitializer
     [SerializeField] private string inventoryName;
     [SerializeField] private int row;
     [SerializeField] private int col;
-    [SerializeField] private bool highlightable;
     [SerializeField] private bool draggable;
+    [SerializeField] private bool highlightable;
+    [SerializeField] private bool SaveInventory;
     [SerializeField] private char EnableDisableOnPress;
     [SerializeField, HideInInspector]
     private bool initialized = false;
@@ -60,6 +61,10 @@ public class InventoryInitializer
     public string GetEnableDisable()
     {
         return EnableDisableOnPress.ToString();
+    }
+    public bool GetSaveInventory()
+    {
+        return SaveInventory;
     }
     public override int GetHashCode()
     {

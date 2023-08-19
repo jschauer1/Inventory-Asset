@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-
 public class Item 
 {
     private int amount;
@@ -34,21 +33,12 @@ public class Item
         }
 
         this.amount = other.amount;
-        this.itemType = other.itemType != null ? string.Copy(other.itemType) : null; // Strings are immutable, but this ensures a new reference.
-
-        // Sprites in Unity are usually shared assets. Deep copying them usually isn't what you want because
-        // it would involve creating a new texture in memory, which is heavy. Instead, you typically just 
-        // want to reference the same sprite. If you truly want a "deep copy", you'll need to duplicate
-        // the texture and create a new sprite from that duplicated texture.
+        this.itemType = other.itemType != null ? string.Copy(other.itemType) : null;
         this.itemImage = other.itemImage;
 
         this.maxStackAmount = other.maxStackAmount;
         this.draggable = other.draggable;
         this.highlightable = other.highlightable;
-
-        // For UnityEvent, creating a deep copy is a complex operation because the event can have multiple listeners.
-        // If you're certain you want to duplicate the event and its listeners (rarely the case), you'll need 
-        // a more advanced approach.
         this.myEvent = other.myEvent;
         this.isNull = other.isNull;
     }

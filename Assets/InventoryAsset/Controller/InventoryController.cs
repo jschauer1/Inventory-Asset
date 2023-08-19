@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 
-/*
+/* 
+ * Author: Jaxon Schauer
  * This class defines an inventory controller, which allows for creating new inventories and defining valid types of objects.
  * Only one InventoryController should be instantiated within a project. Multiple inventories can be created from one controller.
  * This controller manages all information transfered between the inventories.
@@ -51,12 +53,23 @@ public class InventoryController : MonoBehaviour
         {
             Destroy(gameObject);
         }
+
         if (!TestSetup()) return;
         if (!TestInstance()) return;
         TestChildObject();
         AllignDictionaries();
         InitializeItems();
     }
+    /// <summary>
+    /// Loads any saved inventories on start <see cref="LoadSave"/>
+    /// </summary>
+    private void Start()
+    {
+        LoadSave();
+    }
+    /// <summary>
+    /// Constantly checks for input to pass to HighLightOnButtonPress
+    /// </summary>
     private void Update()
     {
         DisableEnableOnKeyInput();
@@ -64,7 +77,8 @@ public class InventoryController : MonoBehaviour
 
 
     /// <summary>
-    /// 
+    /// Uses <see cref="TestSetup"/> to check that the user has correctly setup inventory
+    /// If the user has setup inventory correctly, then the initiaization functions are run, loading the new inventories and deleting missing inventories
     /// </summary>
     public void InitializeInventories()
     {
@@ -77,10 +91,11 @@ public class InventoryController : MonoBehaviour
         AllignDictionaries();
         InitializeItems();
     }
-    public Inventory GetInventory(string name)
-    {
-        return inventoryManager[name];
-    }
+    /// <summary>
+    /// Handles the prevInventoryTracker list, allowing it to track the changes made from the previous initialization and stopping it from initializing
+    /// or deleting the unecessary information in the functions running of <see cref="InitializeNewInventories"/>  
+    /// and <see cref="RemoveDeletedInventories"/>
+    /// </summary>
     private void UpdateInventoryTracker()
     {
         prevInventoryTracker.Clear();
@@ -91,6 +106,10 @@ public class InventoryController : MonoBehaviour
             prevInventoryTracker.Add(InitilizerCopy);
         }
     }
+    /// <summary>
+    /// Initializes any new inventories, giving the necessary information to the <see cref="Inventory"/> class 
+    /// and the <see cref="InventoryUIManager"/>, allowing them to work together displaying and maintaining the information of the inventory
+    /// </summary>
     private void InitializeNewInventories()
     {
         foreach (InventoryInitializer initializer in initializeInventory)
@@ -105,7 +124,7 @@ public class InventoryController : MonoBehaviour
 
                 string inventoryName = initializer.GetInventoryName();
                 int InventorySize = initializer.GetRow() * initializer.GetCol();
-                Inventory curInventory = new Inventory(tempinventoryUI,inventoryName, InventorySize);
+                Inventory curInventory = new Inventory(tempinventoryUI,inventoryName, InventorySize,initializer.GetSaveInventory());
 
                 inventoryManager.Add(inventoryName, curInventory);
 
@@ -125,6 +144,10 @@ public class InventoryController : MonoBehaviour
             inObjects.GetComponent<InventoryUIManager>().UpdateInventoryUI();
         }
     }
+    /// <summary>
+    /// Initializes any new inventories, giving the necessary information to the <see cref="Inventory"/> class 
+    /// and the <see cref="InventoryUIManager"/>, allowing them to work together displaying and maintaining the information of the inventory
+    /// </summary>
     private void RemoveDeletedInventories()
     {
 
@@ -152,6 +175,9 @@ public class InventoryController : MonoBehaviour
 
         }
     }
+    /// <summary>
+    /// Initializes the items into <see cref="itemManager"/>, allowing for the inventory to make deep copies of the items when needed
+    /// </summary>
     private void InitializeItems()
     {
         itemManager.Clear();
@@ -161,8 +187,13 @@ public class InventoryController : MonoBehaviour
             itemManager.Add(item.GetItemType(), newItem);
         }
     }
+    /// <summary>
+    /// Takes in input of two strings, one that is inputted into the <see cref="inventoryManager"/> and a reference to an item in <see cref="itemManager"/>, passing the item to the 
+    /// expected inventory and adding a deep copy of the expected item and adding into the lowest unused possition in the <see cref="Inventory.GetList()"/>.
+    /// </summary>
     public void AddItem(string inventoryName, string itemType)
     {
+
         if(inventoryManager.ContainsKey(inventoryName))
         {
             Inventory inventory = inventoryManager[inventoryName];
@@ -184,6 +215,7 @@ public class InventoryController : MonoBehaviour
         }
 
     }
+
     public void AddItem(string inventoryName, Item itemType, int position)
     {
         Inventory inventory = inventoryManager[inventoryName];
@@ -204,6 +236,7 @@ public class InventoryController : MonoBehaviour
             DestroyImmediate(obj);
         }
         allInventoryUI.Clear();
+        InventorySaveSystem.Reset();
     }
     public void AllignDictionaries()
     {
@@ -241,6 +274,28 @@ public class InventoryController : MonoBehaviour
                     else
                     {
                         inventoryUI.SetActive(true);
+                    }
+                }
+            }
+        }
+    }
+    private void LoadSave()
+    {
+        InventorySaveSystem.Create();
+        if (InventorySaveSystem.LoadItem() != null)
+        {
+            InventoryData itemData = InventorySaveSystem.LoadItem();
+            foreach (var pair in itemData.inventories)
+            {
+                List<string> itemsStr = pair.Value;
+                if (pair.Key == null)
+                    continue;
+
+                foreach (string itemType in itemsStr)
+                {
+                    if (itemType != null)
+                    {
+                        AddItem(pair.Key, itemType);
                     }
                 }
             }
@@ -342,5 +397,9 @@ public class InventoryController : MonoBehaviour
     public List<ItemInitializer> GetItems()
     {
         return items;
+    }
+    private void OnDestroy()
+    {
+        InventorySaveSystem.SaveInventory(inventoryManager);
     }
 }

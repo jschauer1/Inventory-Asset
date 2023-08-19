@@ -16,7 +16,9 @@ public class Inventory
     private GameObject InventoryUIManager;
     [SerializeField, HideInInspector]
     int size;
-    public Inventory(GameObject InventoryUIManager,string name,int size)
+    [SerializeField, HideInInspector]
+    bool saveInventory;
+    public Inventory(GameObject InventoryUIManager,string name,int size, bool saveInventory)
     {
         this.InventoryUIManager = InventoryUIManager;
         this.inventoryName = name;
@@ -24,6 +26,7 @@ public class Inventory
         this.size = size;
         FillInventory(size);
         InventoryUIManagerInstance = InventoryUIManager.GetComponent<InventoryUIManager>();
+        this.saveInventory = saveInventory;
     }
     public void Init()
     {
@@ -66,24 +69,25 @@ public class Inventory
         }
 
     }
-    public void AddItem(Item item, int position)
+    public void AddItem(Item Item, int position)
     {
         if (items == null)
         {
             Debug.LogError("Items List Null");
             return;
         }
+        Item newItem = new Item(Item);
         if (items[position].GetIsNull())
         {
-            if (itemPositions.ContainsKey(item.GetItemType()))
+            if (itemPositions.ContainsKey(newItem.GetItemType()))
             {
-                itemPositions[item.GetItemType()].Add(position);
+                itemPositions[newItem.GetItemType()].Add(position);
             }
             else
             {
-                itemPositions.Add(item.GetItemType(), new List<int> { position });
+                itemPositions.Add(newItem.GetItemType(), new List<int> { position });
             }    
-            items[position] = item;
+            items[position] = newItem;
             InventoryUIManagerInstance.UpdateSlot(position);
         }
     }
@@ -163,5 +167,9 @@ public class Inventory
     public List<Item> GetList()
     {
         return items;
+    }
+    public bool GetSaveInventory()
+    {
+        return saveInventory;
     }
 }
