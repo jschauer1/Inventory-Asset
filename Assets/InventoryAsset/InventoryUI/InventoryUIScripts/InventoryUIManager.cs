@@ -38,6 +38,7 @@ public class InventoryUIManager : MonoBehaviour
     private Transform UI;
 
 
+    private RectTransform rectTransform;
 
 
     //Hold previous values to be checked in CheckEditorChange
@@ -55,14 +56,21 @@ public class InventoryUIManager : MonoBehaviour
     private Dictionary<int, GameObject> slotPos = new Dictionary<int, GameObject>();
     public void Awake()
     {
+        rectTransform = GetComponent<RectTransform>();
+
         createSlots();
     }
 
     public void Start()
     {
+        inventory.Resize(row * col);
+        InventoryUIReset();
+        createSlots();
+        setBackground();
         if (!TestSetup()) return;
+
         UI = InventoryController.instance.GetUI();
-        UpdateInventoryUI();
+
     }
 
     /// <summary>
@@ -78,6 +86,7 @@ public class InventoryUIManager : MonoBehaviour
     /// </summary>
     public void UpdateInventoryUI()
     {
+
         if (CheckEditorChange())
         {
             inventory.Resize(row * col);
@@ -144,29 +153,39 @@ public class InventoryUIManager : MonoBehaviour
     /// Adds the slots into dictionaries and lists to track them
     /// Uses <see cref="SetSlotOrder"/> 
     /// </summary>
+    /// float referenceWidth = 1920f;  // Adjust this to your desired reference resolution width
+
     private void createSlots()
     {
         InventoryUIReset();
         InitSlotPressDict();
-        Vector2 inventoryPosVec = transform.position;
-        Vector2 placeMentPos = new Vector2(inventoryPosVec.x, inventoryPosVec.y);
+        rectTransform = GetComponent<RectTransform>();
 
-        placeMentPos.y = transform.position.y + slotOffSet.y;
+        // Start from the top-left corner of the InventoryUI
+        Vector2 startPlacementPos = rectTransform.right;
+
         for (int curRow = 0; curRow < row; curRow++)
         {
-            placeMentPos.x = transform.position.x + slotOffSet.x;
             for (int curCol = 0; curCol < col; curCol++)
             {
-                GameObject slotObjectInstance = Instantiate(slot, placeMentPos, Quaternion.identity, transform);
-                placeMentPos.x += slotGap.x;
+                // Calculate the x and y position for each slot using the original slotGap and slotOffset values
+                float placeMentPosX = startPlacementPos.x + (curCol * slotGap.x);
+                float placeMentPosY = startPlacementPos.y - (curRow * slotGap.y);
+
+                Vector2 placeMentPos = new Vector2(placeMentPosX, placeMentPosY);
+
+                GameObject slotObjectInstance = Instantiate(slot, rectTransform);
+                slotObjectInstance.GetComponent<RectTransform>().localPosition = placeMentPos;
+
                 slotPositionsVec.Add(new Vector2(curRow, curCol), slotObjectInstance);
                 slots.Add(slotObjectInstance);
-                slotsvec.Add(slotObjectInstance.transform.localPosition);
+                slotsvec.Add(placeMentPos);
             }
-            placeMentPos.y -= (slotGap.y);
         }
         SetSlotOrder(new Vector2(19, 0), "Up", "Right");
     }
+
+
 
     /// <summary>
     /// Takes as input a startPosition, and a movement
