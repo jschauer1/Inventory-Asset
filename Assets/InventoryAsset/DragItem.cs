@@ -10,7 +10,7 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
 {
     // Start is called before the first frame update
     private Slot CurrentSlot;
-    private Item item;
+    private InventoryItem item;
     [SerializeField] TextMeshProUGUI text;
 
     void Start()
@@ -36,7 +36,7 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
         if (CurrentSlot != null)
         {
             transform.SetParent(CurrentSlot.GetInventoryUI().GetUI());
-            CurrentSlot.ResetSlotChild();
+            CurrentSlot.ResetSlot();
         }
         else
         {
@@ -89,7 +89,7 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
         return false;
 
     }
-    public void SetItem(Item item)
+    public void SetItem(InventoryItem item)
     {
         this.item = item;
     }

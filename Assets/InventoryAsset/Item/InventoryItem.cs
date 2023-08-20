@@ -3,7 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-public class Item 
+/*Author: Jaxon Schauer
+ * This class makes an inventoryItem that is used to track the items throughout the inventory
+ */
+public class InventoryItem 
 {
     private int amount;
 
@@ -14,7 +17,7 @@ public class Item
     private bool highlightable;
     private UnityEvent myEvent;
     private bool isNull = false;
-    public Item(ItemInitializer init)
+    public InventoryItem(ItemInitializer init)
     {
         this.amount = 1;
         this.itemType = init.GetItemType();
@@ -25,14 +28,14 @@ public class Item
         this.myEvent = init.GetEvent();
         this.isNull = init.GetIsNull();
     }
-    public Item(Item other)
+    public InventoryItem(InventoryItem other, int amount = 1)
     {
         if (other == null)
         {
             throw new ArgumentNullException(nameof(other), "Passed argument is null");
         }
 
-        this.amount = other.amount;
+        this.amount = amount;
         this.itemType = other.itemType != null ? string.Copy(other.itemType) : null;
         this.itemImage = other.itemImage;
 
@@ -43,7 +46,7 @@ public class Item
         this.isNull = other.isNull;
     }
 
-    public Item(bool isNull)
+    public InventoryItem(bool isNull)
     {
         amount = 1;
         this.isNull = isNull;

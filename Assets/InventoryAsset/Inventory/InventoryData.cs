@@ -18,7 +18,7 @@ public class InventoryData
             }
             List<string> itemsStr = new List<string>();
             Inventory inventory = pair.Value;
-            foreach(Item item in inventory.GetList())
+            foreach(InventoryItem item in inventory.GetList())
             {
                 itemsStr.Add(item.GetItemType());
             }

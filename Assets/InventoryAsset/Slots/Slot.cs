@@ -17,7 +17,7 @@ public class Slot : MonoBehaviour, IPointerClickHandler
     [SerializeField]
     private GameObject slotChildInstance;//This is a child object that is used to display an image of the object
 
-    private Item item;//This is the current item in the inventory, there is always an item however item.GetIsNull() determines if the object contains a real item
+    private InventoryItem item;//This is the current item in the inventory, there is always an item however item.GetIsNull() determines if the object contains a real item
     private Color color;//This is the color of the slot
     private Image slotImage;//This is the image of the slot
     private InventoryUIManager inventoryUIManager;
@@ -35,7 +35,7 @@ public class Slot : MonoBehaviour, IPointerClickHandler
         initialChildScale = slotChildInstance.transform.localScale;
     }
     /// <summary>
-    /// Initializes slot child, updating its image and calling <see cref="UpdateSlot"/>
+    /// Initializes slot child, calling <see cref="UpdateSlot"/>
     /// </summary>
     private void Start()
     {
@@ -46,9 +46,8 @@ public class Slot : MonoBehaviour, IPointerClickHandler
 
     }
     /// <summary>
-    /// Does everything
+    /// Updates the slot to display the item in the slots associated position
     /// </summary>
-
     public void UpdateSlot()
     {
 
@@ -66,19 +65,18 @@ public class Slot : MonoBehaviour, IPointerClickHandler
 
         }
     }
-    public void ResetSlotChild()
+    /// <summary>
+    /// Adds a new slotchild when slot child is dragged away, and resets the slot to empty
+    /// </summary>
+    public void ResetSlot()
     {
         GameObject newInstance = Instantiate(slotChildPrefab, initialSlotChildPosition,Quaternion.identity);
         newInstance.transform.SetParent(transform);
         newInstance.transform.localScale = initialChildScale;
         slotChildInstance = newInstance;
-        inventoryUIManager.GetInventory().ResetConnectedSlot(position);
+        inventoryUIManager.GetInventory().RemoveItemInPosition(position);
         slotChildInstance.SetActive(false);
 
-    }
-    public Image GetSlotImage()
-    {
-        return slotImage;
     }
     public void OnPointerClick(PointerEventData eventData)
     {
@@ -88,6 +86,11 @@ public class Slot : MonoBehaviour, IPointerClickHandler
         }
         inventoryUIManager.GetComponent<InventoryUIManager>().SetHightlighted(gameObject);
     }
+    public Image GetSlotImage()
+    {
+        return slotImage;
+    }
+
     public InventoryUIManager GetInventoryUI()
     {
         return inventoryUIManager;
@@ -96,7 +99,7 @@ public class Slot : MonoBehaviour, IPointerClickHandler
     {
         return color;
     }
-    public Item GetItem()
+    public InventoryItem GetItem()
     {
         return item;
     }

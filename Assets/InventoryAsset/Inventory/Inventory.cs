@@ -1,62 +1,106 @@
 using System.Collections.Generic;
 using UnityEngine;
+/* 
+ * Author: Jaxon Schauer
+ * This class creates an Inventory that tracks and controls the inventory list. This class tells the InventoryUIManager what objects each slot 
+ * holds
+ */
 
 [System.Serializable]
 public class Inventory 
 {
-    private Dictionary<string, List<int>> itemPositions;
+    private Dictionary<string, List<int>> itemPositions;//Holds all positions of a given itemType in the list
 
-    private List<Item> items;
+    private List<InventoryItem> inventoryList;//Holds all inventory items in a list
 
     [SerializeField, HideInInspector]
     private string inventoryName;
     [SerializeField, HideInInspector]
-    InventoryUIManager InventoryUIManagerInstance;
+    private GameObject InventoryUIManager;//holds the linked InventoryUIManager GameObject
     [SerializeField, HideInInspector]
-    private GameObject InventoryUIManager;
+    InventoryUIManager InventoryUIManagerInstance;//Holds an instance of the linked InventoryUIManager class
     [SerializeField, HideInInspector]
     int size;
     [SerializeField, HideInInspector]
-    bool saveInventory;
+    bool saveInventory;//is true if the user decides to save the inventory
+
+    /// <summary>
+    /// Assigns essential variables for the Inventory
+    /// </summary>
     public Inventory(GameObject InventoryUIManager,string name,int size, bool saveInventory)
     {
         this.InventoryUIManager = InventoryUIManager;
         this.inventoryName = name;
-        items = new List<Item>(size);
+        inventoryList = new List<InventoryItem>(size);
         this.size = size;
         FillInventory(size);
         InventoryUIManagerInstance = InventoryUIManager.GetComponent<InventoryUIManager>();
         this.saveInventory = saveInventory;
     }
+    /// <summary>
+    /// Initializes aspects of the inventory that do not transfer into play mode.
+    /// </summary>
     public void Init()
     {
         itemPositions = new Dictionary<string, List<int>>();
-        items = new List<Item>(size);
+        inventoryList = new List<InventoryItem>(size);
         FillInventory(size);
     }
+    /// <summary>
+    /// Resizes the inventory when <see cref="InventoryUIManager.UpdateInventoryUI"/> is called
+    /// </summary>
     public void Resize(int newSize)
     {
         size = newSize; 
-        if (items == null)
+        if (inventoryList == null)
         {
             return;
         }
         for (int i = size; i < newSize; i++)
         {
-            Item filler = new Item(true);
-            items.Add(filler);
+            InventoryItem filler = new InventoryItem(true);
+            inventoryList.Add(filler);
         }
     }
-    public void AddItem(Item item)
+    /// <summary>
+    /// Adds an item to a specified position, updating the <see cref="itemPositions"/> for efficient tracking of the items
+    /// </summary>
+    public void AddItem(int position,InventoryItem Item, int amount = 1)
     {
-        if(itemPositions.ContainsKey(item.GetItemType()))
+        if (inventoryList == null)
         {
-            for(int i = 0; i < itemPositions[item.GetItemType()].Count; i++)
+            Debug.LogError("Items List Null");
+            return;
+        }
+        InventoryItem newItem = new InventoryItem(Item, Item.GetAmount());
+        if (inventoryList[position].GetIsNull())
+        {
+            if (itemPositions.ContainsKey(newItem.GetItemType()))
+            {
+                itemPositions[newItem.GetItemType()].Add(position);
+            }
+            else
+            {
+                itemPositions.Add(newItem.GetItemType(), new List<int> { position });
+            }    
+            inventoryList[position] = newItem;
+            InventoryUIManagerInstance.UpdateSlot(position);
+        }
+    }
+    /// <summary>
+    /// Takes an item as input
+    /// Adds the item at the lowest possible inventory location, adding it into the <see cref="itemPositions"/> to allow for efficient tracking of the inventory items
+    /// </summary>
+    public void AddItem(InventoryItem item, int amount = 1)
+    {
+        if (itemPositions.ContainsKey(item.GetItemType()))
+        {
+            for (int i = 0; i < itemPositions[item.GetItemType()].Count; i++)
             {
                 int position = itemPositions[item.GetItemType()][i];
-                if (items[position].GetItemStackAmount() > items[position].GetAmount())
+                if (inventoryList[position].GetItemStackAmount() > inventoryList[position].GetAmount())
                 {
-                    items[position].SetAmount(items[position].GetAmount() + item.GetAmount());
+                    inventoryList[position].SetAmount(inventoryList[position].GetAmount() + item.GetAmount());
                     InventoryUIManager.GetComponent<InventoryUIManager>().UpdateSlot(position);
                     return;
                 }
@@ -69,39 +113,20 @@ public class Inventory
         }
 
     }
-    public void AddItem(Item Item, int position)
-    {
-        if (items == null)
-        {
-            Debug.LogError("Items List Null");
-            return;
-        }
-        Item newItem = new Item(Item);
-        if (items[position].GetIsNull())
-        {
-            if (itemPositions.ContainsKey(newItem.GetItemType()))
-            {
-                itemPositions[newItem.GetItemType()].Add(position);
-            }
-            else
-            {
-                itemPositions.Add(newItem.GetItemType(), new List<int> { position });
-            }    
-            items[position] = newItem;
-            InventoryUIManagerInstance.UpdateSlot(position);
-        }
-    }
-    private void AddNewItem(Item item)
+    /// <summary>
+    /// Adds a new item in the lowest possible inventoryList position
+    /// </summary>
+    private void AddNewItem(InventoryItem item, int amount = 1)
     {
 
-        for (int i = 0; i < items.Count; i++)
+        for (int i = 0; i < inventoryList.Count; i++)
         {
 
-            if (items[i].GetIsNull())
+            if (inventoryList[i].GetIsNull())
             {
 
-                Item newItem = new Item(item);
-                items[i] = newItem;
+                InventoryItem newItem = new InventoryItem(item, amount);
+                inventoryList[i] = newItem;
                 if(itemPositions.ContainsKey(item.GetItemType()))
                 {
                     itemPositions[item.GetItemType()].Add(i);
@@ -116,45 +141,50 @@ public class Inventory
                 break;
             }
         }
-    }  
-
-    public void ResetConnectedSlot(int position)
+    }
+    /// <summary>
+    /// Takes as input a position, remove the item from the given inventory position.
+    /// </summary>
+    public void RemoveItemInPosition(int position)
     {
-        if (!items[position].GetIsNull())
+        if (!inventoryList[position].GetIsNull())
         {
-            if (itemPositions.ContainsKey(items[position].GetItemType()))
+            if (itemPositions.ContainsKey(inventoryList[position].GetItemType()))
             {
-                itemPositions[items[position].GetItemType()].Remove(position);
+                itemPositions[inventoryList[position].GetItemType()].Remove(position);
             }
             else
             {
                 Debug.LogWarning("ItemPositions Dictitonary Setup Incorrectly");
             }
         }
-        Item filler = new Item(true);
-        items[position] = filler;
+        InventoryItem filler = new InventoryItem(true);
+        inventoryList[position] = filler;
         InventoryUIManagerInstance.UpdateSlot(position);
     }
+    /// <summary>
+    /// Fills the inventory with empty items 
+    /// </summary>
     void FillInventory(int size)
     {
-        if (items == null)
+        if (inventoryList == null)
         {
             return;
         }
         for (int i = 0; i < size; i ++)
         {
-            Item filler = new Item(true);
-            items.Add(filler);
+            InventoryItem filler = new InventoryItem(true);
+            inventoryList.Add(filler);
         }
     }
-    public Item InventoryGetItem(int index)
+    public InventoryItem InventoryGetItem(int index)
     {
-        if(items == null)
+        if(inventoryList == null)
         {
             Debug.LogError("Items List Null");
             return null;
         }
-        return items[index];
+        return inventoryList[index];
     }
     public string GetName()
     {
@@ -164,9 +194,9 @@ public class Inventory
     {
         this.InventoryUIManager= manager;
     }
-    public List<Item> GetList()
+    public List<InventoryItem> GetList()
     {
-        return items;
+        return inventoryList;
     }
     public bool GetSaveInventory()
     {

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 /*Author: Jaxon Schauer
- * This class uses information from the inventory controller to build a UI interface. 
+ * This class uses information given by the inventory controller to build a UI interface. 
  */
 
 public class InventoryUIManager : MonoBehaviour
@@ -83,7 +83,6 @@ public class InventoryUIManager : MonoBehaviour
     {
         if (CheckEditorChange() || _override)
         {
-            Debug.Log("here");
             inventory.Resize(row * col);
 
             InventoryUIReset();
@@ -263,7 +262,7 @@ public class InventoryUIManager : MonoBehaviour
     public void SetHightlighted(GameObject slot)
     {
         Slot slotInstance = slot.GetComponent<Slot>();
-        Item item = slotInstance.GetItem();
+        InventoryItem item = slotInstance.GetItem();
         if (item.GetHighlightable() && highlightable)
         {
             if (previouslyHighlighted != null)
@@ -343,6 +342,13 @@ public class InventoryUIManager : MonoBehaviour
         public int position;
         public char buttonPress;
     }
+    /// <summary>
+    /// Returns the item at a given inventory position
+    /// </summary>
+    public InventoryItem GetInventoryItem(int index)
+    {
+        return inventory.InventoryGetItem(index);
+    }
     public void SetInit(ref InventoryInitializer init)
     {
         this.init = init;
@@ -365,10 +371,6 @@ public class InventoryUIManager : MonoBehaviour
     public ref Inventory GetInventory()
     {
         return ref inventory;
-    }
-    public Item GetInventoryItem(int index)
-    {
-        return inventory.InventoryGetItem(index);
     }
     public void SetInventory(ref Inventory inventory)
     {
