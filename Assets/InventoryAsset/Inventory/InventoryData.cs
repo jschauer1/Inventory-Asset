@@ -14,7 +14,6 @@ public class InventoryData
         {
             if (!inventoryManager[pair.Key].GetSaveInventory())
             {
-                Debug.Log("here");
                 continue;
             }
             List<string> itemsStr = new List<string>();

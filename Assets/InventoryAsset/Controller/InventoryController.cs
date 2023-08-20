@@ -189,7 +189,8 @@ public class InventoryController : MonoBehaviour
     }
     /// <summary>
     /// Takes in input of two strings, one that is inputted into the <see cref="inventoryManager"/> and a reference to an item in <see cref="itemManager"/>, passing the item to the 
-    /// expected inventory and adding a deep copy of the expected item and adding into the lowest unused possition in the <see cref="Inventory.GetList()"/>.
+    /// expected inventory and adding a deep copy of the expected item and adding into the lowest unused possition in the <see cref="Inventory.GetList()"/>
+    /// uses <see cref="Inventory.AddItem(Item)"/>.
     /// </summary>
     public void AddItem(string inventoryName, string itemType)
     {
@@ -215,13 +216,18 @@ public class InventoryController : MonoBehaviour
         }
 
     }
-
+    /// <summary>
+    /// Addits a new item to a specified inventory, in a specified location. Uses <see cref="Inventory.AddItem(Item, int)/>
+    /// </summary>
     public void AddItem(string inventoryName, Item itemType, int position)
     {
         Inventory inventory = inventoryManager[inventoryName];
         Item item = itemType;
         inventory.AddItem(item, position);
     }
+    /// <summary>
+    /// This is a debug function used to reset all lists. This will delete any all existing inventories in the scnene
+    /// </summary>
     public void ResetInventory()
     {
         inventoryManager.Clear();
@@ -238,6 +244,10 @@ public class InventoryController : MonoBehaviour
         allInventoryUI.Clear();
         InventorySaveSystem.Reset();
     }
+    /// <summary>
+    /// This utilizes the serialized list allInventoryUI to setup the dictionaries <see cref="inventoryManager"/>,<see cref="EnableDisableDict"/>, and
+    /// <see cref="EnableDisableDict"/>
+    /// </summary>
     public void AllignDictionaries()
     {
         inventoryManager.Clear();
@@ -248,20 +258,24 @@ public class InventoryController : MonoBehaviour
             inventoryManager.Add(inventoryInstance.GetInventoryName(), inventoryInstance.GetInventory());
             if(EnableDisableDict.ContainsKey(inventoryInstance.GetEnableDisable()))
             {
-                EnableDisableDict[inventoryInstance.GetEnableDisable()].Add(inventories);
+                EnableDisableDict[inventoryInstance.GetEnableDisable().ToLower()].Add(inventories);
             }
             else
             {
-                EnableDisableDict.Add(inventoryInstance.GetEnableDisable(), new List<GameObject>());
-                EnableDisableDict[inventoryInstance.GetEnableDisable()].Add(inventories);
+                EnableDisableDict.Add(inventoryInstance.GetEnableDisable().ToLower(), new List<GameObject>());
+                EnableDisableDict[inventoryInstance.GetEnableDisable().ToLower()].Add(inventories);
             }
         }
     }
+    /// <summary>
+    /// called by <see cref="Update"/> to check if a user given keyinput has been pressed, and if so disable/enable the inventory. 
+    /// </summary>
     private void DisableEnableOnKeyInput()
     {
         if (Input.anyKeyDown)
         {
             string input = Input.inputString;
+            input = input.ToLower();
             if (EnableDisableDict.ContainsKey(input))
             {
                 List<GameObject> inventoryUIs = EnableDisableDict[input];

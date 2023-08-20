@@ -37,6 +37,7 @@ public class InventoryUIManager : MonoBehaviour
 
     private Transform UI;
 
+    InventoryInitializer init;
 
     private RectTransform rectTransform;
 
@@ -48,7 +49,7 @@ public class InventoryUIManager : MonoBehaviour
     private float previousBorderx = 0, previousBordery = 0;
 
 
-
+    //Holds and organizes slots
     [SerializeField, HideInInspector]
     private List<GameObject> slots = new List<GameObject>();
     private List<Vector2> slotsvec = new List<Vector2>();
@@ -57,18 +58,12 @@ public class InventoryUIManager : MonoBehaviour
     public void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
-
-        createSlots();
+        UpdateInventoryUI(true);
     }
 
     public void Start()
     {
-        inventory.Resize(row * col);
-        InventoryUIReset();
-        createSlots();
-        setBackground();
         if (!TestSetup()) return;
-
         UI = InventoryController.instance.GetUI();
 
     }
@@ -84,11 +79,11 @@ public class InventoryUIManager : MonoBehaviour
     /// <summary>
     /// Checks if any meaningful variables have been changed and if so calls the functions, creating the expected UI
     /// </summary>
-    public void UpdateInventoryUI()
+    public void UpdateInventoryUI(bool _override = false)
     {
-
-        if (CheckEditorChange())
+        if (CheckEditorChange() || _override)
         {
+            Debug.Log("here");
             inventory.Resize(row * col);
 
             InventoryUIReset();
@@ -347,6 +342,10 @@ public class InventoryUIManager : MonoBehaviour
     {
         public int position;
         public char buttonPress;
+    }
+    public void SetInit(ref InventoryInitializer init)
+    {
+        this.init = init;
     }
     public void SetRowCol(int row, int col)
     {
