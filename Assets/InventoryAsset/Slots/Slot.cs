@@ -90,7 +90,10 @@ public class Slot : MonoBehaviour, IPointerClickHandler
     {
         return slotImage;
     }
-
+    public GameObject GetSlotChildInstance()
+    {
+        return slotChildInstance;
+    }
     public InventoryUIManager GetInventoryUI()
     {
         return inventoryUIManager;

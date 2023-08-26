@@ -12,13 +12,17 @@ using UnityEngine;
 
 public class InventoryController : MonoBehaviour
 {
+    [Header("Click Check Bool Prove You Only Have\nONE Inventory Controller")]
+    [SerializeField]
+    private bool myONEController = false; // Whether to use this object as the sole instance of InventoryController (cannot have multiple set to true).
+    [Header("Setup Inventory Controller: ")]
     [SerializeField]
     private Transform UI; // UI canvas to build inventories on.
     [SerializeField]
     public List<ItemInitializer> items; // Accepted items that can be added by name to the inventory.
-    [Header("Once Initialized Edit Inventory Under UI.")]
+    [Header("Once Initialized Edit Inventory Under UI.\n\nAny Changes Made Here Will Not Take Effect!\n\nAdditional Options Available under the initialized inventory.")]
     [SerializeField]
-    private List<InventoryInitializer> initializeInventory; // Information about the inventory specified through the manager.
+    private List<InventoryInitializer> initializeInventory = new List<InventoryInitializer>(); // Information about the inventory specified through the manager.
 
     [SerializeField, HideInInspector]
     private List<InventoryInitializer> prevInventoryTracker; // Previously initialized inventories, so they are not initialized again.
@@ -36,8 +40,7 @@ public class InventoryController : MonoBehaviour
     public static InventoryController instance; // Shared instance of the InventoryController to enforce only one being created.
 
     // TODO: rename this
-    [SerializeField]
-    private bool isInstance = false; // Whether to use this object as the sole instance of InventoryController (cannot have multiple set to true).
+
 
     /// <summary>
     /// Check whether an instance of InventoryController has already been created. If it has, delete this instance.
@@ -45,7 +48,7 @@ public class InventoryController : MonoBehaviour
     /// </summary>
     private void Awake()
     {
-        if (isInstance)
+        if (myONEController)
         {
             instance = this;
         }
@@ -85,10 +88,14 @@ public class InventoryController : MonoBehaviour
 
         if (!TestSetup()) return;
 
+        if (myONEController)
+        {
+            instance = this;
+        }
+        AllignDictionaries();
         RemoveDeletedInventories();
         InitializeNewInventories();
         UpdateInventoryTracker();
-        AllignDictionaries();
         InitializeItems();
     }
     /// <summary>
@@ -118,6 +125,8 @@ public class InventoryController : MonoBehaviour
             {
                 initializer.SetInitialized(true);
                 GameObject tempinventoryUI = Instantiate(inventoryManagerObj, transform.position, Quaternion.identity, UI);
+                RectTransform UIRect = UI.GetComponent<RectTransform>();
+                tempinventoryUI.transform.position = new Vector3(Random.Range(0.0f, UIRect.sizeDelta.x), Random.Range(0.0f, UIRect.sizeDelta.y),0);
                 tempinventoryUI.SetActive(true);
                 tempinventoryUI.name = initializer.GetInventoryName();
                 allInventoryUI.Add(tempinventoryUI);
@@ -129,7 +138,8 @@ public class InventoryController : MonoBehaviour
                 inventoryManager.Add(inventoryName, curInventory);
 
                 InventoryUIManager inventoryUI = tempinventoryUI.GetComponent<InventoryUIManager>();
-
+                inventoryUI.SetVarsOnInit();
+                inventoryUI.SetSave(initializer.GetSaveInventory());
                 inventoryUI.SetEnableDisable(initializer.GetEnableDisable());
                 inventoryUI.SetInventory(ref curInventory);
                 inventoryUI.SetHighlightable(initializer.GetHightlightable());
@@ -254,7 +264,7 @@ public class InventoryController : MonoBehaviour
         foreach (GameObject inventories in allInventoryUI)
         {
             InventoryUIManager inventoryInstance = inventories.GetComponent<InventoryUIManager>();
-            inventoryInstance.GetInventory().Init();
+            inventoryInstance.GetInventory().InitList();
             inventoryManager.Add(inventoryInstance.GetInventoryName(), inventoryInstance.GetInventory());
             if(EnableDisableDict.ContainsKey(inventoryInstance.GetEnableDisable()))
             {
@@ -304,15 +314,22 @@ public class InventoryController : MonoBehaviour
             InventoryData itemData = InventorySaveSystem.LoadItem();
             foreach (var pair in itemData.inventories)
             {
-                List<string> itemsStr = pair.Value;
+                Inventory inventory = inventoryManager[pair.Key];
                 if (pair.Key == null)
                     continue;
-
-                foreach (string itemType in itemsStr)
+                if (!inventory.GetSaveInventory())
                 {
-                    if (itemType != null)
+                    continue;
+                }
+                List<ItemData> items = pair.Value;
+                foreach (ItemData item in items)
+                {
+
+                    if (item.name != null)
                     {
-                        AddItem(pair.Key, itemType);
+                        InventoryItem copyItem = itemManager[item.name];
+                        InventoryItem newItem = new InventoryItem(copyItem, item.amount);
+                        AddItem(pair.Key, newItem, item.position);
                     }
                 }
             }
@@ -339,7 +356,7 @@ public class InventoryController : MonoBehaviour
         {
             if (inventories == null)
             {
-                Debug.LogError("Inventories in allInventoryUI Are Null, Try Unpacking IventoryController");
+                Debug.LogError("Inventories in allInventoryUI Are Null, Try Unpacking InventoryController");
                 return false;
             }
         }
@@ -427,6 +444,10 @@ public class InventoryController : MonoBehaviour
             if(transform.childCount == 0)
             Debug.LogWarning("Inventory Controller Does Not Have Child Object with InventoryUIManager");
         }
+    }
+    public InventoryItem GetItem(string inventoryName, int index)
+    {
+        return inventoryManager[inventoryName].InventoryGetItem(index);
     }
     public Transform GetUI()
     {

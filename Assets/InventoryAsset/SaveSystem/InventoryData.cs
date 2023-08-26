@@ -4,25 +4,27 @@ using UnityEngine;
 [System.Serializable]
 public class InventoryData
 {
-    public Dictionary<string, List<string>> inventories;
+    public Dictionary<string, List<ItemData>> inventories;
 
     public string itemType;
     public InventoryData(Dictionary<string, Inventory> inventoryManager)
     {
-        inventories = new Dictionary<string, List<string>>();
+        int position = 0;
+        inventories = new Dictionary<string, List<ItemData>>();
         foreach (var pair in inventoryManager)
         {
             if (!inventoryManager[pair.Key].GetSaveInventory())
             {
                 continue;
             }
-            List<string> itemsStr = new List<string>();
+            List<ItemData> itemData = new List<ItemData>();
             Inventory inventory = pair.Value;
             foreach(InventoryItem item in inventory.GetList())
             {
-                itemsStr.Add(item.GetItemType());
+                itemData.Add(new ItemData(item.GetAmount(),item.GetItemType(), position));
+                position++;
             }
-            inventories.Add(inventory.GetName(), itemsStr);
+            inventories.Add(inventory.GetName(), itemData);
         }
     }
 }

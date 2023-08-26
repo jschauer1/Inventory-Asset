@@ -38,7 +38,7 @@ public class ItemPropertyDrawer : PropertyDrawer
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
         float height = 0;
-        for(int i = 0; i < count+1; i++)
+        for(int i = 0; i < count+3; i++)
         {
             height += EditorGUIUtility.singleLineHeight;
         }

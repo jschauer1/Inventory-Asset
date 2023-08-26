@@ -1,10 +1,14 @@
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 /* 
  * Author: Jaxon Schauer
- * This class creates an Inventory that tracks and controls the inventory list. This class tells the InventoryUIManager what objects each slot 
- * holds
  */
+/// <summary>
+/// This class creates an Inventory that tracks and controls the inventory list. This class tells the InventoryUIManager what objects each slot holds
+/// </summary>
+
 
 [System.Serializable]
 public class Inventory 
@@ -24,6 +28,10 @@ public class Inventory
     [SerializeField, HideInInspector]
     bool saveInventory;//is true if the user decides to save the inventory
 
+    private bool acceptAll;
+    private bool rejectAll;
+    private HashSet<string> exceptions;
+
     /// <summary>
     /// Assigns essential variables for the Inventory
     /// </summary>
@@ -42,7 +50,11 @@ public class Inventory
     /// </summary>
     public void Init()
     {
+        exceptions = new HashSet<string>();
         itemPositions = new Dictionary<string, List<int>>();
+    }
+    public void InitList()
+    {
         inventoryList = new List<InventoryItem>(size);
         FillInventory(size);
     }
@@ -51,21 +63,39 @@ public class Inventory
     /// </summary>
     public void Resize(int newSize)
     {
-        size = newSize; 
+        itemPositions = new Dictionary<string, List<int>>();
         if (inventoryList == null)
         {
             return;
         }
-        for (int i = size; i < newSize; i++)
+        List<InventoryItem> newlist = new List<InventoryItem>();
+        if (size < newSize)
         {
-            InventoryItem filler = new InventoryItem(true);
-            inventoryList.Add(filler);
+            for (int i = 0; i < inventoryList.Count; i++)
+            {
+                newlist.Add(inventoryList[i]);
+            }        
+            for (int i = newlist.Count; i < newSize; i++)
+            {
+                InventoryItem filler = new InventoryItem(true);
+                newlist.Add(filler);
+            }
         }
+        else
+        {
+            for (int i = 0; i < newSize; i++)
+            {
+                newlist.Add(inventoryList[i]);
+            }
+        }
+        inventoryList.Clear();
+        inventoryList = newlist;
+        size = newSize;
     }
     /// <summary>
     /// Adds an item to a specified position, updating the <see cref="itemPositions"/> for efficient tracking of the items
     /// </summary>
-    public void AddItem(int position,InventoryItem Item, int amount = 1)
+    public void AddItem(int position,InventoryItem Item)
     {
         if (inventoryList == null)
         {
@@ -105,11 +135,11 @@ public class Inventory
                     return;
                 }
             }
-            AddNewItem(item);
+            AddNewItem(item, amount);
         }
         else
         {
-            AddNewItem(item);
+            AddNewItem(item, amount);
         }
 
     }
@@ -118,8 +148,7 @@ public class Inventory
     /// </summary>
     private void AddNewItem(InventoryItem item, int amount = 1)
     {
-
-        for (int i = 0; i < inventoryList.Count; i++)
+         for (int i = 0; i < inventoryList.Count; i++)
         {
 
             if (inventoryList[i].GetIsNull())
@@ -177,6 +206,9 @@ public class Inventory
             inventoryList.Add(filler);
         }
     }
+    /// <summary>
+    /// Returns the item at a specific index of the inventory, returning the closest value if out of range
+    /// </summary>
     public InventoryItem InventoryGetItem(int index)
     {
         if(inventoryList == null)
@@ -184,7 +216,72 @@ public class Inventory
             Debug.LogError("Items List Null");
             return null;
         }
+        else if(index > size -1)
+        {
+            Debug.LogWarning("Out of Range Returning Closest Item: " + index);
+            return inventoryList[size-1];
+        }
+        else if(index < 0)
+        {
+            Debug.LogWarning("Out of Range Returning Closest Item: " + index);
+            return inventoryList[0];
+        }
         return inventoryList[index];
+    }
+    /// <summary>
+    /// Sets up values for the inventory to determine if an item should be accepted or rejected from the inventory
+    /// </summary>
+    public void SetupItemAcceptance(bool acceptAll, bool rejectAll, List<string>exceptions)
+    {
+        if(acceptAll && !rejectAll)
+        {
+            this.acceptAll= true;
+            this.rejectAll= false;
+        }
+        else if(rejectAll && !acceptAll)
+        {
+            this.acceptAll = false;
+            this.rejectAll = true;
+        }
+        else
+        {
+            Debug.LogError("Only one AcceptAll or RejectAll should Be True And False");
+        }
+        foreach (string exception in exceptions)
+        {
+            if (!this.exceptions.Contains(exception))
+            {
+                this.exceptions.Add(exception);
+            }
+            else
+            {
+                Debug.LogWarning("No Duplicate Items Should Exist In Exception List");
+            }
+        }
+    }
+    /// <summary>
+    /// Returns a bool, true if an item can be transfered into an inventory and false otherwise.
+    /// </summary>
+    public bool CheckAcceptance(string itemType)
+    {
+        if((acceptAll && rejectAll) || (!acceptAll&&!rejectAll))
+        {
+            Debug.LogWarning("Acceptance Incorrectly Setup, Returning True Or False For All");
+            return true;
+        }
+        if(acceptAll && !exceptions.Contains(itemType))
+        {
+            return true;
+        }
+        else if(rejectAll && exceptions.Contains(itemType))
+        {
+            return true;
+        }
+        return false;
+    }
+    public void SetSave(bool saveable)
+    {
+        this.saveInventory= saveable;
     }
     public string GetName()
     {

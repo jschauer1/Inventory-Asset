@@ -11,12 +11,13 @@ public class InventoryItem
     private int amount;
 
     string itemType;
-    private Sprite itemImage;
+    private Sprite itemImage;//Holds image of item
     private int maxStackAmount;
     private bool draggable;
     private bool highlightable;
-    private UnityEvent myEvent;
-    private bool isNull = false;
+    private UnityEvent itemEvent;//Calls function on invoke
+    private GameObject linkedGameObject;
+    private bool isNull = false;//Checks if item exists
     public InventoryItem(ItemInitializer init)
     {
         this.amount = 1;
@@ -25,8 +26,9 @@ public class InventoryItem
         this.maxStackAmount = init.GetItemStackAmount();
         this.draggable = init.GetDraggable();
         this.highlightable = init.GetHighlightable();
-        this.myEvent = init.GetEvent();
+        this.itemEvent = init.GetEvent();
         this.isNull = init.GetIsNull();
+        this.linkedGameObject=init.GetGameObjectAction();   
     }
     public InventoryItem(InventoryItem other, int amount = 1)
     {
@@ -42,8 +44,10 @@ public class InventoryItem
         this.maxStackAmount = other.maxStackAmount;
         this.draggable = other.draggable;
         this.highlightable = other.highlightable;
-        this.myEvent = other.myEvent;
+        this.itemEvent = other.itemEvent;
         this.isNull = other.isNull;
+        this.linkedGameObject = other.GetLinkedGameObject();
+
     }
 
     public InventoryItem(bool isNull)
@@ -73,8 +77,8 @@ public class InventoryItem
     }
     public void Selected()
     {
-        if (myEvent != null)
-            myEvent.Invoke();
+        if (itemEvent != null)
+            itemEvent.Invoke();
     }
     public bool GetHighlightable()
     {
@@ -91,5 +95,13 @@ public class InventoryItem
     public void SetAmount(int amount)
     {
         this.amount = amount;
+    }
+    public GameObject GetLinkedGameObject()
+    {
+        if(linkedGameObject == null)
+        {
+            //Debug.LogError("Linked GameObject null");
+        }
+        return linkedGameObject;
     }
 }

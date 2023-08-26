@@ -14,9 +14,11 @@ public class ItemInitializer
     [SerializeField, HideInInspector]
     private UnityEvent myEvent;
 
-
+    [Header("Optional: ")]
+    [SerializeField] GameObject GameObjectAction;
     [SerializeField, HideInInspector]
     private bool isNull = false;
+
     public ItemInitializer(bool isNull)
     {
         this.isNull = isNull;
@@ -65,6 +67,10 @@ public class ItemInitializer
     public UnityEvent GetEvent()
     {
         return myEvent;
+    }
+    public GameObject GetGameObjectAction()
+    {
+        return GameObjectAction;
     }
 
 }

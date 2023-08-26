@@ -22,7 +22,7 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
     public void OnDrag(PointerEventData eventData)
     {
         if (Draggable()) return;
-        Canvas canvas = GameObject.Find("UI").GetComponent<Canvas>();
+        Canvas canvas = InventoryController.instance.GetUI().GetComponent<Canvas>();
         transform.parent.gameObject.transform.SetSiblingIndex(100);
         Vector2 position;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
@@ -57,7 +57,7 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
             if(result.gameObject.tag == "Slot")
             {
                 Slot slot = result.gameObject.GetComponent<Slot>();
-                if(slot.GetItem().GetIsNull())
+                if(slot.GetItem().GetIsNull() && slot.GetInventoryUI().GetInventory().CheckAcceptance(item.GetItemType()))
                 {
                     InventoryController.instance.AddItem(slot.GetInventoryUI().GetInventoryName(), item, slot.GetPosition());
                     Destroy(gameObject);
