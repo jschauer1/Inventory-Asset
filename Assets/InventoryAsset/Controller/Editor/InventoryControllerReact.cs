@@ -2,7 +2,7 @@ using UnityEditor;
 using UnityEngine;
 
 [CustomEditor(typeof(InventoryController))]
-public class InventoryControllerReact : Editor
+internal class InventoryControllerReact : Editor
 {
     public override void OnInspectorGUI()
     {
@@ -10,12 +10,12 @@ public class InventoryControllerReact : Editor
 
         InventoryController script = (InventoryController)target;
 
-        if (GUILayout.Button("Initialize Inventories"))
+        if (GUILayout.Button("Initialize Inventories/Update Inventories"))
         {
 
             EditorApplication.delayCall += script.InitializeInventories;
         }
-        else if (GUILayout.Button("Debug Reset"))
+        else if (GUILayout.Button("Delete All Instantiated Inventories"))
         {
             EditorApplication.delayCall += script.ResetInventory;
         }

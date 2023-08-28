@@ -9,10 +9,10 @@ public class InventoryData
     public string itemType;
     public InventoryData(Dictionary<string, Inventory> inventoryManager)
     {
-        int position = 0;
         inventories = new Dictionary<string, List<ItemData>>();
         foreach (var pair in inventoryManager)
         {
+            int position = 0;
             if (!inventoryManager[pair.Key].GetSaveInventory())
             {
                 continue;

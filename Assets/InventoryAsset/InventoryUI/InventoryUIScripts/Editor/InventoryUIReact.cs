@@ -2,7 +2,7 @@ using UnityEditor;
 using UnityEngine;
 
 [CustomEditor(typeof(InventoryUIManager))]
-public class InventoryUIReact : Editor
+internal class InventoryUIReact : Editor
 {
     public override void OnInspectorGUI()
     {

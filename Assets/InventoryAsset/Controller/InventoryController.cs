@@ -1,28 +1,54 @@
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
+using UnityEngine.XR;
 
 
-/* 
- * Author: Jaxon Schauer
- * This class defines an inventory controller, which allows for creating new inventories and defining valid types of objects.
- * Only one InventoryController should be instantiated within a project. Multiple inventories can be created from one controller.
- * This controller manages all information transfered between the inventories.
- */
 
-public class InventoryController : MonoBehaviour
+//Author: Jaxon Schauer
+/// <summary>
+/// This class defines an inventory controller, which allows for creating new inventories and defining valid types of objects.
+/// Only one InventoryController should be instantiated within a project. Multiple inventories can be created from one controller.
+/// This controller manages all information being given to an inventory
+/// </summary>
+
+public class InventoryController : MonoBehaviour 
 {
-    [Header("Click Check Bool Prove You Only Have\nONE Inventory Controller")]
+    [Header("============[ Setup Confirmation ]============")]
+    [Header("**********************************************")]
+    [Header("Click the \"I Understand The Setup\" to show you understand there\nshould only ever be one InventoryController and the \nInventoryController is unpacked in the scene       ")]
+    [Header("**********************************************")]
+    [Tooltip("Toggle to confirm you understand the setup requirements.")]
     [SerializeField]
-    private bool myONEController = false; // Whether to use this object as the sole instance of InventoryController (cannot have multiple set to true).
-    [Header("Setup Inventory Controller: ")]
+    private bool iUnderstandTheSetup = false; // Ensure this is true for the sole instance of InventoryController.
+
+    [Space(10)] // Add some space for better organization
+
+    [Header("============[ Inventory Controller Setup ]============")]
+    [Space(20)] 
+    [Tooltip("Assign Main Canvas Here")]
     [SerializeField]
     private Transform UI; // UI canvas to build inventories on.
+
+    [Space(10)] // Add some space
+
+    [Header("========[ Items Setup ]========")]
+    [Tooltip("Add templates for each accepted item.")]
     [SerializeField]
-    public List<ItemInitializer> items; // Accepted items that can be added by name to the inventory.
-    [Header("Once Initialized Edit Inventory Under UI.\n\nAny Changes Made Here Will Not Take Effect!\n\nAdditional Options Available under the initialized inventory.")]
+    public List<ItemInitializer> items; // Accepted items to add to the inventory.
+
+    [Space(10)] // Add some space
+
+    [Header("========[ Inventory Setup ]========")]
+    [Header("NOTE: After initialization, changes here won't take effect.")]
+    [Header("Modify the inventory under the UI component.")]
+    [Tooltip("Add templates for each inventory to be initialized.")]
     [SerializeField]
-    private List<InventoryInitializer> initializeInventory = new List<InventoryInitializer>(); // Information about the inventory specified through the manager.
+    private List<InventoryInitializer> initializeInventory = new List<InventoryInitializer>(); // Information about inventory setup.
+
+
+
 
     [SerializeField, HideInInspector]
     private List<InventoryInitializer> prevInventoryTracker; // Previously initialized inventories, so they are not initialized again.
@@ -34,6 +60,8 @@ public class InventoryController : MonoBehaviour
     [SerializeField, HideInInspector]
     private List<GameObject> allInventoryUI = new List<GameObject>(); // Holds all inventory UI instances for each inventory created.
     private Dictionary<string, Inventory> inventoryManager = new Dictionary<string, Inventory>(); // Dictionary to map inventory names to their objects.
+    private Dictionary<string, GameObject> inventoryUIDict = new Dictionary<string, GameObject>(); // Dictionary to map inventory names to their objects.
+
     private Dictionary<string, InventoryItem> itemManager = new Dictionary<string, InventoryItem>(); // Dictionary to map item names to their objects.
     private Dictionary<string, List<GameObject>> EnableDisableDict = new Dictionary<string, List<GameObject>>();
 
@@ -48,7 +76,7 @@ public class InventoryController : MonoBehaviour
     /// </summary>
     private void Awake()
     {
-        if (myONEController)
+        if (iUnderstandTheSetup)
         {
             instance = this;
         }
@@ -56,9 +84,8 @@ public class InventoryController : MonoBehaviour
         {
             Destroy(gameObject);
         }
-
-        if (!TestSetup()) return;
         if (!TestInstance()) return;
+        if (!TestSetup()) return;
         TestChildObject();
         AllignDictionaries();
         InitializeItems();
@@ -75,9 +102,8 @@ public class InventoryController : MonoBehaviour
     /// </summary>
     private void Update()
     {
-        DisableEnableOnKeyInput();
+        ToggleOnKeyInput();
     }
-
 
     /// <summary>
     /// Uses <see cref="TestSetup"/> to check that the user has correctly setup inventory
@@ -88,7 +114,7 @@ public class InventoryController : MonoBehaviour
 
         if (!TestSetup()) return;
 
-        if (myONEController)
+        if (iUnderstandTheSetup)
         {
             instance = this;
         }
@@ -140,7 +166,7 @@ public class InventoryController : MonoBehaviour
                 InventoryUIManager inventoryUI = tempinventoryUI.GetComponent<InventoryUIManager>();
                 inventoryUI.SetVarsOnInit();
                 inventoryUI.SetSave(initializer.GetSaveInventory());
-                inventoryUI.SetEnableDisable(initializer.GetEnableDisable());
+                inventoryUI.SetInvToggle(initializer.GetToggle());
                 inventoryUI.SetInventory(ref curInventory);
                 inventoryUI.SetHighlightable(initializer.GetHightlightable());
                 inventoryUI.SetDraggable(initializer.GetDraggable());
@@ -255,32 +281,71 @@ public class InventoryController : MonoBehaviour
         InventorySaveSystem.Reset();
     }
     /// <summary>
-    /// This utilizes the serialized list allInventoryUI to setup the dictionaries <see cref="inventoryManager"/>,<see cref="EnableDisableDict"/>, and
-    /// <see cref="EnableDisableDict"/>
+    /// This utilizes the serialized list allInventoryUI to setup the dictionaries <see cref="inventoryManager"/> and <see cref="EnableDisableDict"/>
     /// </summary>
     public void AllignDictionaries()
     {
         inventoryManager.Clear();
-        foreach (GameObject inventories in allInventoryUI)
+        foreach (GameObject InventoryUI in allInventoryUI)
         {
-            InventoryUIManager inventoryInstance = inventories.GetComponent<InventoryUIManager>();
+            InventoryUIManager inventoryInstance = InventoryUI.GetComponent<InventoryUIManager>();
+            inventoryUIDict.Add(inventoryInstance.GetInventoryName(), InventoryUI);
             inventoryInstance.GetInventory().InitList();
             inventoryManager.Add(inventoryInstance.GetInventoryName(), inventoryInstance.GetInventory());
-            if(EnableDisableDict.ContainsKey(inventoryInstance.GetEnableDisable()))
+            foreach(char character in inventoryInstance.GetEnableDisable())
             {
-                EnableDisableDict[inventoryInstance.GetEnableDisable().ToLower()].Add(inventories);
-            }
-            else
-            {
-                EnableDisableDict.Add(inventoryInstance.GetEnableDisable().ToLower(), new List<GameObject>());
-                EnableDisableDict[inventoryInstance.GetEnableDisable().ToLower()].Add(inventories);
+                if (EnableDisableDict.ContainsKey(character.ToString().ToLower()))
+                {
+                    EnableDisableDict[character.ToString().ToLower()].Add(InventoryUI);
+                }
+                else
+                {
+                    EnableDisableDict.Add(character.ToString().ToLower(), new List<GameObject>());
+                    EnableDisableDict[character.ToString().ToLower()].Add(InventoryUI);
+                }
             }
         }
     }
     /// <summary>
-    /// called by <see cref="Update"/> to check if a user given keyinput has been pressed, and if so disable/enable the inventory. 
+    /// runs setup test sweet, returns false if there is a setup error.
     /// </summary>
-    private void DisableEnableOnKeyInput()
+    public void AddToggleKey(string InventoryName, char character)
+    {
+        if (EnableDisableDict.ContainsKey(character.ToString().ToLower()))
+        {
+            if (EnableDisableDict[character.ToString().ToLower()].Contains(inventoryUIDict[InventoryName]))
+            {
+                Debug.LogWarning("Dict Already Contains obj");
+                return;
+            }
+            EnableDisableDict[character.ToString().ToLower()].Add(inventoryUIDict[InventoryName]);
+        }
+        else
+        {
+            EnableDisableDict.Add(character.ToString().ToLower(), new List<GameObject>());
+            EnableDisableDict[character.ToString().ToLower()].Add(inventoryUIDict[InventoryName]);
+        }
+    }
+    public void RemoveToggleKey(string InventoryName, char character)
+    {
+        if (EnableDisableDict.ContainsKey(character.ToString().ToLower()))
+        {
+            if (!EnableDisableDict[character.ToString().ToLower()].Contains(inventoryUIDict[InventoryName]))
+            {
+                Debug.LogWarning("Dict Does Not Contain Object attached to char");
+                return;
+            }
+            EnableDisableDict[character.ToString().ToLower()].Remove(inventoryUIDict[InventoryName]);
+        }
+        else
+        {
+            Debug.LogWarning("Given character is not attached to a InventoryUIManager");
+        }
+    }
+        /// <summary>
+        /// called by <see cref="Update"/> to check if a user given keyinput has been pressed, and if so disable/enable the inventory. 
+        /// </summary>
+        private void ToggleOnKeyInput()
     {
         if (Input.anyKeyDown)
         {
@@ -336,12 +401,37 @@ public class InventoryController : MonoBehaviour
         }
     }
     /// <summary>
+    /// Can be used to programatically create inventoryUI. This is a skeleton of what is likely needed. More customization is recommended for your situation.
+    /// </summary>
+    public void CreateInventory(Transform instantiaterPos, string inventoryName, int row, int col,
+        bool highlightable = false, bool draggable = false, bool saveInventory = false, bool isActive = true)
+    {
+        if (!TestSetup()) return;
+        GameObject tempinventoryUI = Instantiate(inventoryManagerObj, instantiaterPos.position, Quaternion.identity, UI);
+        tempinventoryUI.SetActive(isActive);
+
+        tempinventoryUI.transform.position = instantiaterPos.position;
+
+        Inventory curInventory = new Inventory(tempinventoryUI, inventoryName, col * row, saveInventory);
+        inventoryManager.Add(inventoryName, curInventory);
+
+        InventoryUIManager inventoryUI = tempinventoryUI.GetComponent<InventoryUIManager>();
+        inventoryUI.SetVarsOnInit();
+        inventoryUI.SetSave(saveInventory);
+        inventoryUI.SetInventory(ref curInventory);
+        inventoryUI.SetHighlightable(highlightable);
+        inventoryUI.SetDraggable(draggable);
+        inventoryUI.SetRowCol(row, col);
+        inventoryUI.SetInventoryName(inventoryName);
+        inventoryUI.UpdateInventoryUI();
+    }
+    /// <summary>
     /// runs setup test sweet, returns false if there is a setup error.
     /// </summary>
     public bool TestSetup()
     {
-        return TestInventoryUI()
-            && TestinventoryManagerObjSetup()
+        return TestinventoryManagerObjSetup()
+            && TestInventoryUI()
             && TestInveInitializerListSetup()
             && TestUISetup();
             
@@ -352,11 +442,16 @@ public class InventoryController : MonoBehaviour
     /// </summary>
     private bool TestInventoryUI()
     {
+        if(allInventoryUI.Count == 0 && Application.isPlaying)
+        {
+            Debug.LogWarning("No InventoryUIManagers Detected, if Unexpected Try Unpacking InventoryController");
+            return false;
+        }
         foreach (GameObject inventories in allInventoryUI)
         {
             if (inventories == null)
             {
-                Debug.LogError("Inventories in allInventoryUI Are Null, Try Unpacking InventoryController");
+                Debug.LogError("Inventories in allInventoryUI Are Null, Try hitting button \"Delete All Instantiated Objects\"");
                 return false;
             }
         }
@@ -369,7 +464,7 @@ public class InventoryController : MonoBehaviour
     {
         if (inventoryManagerObj == null)
         {
-            Debug.LogError("Inventory Manager Object Not Set Correclty.");
+            Debug.LogError("Inventory Manager Object Not Set Correclty");
             return false;
         }
         return true;
@@ -391,7 +486,7 @@ public class InventoryController : MonoBehaviour
                 }
                 if (countInstance > 1)
                 {
-                    Debug.LogError("You can only have one of each inventory name");
+                    Debug.LogError("You Can Only Have One Of Each Inventory Name");
 
                     return false;
                 }
@@ -419,7 +514,7 @@ public class InventoryController : MonoBehaviour
     {
         if (instance == null)
         {
-            Debug.LogError("You must choose ONE InventoryController instance by clicking the bool isInstance inside InventoryController script");
+            Debug.LogError("Read Instructions and Click The I Understand The Setup Bool");
             return false;
         }
         return true;
@@ -444,6 +539,10 @@ public class InventoryController : MonoBehaviour
             if(transform.childCount == 0)
             Debug.LogWarning("Inventory Controller Does Not Have Child Object with InventoryUIManager");
         }
+    }
+    public Inventory GetInventory(string inventoryName)
+    {
+        return inventoryManager[inventoryName];
     }
     public InventoryItem GetItem(string inventoryName, int index)
     {

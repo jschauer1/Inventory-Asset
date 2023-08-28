@@ -1,10 +1,9 @@
-using System.Collections;
+
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-/* 
- * Author: Jaxon Schauer
- */
+using static UnityEditor.Progress;
+//Author: Jaxon Schauer
 /// <summary>
 /// This class creates an Inventory that tracks and controls the inventory list. This class tells the InventoryUIManager what objects each slot holds
 /// </summary>
@@ -63,58 +62,86 @@ public class Inventory
     /// </summary>
     public void Resize(int newSize)
     {
-        itemPositions = new Dictionary<string, List<int>>();
-        if (inventoryList == null)
+        if(inventoryList != null)
         {
-            return;
-        }
-        List<InventoryItem> newlist = new List<InventoryItem>();
-        if (size < newSize)
-        {
-            for (int i = 0; i < inventoryList.Count; i++)
+            itemPositions = new Dictionary<string, List<int>>();
+            List<InventoryItem> newlist = new List<InventoryItem>();
+
+            if (size < newSize)
             {
-                newlist.Add(inventoryList[i]);
-            }        
-            for (int i = newlist.Count; i < newSize; i++)
-            {
-                InventoryItem filler = new InventoryItem(true);
-                newlist.Add(filler);
+                for (int i = 0; i < inventoryList.Count; i++)
+                {
+                    InventoryItem item = inventoryList[i];
+                    newlist.Add(item);
+                    AddItemPosDict(item, i);
+
+                }
+                for (int i = newlist.Count; i < newSize; i++)
+                {
+                    InventoryItem filler = new InventoryItem(true);
+                    newlist.Add(filler);
+                }
             }
-        }
-        else
-        {
-            for (int i = 0; i < newSize; i++)
+            else
             {
-                newlist.Add(inventoryList[i]);
+                for (int i = 0; i < newSize; i++)
+                {
+                    InventoryItem item = inventoryList[i];
+                    newlist.Add(item);
+                    AddItemPosDict(item, i);
+
+                }
             }
+            inventoryList.Clear();
+
+            inventoryList = newlist;
+
         }
-        inventoryList.Clear();
-        inventoryList = newlist;
         size = newSize;
+    }
+    public Dictionary<string, List<int>> TestPrintItemPosDict()
+    {
+        Debug.Log(itemPositions.Count);
+        foreach(KeyValuePair<string, List<int>> pair in itemPositions)
+        {
+            foreach (int position in pair.Value)
+            {
+                Debug.Log(pair.Key + " " +  position + " ");
+            }
+        }
+        return itemPositions;
     }
     /// <summary>
     /// Adds an item to a specified position, updating the <see cref="itemPositions"/> for efficient tracking of the items
     /// </summary>
-    public void AddItem(int position,InventoryItem Item)
+    public void AddItem(int index,InventoryItem item)
     {
         if (inventoryList == null)
         {
             Debug.LogError("Items List Null");
             return;
         }
-        InventoryItem newItem = new InventoryItem(Item, Item.GetAmount());
-        if (inventoryList[position].GetIsNull())
+        else if (index > size - 1)
         {
-            if (itemPositions.ContainsKey(newItem.GetItemType()))
-            {
-                itemPositions[newItem.GetItemType()].Add(position);
-            }
-            else
-            {
-                itemPositions.Add(newItem.GetItemType(), new List<int> { position });
-            }    
-            inventoryList[position] = newItem;
-            InventoryUIManagerInstance.UpdateSlot(position);
+            Debug.LogWarning("Out of Range Adding to closest Index: " + index);
+            index = size - 1;
+        }
+        else if (index < 0)
+        {
+            Debug.LogWarning("Out of Range Adding to Closest Index: " + index);
+            index = 0;
+        }
+        if(!CheckAcceptance(item.GetItemType()))
+        {
+            Debug.LogWarning("Item Acceptance is false. Overruling and adding item.");
+        }
+        InventoryItem newItem = new InventoryItem(item, item.GetAmount());
+        if (inventoryList[index].GetIsNull())
+        {
+            AddItemPosDict(newItem, index);
+
+            inventoryList[index] = newItem;
+            InventoryUIManagerInstance.UpdateSlot(index);
         }
     }
     /// <summary>
@@ -123,6 +150,10 @@ public class Inventory
     /// </summary>
     public void AddItem(InventoryItem item, int amount = 1)
     {
+        if (!CheckAcceptance(item.GetItemType()))
+        {
+            Debug.LogWarning("Item Acceptance is false. Overruling and adding item.");
+        }
         if (itemPositions.ContainsKey(item.GetItemType()))
         {
             for (int i = 0; i < itemPositions[item.GetItemType()].Count; i++)
@@ -143,6 +174,24 @@ public class Inventory
         }
 
     }
+    private void AddItemPosDict(InventoryItem item, int pos)
+    {
+        if (!item.GetIsNull())
+        {
+            if (!itemPositions.ContainsKey(item.GetItemType()))
+            {
+                itemPositions.Add(item.GetItemType(), new List<int>() { pos });
+                InventoryUIManagerInstance.UpdateSlot(pos);
+
+            }
+            else
+            {
+                itemPositions[item.GetItemType()].Add(pos);
+                InventoryUIManagerInstance.UpdateSlot(pos);
+
+            }
+        }
+    }
     /// <summary>
     /// Adds a new item in the lowest possible inventoryList position
     /// </summary>
@@ -156,17 +205,7 @@ public class Inventory
 
                 InventoryItem newItem = new InventoryItem(item, amount);
                 inventoryList[i] = newItem;
-                if(itemPositions.ContainsKey(item.GetItemType()))
-                {
-                    itemPositions[item.GetItemType()].Add(i);
-                    InventoryUIManagerInstance.UpdateSlot(i);
-                }
-                else
-                {
-                    itemPositions.Add(item.GetItemType(), new List<int>());
-                    itemPositions[item.GetItemType()].Add(i);
-                    InventoryUIManagerInstance.UpdateSlot(i);
-                }
+                AddItemPosDict(newItem, i);
                 break;
             }
         }
@@ -194,7 +233,7 @@ public class Inventory
     /// <summary>
     /// Fills the inventory with empty items 
     /// </summary>
-    void FillInventory(int size)
+    public void FillInventory(int size, bool highlightable = false)
     {
         if (inventoryList == null)
         {
@@ -203,6 +242,7 @@ public class Inventory
         for (int i = 0; i < size; i ++)
         {
             InventoryItem filler = new InventoryItem(true);
+            filler.SetHighlightable(highlightable);
             inventoryList.Add(filler);
         }
     }
@@ -211,7 +251,7 @@ public class Inventory
     /// </summary>
     public InventoryItem InventoryGetItem(int index)
     {
-        if(inventoryList == null)
+        if (inventoryList == null)
         {
             Debug.LogError("Items List Null");
             return null;
@@ -266,7 +306,7 @@ public class Inventory
     {
         if((acceptAll && rejectAll) || (!acceptAll&&!rejectAll))
         {
-            Debug.LogWarning("Acceptance Incorrectly Setup, Returning True Or False For All");
+            Debug.LogWarning("Acceptance Incorrectly Setup, Returning True Or False For All, and should only be for one. Return True for All.");
             return true;
         }
         if(acceptAll && !exceptions.Contains(itemType))

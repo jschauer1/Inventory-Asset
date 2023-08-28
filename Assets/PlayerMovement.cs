@@ -5,7 +5,8 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     public float speed = 5.0f; // Speed at which the player moves
-
+    public GameObject hatFlippedFalse;
+    public GameObject hatFlippedTrue;
     private Rigidbody2D rb;
     private SpriteRenderer sR;
     Animator animator;
@@ -30,12 +31,16 @@ public class PlayerMovement : MonoBehaviour
         if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
         {
             moveHorizontal = -1; // Move left
+            hatFlippedTrue.SetActive(true);
+            hatFlippedFalse.SetActive(false);
             sR.flipX = true;
             
         }
         else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
         {
             moveHorizontal = 1; // Move right
+            hatFlippedTrue.SetActive(false);
+            hatFlippedFalse.SetActive(true);
             sR.flipX = false;
 
         }
@@ -48,7 +53,6 @@ public class PlayerMovement : MonoBehaviour
             animator.SetBool("Running", true);
 
         }
-
         // Apply movement to the Rigidbody2D
         Vector2 movement = new Vector2(moveHorizontal, 0);
         rb.velocity = new Vector2(movement.x * speed, rb.velocity.y);

@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
-/*Author: Jaxon Schauer
- * 
- */
+using UnityEngine.UI;
+//Author: Jaxon Schauer
 /// <summary>
 /// This class uses information given by the inventory controller to build a UI interface. This interface is linked with the <see cref="Inventory"/> class
 /// displaying the items contained inside the associated object
@@ -11,46 +10,105 @@ using UnityEngine;
 public class InventoryUIManager : MonoBehaviour
 {
     private GameObject previouslyHighlighted;
-    [Header("Inventory UI Setup")]
+
+    // Inventory UI Configuration
+    [Header("============[ Inventory UI Setup ]============")]
+
+    [Tooltip("Name of the inventory for identification purposes.")]
     [SerializeField]
     private string inventoryName;
+
+    // This field isn't intended for direct modifications hence hidden.
     [SerializeField, HideInInspector]
-    private Inventory inventory;//Holds a reference to the inventory object that is linked with the inventory UI.
+    private Inventory inventory; // Reference to the associated inventory object.
+
+    [Tooltip("Number of columns for the inventory layout.")]
     [SerializeField]
-    private int col, row;
+    private int col;
+
+    [Tooltip("Number of rows for the inventory layout.")]
     [SerializeField]
-    private GameObject slot;//Holds the prefab for the slot. The slot is used to hold the items added to the inventory.
+    private int row;
+
+    [Tooltip("Prefab representing an individual item slot.")]
     [SerializeField]
-    private GameObject backGround;//Holds the prefab for the background image that will be used behind the slots.
+    private GameObject slot;
+
+    [Tooltip("Sets the slots image")]
     [SerializeField]
-    private Vector2 slotGap;//Defines the space between each slot
+    private Sprite SlotImage;
+
+    [Tooltip("Spacing between individual slots in the inventory.")]
     [SerializeField]
-    private Vector2 slotSize;//Defines the space between each slot
+    private Vector2 slotGap;
+
+    [Tooltip("Size dimensions of each slot.")]
     [SerializeField]
-    private Vector2 slotImageSizeOffSet;//Defines the space between each slot
+    private Vector2 slotSize;
+
+    [Tooltip("Size factor for the item image displayed in a slot. Gets multiplied by the slot size.")]
     [SerializeField]
-    private Vector2 slotOffSet;//Defines a offset between the slots and the background
+    private Vector2 ItemImageSize;
+
+    [SerializeField] private float textSize;
+
+    [SerializeField] private Vector3 textPosition;
+
+    [Header("========[Background Settings]========")]
+
+    [Tooltip("Prefab for the background behind the inventory slots.")]
     [SerializeField]
-    private Vector2 backGroundBoarder;//Defines the expansion of the background as needed by the user
-    [Header("Start Point")]
-    [SerializeField] 
+    private GameObject background;
+
+    [Tooltip("Active and deactivate background")]
+    [SerializeField] bool activeBackground;
+
+    [Tooltip("Dimensions for adjusting the background size.")]
+    [SerializeField]
+    private Vector2 backgroundBoarder;
+
+    [Tooltip("Offset for positioning slots with respect to the background.")]
+    [SerializeField]
+    private Vector2 slotOffSetToBackground;
+
+
+    // Additional Configuration Options
+    [Header("========[ Additional Options ]========")]
+
+    [Tooltip("Determines the starting point for slot arrangement.")]
+    [SerializeField]
     StartPositions slotStartPosition;
-    [Header("Extra Options:")]
+
+    [Tooltip("Enable dragging items within the inventory. NOTE: Must also be enabled in item.")]
     [SerializeField]
-    private bool draggable;//Boolean that when pressed, along with the boolean on the items, allows items to be dragged in chosen inventory
+    private bool draggable;
+
+    [Tooltip("Allow items to be highlighted when selected. NOTE: Must also be enabled in item.")]
     [SerializeField]
-    private bool highlightable;//Boolean that when pressed,along with the boolean on the items, allows items to be highlighed in chosen inventory
-    [SerializeField] 
-    private bool saveable;
+    private bool highlightable;
+
+    [Tooltip("Enable saving the state of the inventory.")]
     [SerializeField]
-    private char EnableDisableOnPress;//Defines a button that can be pressed to disable or enable an inventory, This button must be a Char
+    private bool saveInventory;
+
+    [Tooltip("Key that toggles the visibility/enabling of the inventory. Must be a character.")]
     [SerializeField]
-    List<PressableSlot> highLightOnPress;//List of chars and inventory positions that allows for the highlighting on button press
-    [Header("Accept/Reject Items: ")]
+    private List<char> toggleOnButtonPress;
+
+    [Tooltip("Map between keys and inventory slots for slot highlighting.")]
     [SerializeField]
-    private ItemAcceptance acceptance;//Takes input from the user on what level of item acceptance they want
+    List<PressableSlot> highLightSlotOnPress;
+
+    // Item Acceptance Configuration
+    [Header("========[ Item Acceptance Configuration ]========")]
+
+    [Tooltip("Specify the general rules for item acceptance in this inventory.")]
     [SerializeField]
-    private List<string> exceptions;//exceptions for the above level of acceptance, EX: An armor piece may be the only thing you want in an inventory, that is an exception
+    private ItemAcceptance acceptance;
+
+    [Tooltip("Define any exceptions to the general item acceptance rules.")]
+    [SerializeField]
+    private List<string> exceptions;
 
 
     Dictionary<string, int> slotPress = new Dictionary<string, int>();//Links the string and the position to highlight on press.
@@ -58,15 +116,6 @@ public class InventoryUIManager : MonoBehaviour
     private Transform UI;
 
     private RectTransform rectTransform;
-
-
-    //Hold previous values to be checked in CheckEditorChange
-    private int previousRow = 0, previousCol = 0, previousExceptionsSize=0;
-    private float previousWidth = 0, previousHeight = 0;
-    private float previousOffSetx = 0, previousOffSety = 0;
-    private float previousBorderx = 0, previousBordery = 0;
-    private StartPositions prevSlotPos;
-
 
     //Holds and organizes slots
     [SerializeField, HideInInspector]
@@ -99,12 +148,13 @@ public class InventoryUIManager : MonoBehaviour
     /// </summary>
     public void SetVarsOnInit()
     {
+        SlotImage = slot.GetComponent<Image>().sprite;
         slotSize = slot.GetComponent<RectTransform>().sizeDelta;
         slotGap = slotSize;
         GameObject slotChild = slot.GetComponent<Slot>().GetSlotChildInstance();
         RectTransform slotChildRect = slotChild.GetComponent<RectTransform>();
-        slotImageSizeOffSet = new Vector2(slotChildRect.sizeDelta.x/slot.GetComponent<RectTransform>().sizeDelta.x, slotChildRect.sizeDelta.y/slot.GetComponent<RectTransform>().sizeDelta.y);
-
+        ItemImageSize = new Vector2(slotChildRect.sizeDelta.x/slot.GetComponent<RectTransform>().sizeDelta.x, slotChildRect.sizeDelta.y/slot.GetComponent<RectTransform>().sizeDelta.y);
+        textSize = slot.GetComponent<Slot>().GetSlotChildInstance().GetComponent<DragItem>().GetTextSize();
     }
     /// <summary>
     /// Checks if any meaningful variables have been changed and if so calls the functions, creating the expected UI
@@ -123,8 +173,16 @@ public class InventoryUIManager : MonoBehaviour
 
             createSlots();
             SetSlotPositions();
-            setBackground();
+            SetBackground();
             UpdateInventory();
+            if(background!=null && !activeBackground)
+            {
+                background.SetActive(false);
+            }
+            else if(background!=null && activeBackground)
+            {
+                background.SetActive(true);
+            }
 
         }
     }
@@ -133,14 +191,6 @@ public class InventoryUIManager : MonoBehaviour
     /// </summary>
     private void InventoryUIReset()
     {
-        previousExceptionsSize = exceptions.Count;
-        previousCol = col;
-        previousRow = row;
-        previousHeight = slotGap.y;
-        previousWidth = slotGap.x;
-        previousOffSetx = slotOffSet.x;
-        previousOffSety = slotOffSet.y;
-        prevSlotPos = slotStartPosition;
         if (slot == null) return;
         if (Application.isPlaying)
         {
@@ -173,9 +223,9 @@ public class InventoryUIManager : MonoBehaviour
     /// <summary>
     /// Aligns the background with the slots while account of other user based offsets in relationship to the background vs the slots
     /// </summary>
-    private void setBackground()
+    private void SetBackground()
     {
-        if (backGround == null)
+        if (background == null)
         {
             return;
         }
@@ -183,10 +233,10 @@ public class InventoryUIManager : MonoBehaviour
         {
             return;
         }
-        RectTransform rectTransform = backGround.GetComponent<RectTransform>();
+        RectTransform rectTransform = background.GetComponent<RectTransform>();
         Vector2 backGroundArea = slotsvec[0] - slotsvec[slotsvec.Count - 1];
-        rectTransform.sizeDelta = new Vector2((Mathf.Abs(backGroundArea.x) + backGroundBoarder.x), Mathf.Abs(backGroundArea.y) + backGroundBoarder.y);
-        backGround.transform.position = new Vector2(transform.position.x, transform.position.y);
+        rectTransform.sizeDelta = new Vector2((Mathf.Abs(backGroundArea.x) + backgroundBoarder.x), Mathf.Abs(backGroundArea.y) + backgroundBoarder.y);
+        background.transform.position = new Vector2(transform.position.x + slotOffSetToBackground.x, transform.position.y+slotOffSetToBackground.y);
     }
     /// <summary>
     /// Creates all slots on the inventory UI, applying the slot gap and other offsets accordingly
@@ -216,7 +266,10 @@ public class InventoryUIManager : MonoBehaviour
                 GameObject slotObjectInstance = Instantiate(slot, rectTransform);
                 slotObjectInstance.GetComponent<RectTransform>().localPosition = placeMentPos;
                 slotObjectInstance.GetComponent<RectTransform>().sizeDelta = slotSize;
-                slotObjectInstance.GetComponent<Slot>().GetSlotChildInstance().GetComponent<RectTransform>().sizeDelta = new Vector2(slotSize.x * slotImageSizeOffSet.x, slotSize.y * slotImageSizeOffSet.y);
+                slotObjectInstance.GetComponent<Image>().sprite = SlotImage;
+                slotObjectInstance.GetComponent<Slot>().GetSlotChildInstance().GetComponent<RectTransform>().sizeDelta = new Vector2(slotSize.x * ItemImageSize.x, slotSize.y * ItemImageSize.y);
+                slotObjectInstance.GetComponent<Slot>().GetSlotChildInstance().GetComponent<DragItem>().SetTextSize(textSize);
+                slotObjectInstance.GetComponent<Slot>().GetSlotChildInstance().GetComponent<DragItem>().SetTextPositionOffset(textPosition);
 
                 slotPositionsVec.Add(new Vector2(curRow, curCol), slotObjectInstance);
                 slots.Add(slotObjectInstance);
@@ -329,7 +382,7 @@ public class InventoryUIManager : MonoBehaviour
     {
         Slot slotInstance = slot.GetComponent<Slot>();
         InventoryItem item = slotInstance.GetItem();
-        if (item.GetHighlightable() && highlightable)
+        if (item.GetHighlightable() && highlightable || item.GetIsNull() && highlightable)
         {
             if (previouslyHighlighted != null)
             {
@@ -342,6 +395,7 @@ public class InventoryUIManager : MonoBehaviour
                 prevSlotInstance.GetSlotImage().color = prevSlotInstance.GetColor();
             }
             slotInstance.GetSlotImage().color = Color.grey;
+            Debug.Log("here");
             slotInstance.GetItem().Selected();
             previouslyHighlighted = slot;
         }
@@ -366,7 +420,7 @@ public class InventoryUIManager : MonoBehaviour
     /// </summary>
     private void InitSlotPressDict()
     {
-        foreach (PressableSlot press in highLightOnPress)
+        foreach (PressableSlot press in highLightSlotOnPress)
         {
             if (!slotPress.ContainsKey(press.buttonPress.ToString()))
             {
@@ -417,11 +471,11 @@ public class InventoryUIManager : MonoBehaviour
     }
     public void SetSave(bool save)
     {
-        saveable = save;
+        saveInventory = save;
     }
     public void SetSaveInventory()
     {
-        inventory.SetSave(saveable);
+        inventory.SetSave(saveInventory);
     }
     public void SetRowCol(int row, int col)
     {
@@ -479,13 +533,13 @@ public class InventoryUIManager : MonoBehaviour
         inventory = null;
     }
 
-    public void SetEnableDisable(string EnableDisableOnPress)
+    public void SetInvToggle(List<char> EnableDisableOnPress)
     {
-        this.EnableDisableOnPress = EnableDisableOnPress.ToCharArray()[0];
+        this.toggleOnButtonPress = EnableDisableOnPress;
     }
-    public string GetEnableDisable()
+    public List<char> GetEnableDisable()
     {
-        return EnableDisableOnPress.ToString();
+        return toggleOnButtonPress;
     }
     private enum StartPositions
     {

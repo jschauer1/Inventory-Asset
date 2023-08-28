@@ -18,6 +18,7 @@ public class InventoryItem
     private UnityEvent itemEvent;//Calls function on invoke
     private GameObject linkedGameObject;
     private bool isNull = false;//Checks if item exists
+    private bool displayAmount;
     public InventoryItem(ItemInitializer init)
     {
         this.amount = 1;
@@ -28,7 +29,8 @@ public class InventoryItem
         this.highlightable = init.GetHighlightable();
         this.itemEvent = init.GetEvent();
         this.isNull = init.GetIsNull();
-        this.linkedGameObject=init.GetGameObjectAction();   
+        this.linkedGameObject=init.GetGameObjectAction();
+        this.displayAmount = init.GetDisplayAmount();
     }
     public InventoryItem(InventoryItem other, int amount = 1)
     {
@@ -47,7 +49,7 @@ public class InventoryItem
         this.itemEvent = other.itemEvent;
         this.isNull = other.isNull;
         this.linkedGameObject = other.GetLinkedGameObject();
-
+        this.displayAmount = other.GetDisplayAmount();
     }
 
     public InventoryItem(bool isNull)
@@ -96,12 +98,16 @@ public class InventoryItem
     {
         this.amount = amount;
     }
+    public bool GetDisplayAmount()
+    {
+        return displayAmount;
+    }
     public GameObject GetLinkedGameObject()
     {
-        if(linkedGameObject == null)
-        {
-            //Debug.LogError("Linked GameObject null");
-        }
         return linkedGameObject;
+    }
+    public void SetHighlightable(bool highlightable)
+    {
+        this.highlightable = highlightable; 
     }
 }

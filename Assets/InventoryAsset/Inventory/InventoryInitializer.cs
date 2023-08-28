@@ -2,16 +2,45 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+//Author: Jaxon Schauer
+/// <summary>
+/// Represents the initial configuration for an inventory.
+/// This class defines various properties such as dimensions, behavior, and interactive elements for an inventory system.
+/// </summary>
 [System.Serializable]
 public class InventoryInitializer
 {
-    [SerializeField] private string inventoryName;
-    [SerializeField] private int row;
-    [SerializeField] private int col;
-    [SerializeField] private bool draggable;
-    [SerializeField] private bool highlightable;
-    [SerializeField] private bool SaveInventory;
-    [SerializeField] private char EnableDisableOnPress;
+    [Header("========[ Basic Inventory Info ]========")]
+
+    [Tooltip("Descriptive name or identifier for the inventory.")]
+    [SerializeField]
+    private string inventoryName;
+
+    [Tooltip("Number of rows for the inventory layout.")]
+    [SerializeField]
+    private int row;
+
+    [Tooltip("Number of columns for the inventory layout.")]
+    [SerializeField]
+    private int col;
+
+    [Header("========[ Inventory Interactivity ]========")]
+
+    [Tooltip("Determines if items within the inventory can be dragged.")]
+    [SerializeField]
+    private bool draggable;
+
+    [Tooltip("Determines if items within the inventory can be highlighted when selected.")]
+    [SerializeField]
+    private bool highlightable;
+
+    [Tooltip("Enable saving the state of the inventory.")]
+    [SerializeField]
+    private bool SaveInventory;
+
+    [Tooltip("Character key that toggles the visibility/enabling of the inventory.")]
+    [SerializeField]
+    private List<char> ToggleVisabilityOnPress;
     [SerializeField, HideInInspector]
     private bool initialized = false;
     public string GetInventoryName()
@@ -54,13 +83,9 @@ public class InventoryInitializer
     {
         this.initialized = initialized;
     }
-    public void SetEnableDisable(string EnableDisableOnPress)
+    public List<char> GetToggle()
     {
-        this.EnableDisableOnPress = EnableDisableOnPress.ToCharArray()[0];
-    }
-    public string GetEnableDisable()
-    {
-        return EnableDisableOnPress.ToString();
+        return ToggleVisabilityOnPress;
     }
     public bool GetSaveInventory()
     {

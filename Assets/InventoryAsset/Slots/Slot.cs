@@ -1,6 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
+using System.Drawing;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -18,7 +16,7 @@ public class Slot : MonoBehaviour, IPointerClickHandler
     private GameObject slotChildInstance;//This is a child object that is used to display an image of the object
 
     private InventoryItem item;//This is the current item in the inventory, there is always an item however item.GetIsNull() determines if the object contains a real item
-    private Color color;//This is the color of the slot
+    private UnityEngine.Color color;//This is the color of the slot
     private Image slotImage;//This is the image of the slot
     private InventoryUIManager inventoryUIManager;
     private Vector3 initialChildScale;//holds the scale for the slot child to allow for it to be instantiated with the correct size
@@ -52,18 +50,26 @@ public class Slot : MonoBehaviour, IPointerClickHandler
     {
 
         item = transform.parent.GetComponent<InventoryUIManager>().GetInventoryItem(position);
-        if (!item.GetIsNull())
+        if(item != null)
         {
-            slotChildInstance.SetActive(true);
-            slotChildInstance.GetComponent<DragItem>().SetItem(item);
-            slotChildInstance.GetComponent<Image>().sprite = item.GetItemImage();
-            slotChildInstance.GetComponent<DragItem>()._SetText();
+            if (!item.GetIsNull())
+            {
+                slotChildInstance.SetActive(true);
+                slotChildInstance.GetComponent<DragItem>().SetItem(item);
+                slotChildInstance.GetComponent<Image>().sprite = item.GetItemImage();
+                slotChildInstance.GetComponent<DragItem>().SetText();
+            }
+            else
+            {
+                slotChildInstance.SetActive(false);
+
+            }
         }
         else
         {
-            slotChildInstance.SetActive(false);
-
+            Debug.LogError("Item is null");
         }
+
     }
     /// <summary>
     /// Adds a new slotchild when slot child is dragged away, and resets the slot to empty
@@ -80,11 +86,39 @@ public class Slot : MonoBehaviour, IPointerClickHandler
     }
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (item.GetIsNull() || !item.GetHighlightable())
+/*        if (!item.GetHighlightable())
         {
             return;
-        }
+        }*/
         inventoryUIManager.GetComponent<InventoryUIManager>().SetHightlighted(gameObject);
+    }
+    public void SetTextSize(int size)
+    {
+        if(slotChildInstance != null)
+        {
+            slotChildInstance.GetComponent<DragItem>().SetTextSize(size);
+        }
+        else
+        {
+            Debug.LogError("Slot Child Null");
+        }
+    }
+    public void SetTextOffset(Vector3 offset)
+    {
+        if(slotChildInstance != null)
+        {
+            slotChildInstance.GetComponent<DragItem>().SetTextPositionOffset(offset);
+
+        }
+        else
+        {
+            Debug.LogError("Slot Child Null");
+
+        }
+    }
+    public float GetTextSize()
+    {
+        return slotChildInstance.GetComponent<DragItem>().GetTextSize();
     }
     public Image GetSlotImage()
     {
@@ -98,7 +132,7 @@ public class Slot : MonoBehaviour, IPointerClickHandler
     {
         return inventoryUIManager;
     }
-    public Color GetColor()
+    public UnityEngine.Color GetColor()
     {
         return color;
     }
