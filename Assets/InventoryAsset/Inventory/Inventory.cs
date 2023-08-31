@@ -1,8 +1,10 @@
 
 using System.Collections.Generic;
-using System.Linq;
+using System.Text;
+using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
-using static UnityEditor.Progress;
+using UnityEngine.Events;
+using static UnityEditor.PlayerSettings;
 //Author: Jaxon Schauer
 /// <summary>
 /// This class creates an Inventory that tracks and controls the inventory list. This class tells the InventoryUIManager what objects each slot holds
@@ -26,10 +28,14 @@ public class Inventory
     int size;
     [SerializeField, HideInInspector]
     bool saveInventory;//is true if the user decides to save the inventory
-
+    private bool clickItemOnEnter;
     private bool acceptAll;
     private bool rejectAll;
     private HashSet<string> exceptions;
+    private Dictionary<int, UnityEvent> enterDict;
+    private Dictionary<int, UnityEvent> exitDict;
+    private Dictionary<int, bool> itemAction;
+
 
     /// <summary>
     /// Assigns essential variables for the Inventory
@@ -73,7 +79,7 @@ public class Inventory
                 {
                     InventoryItem item = inventoryList[i];
                     newlist.Add(item);
-                    AddItemPosDict(item, i);
+                    AddItemPosDict(item, i,false);
 
                 }
                 for (int i = newlist.Count; i < newSize; i++)
@@ -88,7 +94,7 @@ public class Inventory
                 {
                     InventoryItem item = inventoryList[i];
                     newlist.Add(item);
-                    AddItemPosDict(item, i);
+                    AddItemPosDict(item, i,false);
 
                 }
             }
@@ -101,20 +107,27 @@ public class Inventory
     }
     public Dictionary<string, List<int>> TestPrintItemPosDict()
     {
-        Debug.Log(itemPositions.Count);
-        foreach(KeyValuePair<string, List<int>> pair in itemPositions)
+        StringBuilder output = new StringBuilder();
+
+        output.Append(itemPositions.Count + " | ");
+
+        foreach (KeyValuePair<string, List<int>> pair in itemPositions)
         {
+            output.Append(pair.Key + ": ");
             foreach (int position in pair.Value)
             {
-                Debug.Log(pair.Key + " " +  position + " ");
+                output.Append(position + " ");
             }
+            output.Append("| ");
         }
+
+        Debug.Log(output.ToString());
         return itemPositions;
     }
     /// <summary>
     /// Adds an item to a specified position, updating the <see cref="itemPositions"/> for efficient tracking of the items
     /// </summary>
-    public void AddItem(int index,InventoryItem item)
+    public void AddItemSlot(int index,InventoryItem item)
     {
         if (inventoryList == null)
         {
@@ -136,11 +149,13 @@ public class Inventory
             Debug.LogWarning("Item Acceptance is false. Overruling and adding item.");
         }
         InventoryItem newItem = new InventoryItem(item, item.GetAmount());
+
         if (inventoryList[index].GetIsNull())
         {
+            Debug.Log("here");
+            inventoryList[index] = item;
             AddItemPosDict(newItem, index);
 
-            inventoryList[index] = newItem;
             InventoryUIManagerInstance.UpdateSlot(index);
         }
     }
@@ -174,15 +189,34 @@ public class Inventory
         }
 
     }
-    private void AddItemPosDict(InventoryItem item, int pos)
+    /// <summary>
+    /// Adds a new item in the lowest possible inventoryList position
+    /// </summary>
+    private void AddNewItem(InventoryItem item, int amount = 1)
+    {
+        for (int i = 0; i < inventoryList.Count; i++)
+        {
+
+            if (inventoryList[i].GetIsNull())
+            {
+
+                InventoryItem newItem = new InventoryItem(item, amount);
+                inventoryList[i] = item;
+                AddItemPosDict(newItem, i);
+                break;
+            }
+        }
+    }
+    private void AddItemPosDict(InventoryItem item, int pos, bool invokeEnterExit = true)
     {
         if (!item.GetIsNull())
         {
+            item.SetPosition(pos);
+            item.SetInventory(inventoryName);
             if (!itemPositions.ContainsKey(item.GetItemType()))
             {
                 itemPositions.Add(item.GetItemType(), new List<int>() { pos });
                 InventoryUIManagerInstance.UpdateSlot(pos);
-
             }
             else
             {
@@ -190,36 +224,29 @@ public class Inventory
                 InventoryUIManagerInstance.UpdateSlot(pos);
 
             }
-        }
-    }
-    /// <summary>
-    /// Adds a new item in the lowest possible inventoryList position
-    /// </summary>
-    private void AddNewItem(InventoryItem item, int amount = 1)
-    {
-         for (int i = 0; i < inventoryList.Count; i++)
-        {
-
-            if (inventoryList[i].GetIsNull())
+            if (invokeEnterExit&&enterDict!= null && enterDict.ContainsKey(pos))
             {
-
-                InventoryItem newItem = new InventoryItem(item, amount);
-                inventoryList[i] = newItem;
-                AddItemPosDict(newItem, i);
-                break;
+                if (itemAction[pos])
+                {
+                    item.Selected();
+                }
+                enterDict[pos].Invoke();
             }
+
         }
     }
+
+
     /// <summary>
     /// Takes as input a position, remove the item from the given inventory position.
     /// </summary>
-    public void RemoveItemInPosition(int position)
+    public void RemoveItemInPosition(int pos, bool invokeEnterExit = true)
     {
-        if (!inventoryList[position].GetIsNull())
+        if (!inventoryList[pos].GetIsNull())
         {
-            if (itemPositions.ContainsKey(inventoryList[position].GetItemType()))
+            if (itemPositions.ContainsKey(inventoryList[pos].GetItemType()))
             {
-                itemPositions[inventoryList[position].GetItemType()].Remove(position);
+                itemPositions[inventoryList[pos].GetItemType()].Remove(pos);
             }
             else
             {
@@ -227,8 +254,69 @@ public class Inventory
             }
         }
         InventoryItem filler = new InventoryItem(true);
-        inventoryList[position] = filler;
-        InventoryUIManagerInstance.UpdateSlot(position);
+        inventoryList[pos] = filler;
+        InventoryUIManagerInstance.UpdateSlot(pos);
+        if (invokeEnterExit && exitDict != null && exitDict.ContainsKey(pos))
+        {
+            exitDict[pos].Invoke();
+        }
+    }
+    public void RemoveItemInPosition(int pos, int amount)
+    {
+        InventoryItem item = inventoryList[pos];
+        if (!item.GetIsNull())
+        {
+            if (itemPositions.ContainsKey(item.GetItemType()))
+            {
+                if(item.GetAmount() - amount > 0)
+                {
+                    item.SetAmount(item.GetAmount() - amount);
+                    InventoryUIManagerInstance.UpdateSlot(pos);
+
+                }
+                else
+                {
+                    itemPositions[item.GetItemType()].Remove(pos);
+                    InventoryItem filler = new InventoryItem(true);
+                    inventoryList[pos] = filler;
+                    InventoryUIManagerInstance.UpdateSlot(pos);
+                }
+                if (exitDict != null && exitDict.ContainsKey(pos))
+                {
+                    exitDict[pos].Invoke();
+                    InventoryUIManagerInstance.UpdateSlot(pos);
+                }
+            }
+            else
+            {
+                Debug.LogWarning("ItemPositions Dictitonary Setup Incorrectly");
+            }
+        }
+    }
+    public void RemoveItemInPosition(InventoryItem item, int amount)
+    {
+        int position = item.GetPosition();
+        if (!item.GetIsNull())
+        {
+            if (itemPositions.ContainsKey(item.GetItemType()))
+            {
+                if(item.GetAmount() - amount > 0)
+                {
+                    item.SetAmount(item.GetAmount() - amount);
+                }
+                else
+                {
+                    itemPositions[item.GetItemType()].Remove(position);
+                    InventoryItem filler = new InventoryItem(true);
+                    inventoryList[position] = filler;
+                }
+                InventoryUIManagerInstance.UpdateSlot(position);
+            }
+            else
+            {
+                Debug.LogWarning("ItemPositions Dictitonary Setup Incorrectly");
+            }
+        }
     }
     /// <summary>
     /// Fills the inventory with empty items 
@@ -338,5 +426,15 @@ public class Inventory
     public bool GetSaveInventory()
     {
         return saveInventory;
+    }
+    public void SetclickItemOnEnter(bool clickItemOnEnter)
+    {
+        this.clickItemOnEnter = clickItemOnEnter;
+    }
+    public void SetExitEntranceDict(Dictionary<int, UnityEvent> enterDict, Dictionary<int, UnityEvent> exitDict, Dictionary<int, bool> itemAction)
+    {
+        this.enterDict = enterDict;
+        this.exitDict = exitDict;
+        this.itemAction = itemAction;
     }
 }

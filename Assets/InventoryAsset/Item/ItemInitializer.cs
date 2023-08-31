@@ -24,7 +24,7 @@ public class ItemInitializer
     // This event is likely linked to item-specific behavior and isn't meant for direct modification.
     [Tooltip("Event triggered in relation to this item.")]
     [SerializeField, HideInInspector]
-    private UnityEvent myEvent;
+    private InventoryItemEvent myEvent;
 
     [Tooltip("Display the quantity/amount of the item on its icon.")]
     [SerializeField]
@@ -71,11 +71,6 @@ public class ItemInitializer
     {
         return maxStackAmount;
     }
-    public void Selected()
-    {
-        if (myEvent != null)
-            myEvent.Invoke();
-    }
     public bool GetHighlightable()
     {
         return highlightable;
@@ -92,7 +87,7 @@ public class ItemInitializer
     {
         this.amount = amount;
     }
-    public UnityEvent GetEvent()
+    public InventoryItemEvent GetEvent()
     {
         return myEvent;
     }

@@ -22,11 +22,6 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
     [SerializeField] private TextMeshProUGUI text;
 
     /// <summary>
-    /// Offset for the text position.
-    /// </summary>
-    private Vector3 textPositionOffset;
-
-    /// <summary>
     /// Initializes the CurrentSlot on start.
     /// </summary>
     private void Start()
@@ -55,11 +50,10 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
     public void OnBeginDrag(PointerEventData eventData)
     {
         if (Draggable()) return;
-
         if (CurrentSlot != null)
         {
-            transform.SetParent(CurrentSlot.GetInventoryUI().GetUI());
             CurrentSlot.ResetSlot();
+            transform.SetParent(CurrentSlot.GetInventoryUI().GetUI());
         }
         else
         {
@@ -108,9 +102,10 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
     private void HandleSlot(RaycastResult result)
     {
         Slot slot = result.gameObject.GetComponent<Slot>();
-        if (slot.GetItem().GetIsNull() && slot.GetInventoryUI().GetInventory().CheckAcceptance(item.GetItemType()))
+        if(slot.GetInventoryUI())
+        if (slot.GetItem().GetIsNull() &&slot.GetInventoryUI().GetInventory().CheckAcceptance(item.GetItemType()))
         {
-            InventoryController.instance.AddItem(slot.GetInventoryUI().GetInventoryName(), item, slot.GetPosition());
+            InventoryController.instance.AddItemSlot(slot.GetInventoryUI().GetInventoryName(), item, slot.GetPosition());
             Destroy(gameObject);
         }
         else
@@ -124,7 +119,7 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
     /// </summary>
     private void ReturnToOriginalPosition()
     {
-        InventoryController.instance.AddItem(CurrentSlot.GetInventoryUI().GetInventoryName(), item, CurrentSlot.GetPosition());
+        InventoryController.instance.AddItemSlot(CurrentSlot.GetInventoryUI().GetInventoryName(), item, CurrentSlot.GetPosition());
         Destroy(gameObject);
     }
 
@@ -158,21 +153,24 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
             }
         }
     }
-
     /// <summary>
     /// Sets the offset for the text position.
     /// </summary>
     public void SetTextPositionOffset(Vector3 offset)
     {
-        text.gameObject.transform.localPosition += offset;
+        text.gameObject.transform.position += offset;
     }
-
     /// <summary>
     /// Sets the font size for the text UI.
     /// </summary>
     public void SetTextSize(float size)
     {
         text.fontSize = size;
+    }
+    public void SetImageSize(Vector2 size)
+    {
+        RectTransform imageRect = GetComponent<RectTransform>();
+        imageRect.sizeDelta = size;
     }
 
     /// <summary>
@@ -181,5 +179,13 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
     public float GetTextSize()
     {
         return text.fontSize;
+    }
+    public Vector2 GetTextPosition()
+    {
+        return text.transform.localPosition;
+    }
+    public void SetTextPosition(Vector2 textposition)
+    {
+        text.transform.localPosition = textposition;
     }
 }

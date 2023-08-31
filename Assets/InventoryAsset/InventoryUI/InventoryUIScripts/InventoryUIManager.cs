@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 //Author: Jaxon Schauer
 /// <summary>
@@ -86,19 +87,20 @@ public class InventoryUIManager : MonoBehaviour
     [Tooltip("Allow items to be highlighted when selected. NOTE: Must also be enabled in item.")]
     [SerializeField]
     private bool highlightable;
-
     [Tooltip("Enable saving the state of the inventory.")]
     [SerializeField]
     private bool saveInventory;
-
+    [Tooltip("Invokes item action when item enters inventory")]
+    [SerializeField]
+    bool clickItemOnEnter;
     [Tooltip("Key that toggles the visibility/enabling of the inventory. Must be a character.")]
     [SerializeField]
     private List<char> toggleOnButtonPress;
-
     [Tooltip("Map between keys and inventory slots for slot highlighting.")]
     [SerializeField]
     List<PressableSlot> highLightSlotOnPress;
-
+    [SerializeField] 
+    List<invokeOnExit> itemEntryExitAction;
     // Item Acceptance Configuration
     [Header("========[ Item Acceptance Configuration ]========")]
 
@@ -109,7 +111,6 @@ public class InventoryUIManager : MonoBehaviour
     [Tooltip("Define any exceptions to the general item acceptance rules.")]
     [SerializeField]
     private List<string> exceptions;
-
 
     Dictionary<string, int> slotPress = new Dictionary<string, int>();//Links the string and the position to highlight on press.
 
@@ -175,7 +176,8 @@ public class InventoryUIManager : MonoBehaviour
             SetSlotPositions();
             SetBackground();
             UpdateInventory();
-            if(background!=null && !activeBackground)
+            InitSlotEnterExitDict();
+            if (background!=null && !activeBackground)
             {
                 background.SetActive(false);
             }
@@ -183,6 +185,7 @@ public class InventoryUIManager : MonoBehaviour
             {
                 background.SetActive(true);
             }
+            inventory.SetclickItemOnEnter(clickItemOnEnter);
 
         }
     }
@@ -267,9 +270,9 @@ public class InventoryUIManager : MonoBehaviour
                 slotObjectInstance.GetComponent<RectTransform>().localPosition = placeMentPos;
                 slotObjectInstance.GetComponent<RectTransform>().sizeDelta = slotSize;
                 slotObjectInstance.GetComponent<Image>().sprite = SlotImage;
-                slotObjectInstance.GetComponent<Slot>().GetSlotChildInstance().GetComponent<RectTransform>().sizeDelta = new Vector2(slotSize.x * ItemImageSize.x, slotSize.y * ItemImageSize.y);
-                slotObjectInstance.GetComponent<Slot>().GetSlotChildInstance().GetComponent<DragItem>().SetTextSize(textSize);
-                slotObjectInstance.GetComponent<Slot>().GetSlotChildInstance().GetComponent<DragItem>().SetTextPositionOffset(textPosition);
+                slotObjectInstance.GetComponent<Slot>().SetChildImageSize(new Vector2(slotSize.x * ItemImageSize.x, slotSize.y * ItemImageSize.y));
+                slotObjectInstance.GetComponent<Slot>().SetTextSize(textSize);
+                slotObjectInstance.GetComponent<Slot>().SetTextOffset(textPosition);
 
                 slotPositionsVec.Add(new Vector2(curRow, curCol), slotObjectInstance);
                 slots.Add(slotObjectInstance);
@@ -395,7 +398,6 @@ public class InventoryUIManager : MonoBehaviour
                 prevSlotInstance.GetSlotImage().color = prevSlotInstance.GetColor();
             }
             slotInstance.GetSlotImage().color = Color.grey;
-            Debug.Log("here");
             slotInstance.GetItem().Selected();
             previouslyHighlighted = slot;
         }
@@ -433,11 +435,56 @@ public class InventoryUIManager : MonoBehaviour
             }
         }
     }
+    private void InitSlotEnterExitDict()
+    {
+        if(itemEntryExitAction.Count != 0)
+        {
+            Dictionary<int, UnityEvent> enter = new Dictionary<int, UnityEvent>();
+            Dictionary<int, UnityEvent> exit = new Dictionary<int, UnityEvent>();
+            Dictionary<int, bool>actItem = new Dictionary<int, bool>(); 
+            foreach(invokeOnExit enterExit in itemEntryExitAction)
+            {
+                if(enterExit.enterExit == EnterExit.Exit)
+                {
+                    if(!exit.ContainsKey(enterExit.slotpos))
+                    {
+                        exit.Add(enterExit.slotpos, enterExit.action);
+
+                    }
+                    else
+                    {
+                        Debug.LogError("Each slot can only have one Exit action, ignoring: " + enterExit.slotpos);
+                    }
+                }
+                else
+                {
+                    if (!enter.ContainsKey(enterExit.slotpos))
+                    {
+                        enter.Add(enterExit.slotpos, enterExit.action);
+
+                    }
+                    else
+                    {
+                        Debug.LogError("Each slot can only have one Enter action, ignoring: "+ enterExit.slotpos);
+                    }
+                }
+                actItem.Add(enterExit.slotpos, enterExit.ItemActOnEnter);
+                inventory.SetExitEntranceDict(enter, exit, actItem);
+            }
+
+        }
+    }
     /// <summary>
     /// Tests that InventoryController is Setup to support the InventoryUIManager, destroying the InventoryUIManager if not
     /// </summary>
     public bool TestSetup()
     {
+        if (!InventoryController.instance.checkUI(gameObject))
+        {
+            Debug.LogError("inventoryUIDict does not contain object, this can be caused by not initializing through inventory controller. Destroying: " + gameObject.name);
+            Destroy(gameObject);
+            return false;
+        }
         if (InventoryController.instance == null)
         {
             Debug.LogError("Inventory Controller Instance Null. Destroying Inventory: " + inventoryName);
@@ -460,7 +507,19 @@ public class InventoryUIManager : MonoBehaviour
     private struct PressableSlot
     {
         public int position;
+
         public char buttonPress;
+    }
+    [System.Serializable]
+    private struct invokeOnExit
+    {
+        public EnterExit enterExit;
+
+        public int slotpos;
+
+        public UnityEvent action;
+
+        public bool ItemActOnEnter;
     }
     /// <summary>
     /// Returns the item at a given inventory position
@@ -552,6 +611,11 @@ public class InventoryUIManager : MonoBehaviour
     {
         AcceptAll,
         RejectAll
+    }
+    private enum EnterExit
+    {
+        Enter,
+        Exit
     }
 
 }

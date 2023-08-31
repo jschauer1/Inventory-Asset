@@ -2,7 +2,9 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.TextCore.Text;
+using UnityEngine.UIElements;
 using UnityEngine.XR;
+using static UnityEditor.Progress;
 
 
 
@@ -17,7 +19,9 @@ public class InventoryController : MonoBehaviour
 {
     [Header("============[ Setup Confirmation ]============")]
     [Header("**********************************************")]
-    [Header("Click the \"I Understand The Setup\" to show you understand there\nshould only ever be one InventoryController and the \nInventoryController is unpacked in the scene       ")]
+    [Header("Click the \"I Understand The Setup\" to show you understand")]
+    [Header("there should only ever be one InventoryController and the")]
+    [Header("InventoryController needs to be unpacked in the scene")]
     [Header("**********************************************")]
     [Tooltip("Toggle to confirm you understand the setup requirements.")]
     [SerializeField]
@@ -252,14 +256,38 @@ public class InventoryController : MonoBehaviour
         }
 
     }
-    /// <summary>
-    /// Addits a new item to a specified inventory, in a specified location. Uses <see cref="Inventory.AddItem(InventoryItem, int)/>
-    /// </summary>
-    public void AddItem(string inventoryName, InventoryItem itemType, int position)
+    public void AddItemSlot(string inventoryName, InventoryItem itemType, int position)
     {
         Inventory inventory = inventoryManager[inventoryName];
         InventoryItem item = itemType;
-        inventory.AddItem(position, item);
+        inventory.AddItemSlot(position, item);
+    }
+    /// <summary>
+    /// Addits a new item to a specified inventory, in a specified location. Uses <see cref="Inventory.AddItem(InventoryItem, int)/>
+    /// </summary>
+    public void AddItemPos(string inventoryName, string itemType, int position, int amount = 1)
+    {
+        Inventory inventory = inventoryManager[inventoryName];
+        InventoryItem item = new InventoryItem(itemManager[itemType], amount);
+        inventory.AddItemSlot(position, item);
+    }
+    public void AddItemLinearly(string inventoryName, string itemType, int amount = 1)
+    {
+        Inventory inventory = inventoryManager[inventoryName];
+        InventoryItem item = new InventoryItem(itemManager[itemType], amount);
+        inventory.AddItem(item);
+    }
+
+    public void RemoveItemPos(string inventoryName, int position, int amount)
+    {
+        Inventory inventory = inventoryManager[inventoryName];
+        inventory.RemoveItemInPosition(position, amount);
+
+    }
+    public void RemoveItem(string inventoryName, InventoryItem item, int amount = 1)
+    {
+        Inventory inventory = inventoryManager[inventoryName];
+        inventory.RemoveItemInPosition(item, amount);
     }
     /// <summary>
     /// This is a debug function used to reset all lists. This will delete any all existing inventories in the scnene
@@ -278,6 +306,7 @@ public class InventoryController : MonoBehaviour
             DestroyImmediate(obj);
         }
         allInventoryUI.Clear();
+        inventoryUIDict.Clear();
         InventorySaveSystem.Reset();
     }
     /// <summary>
@@ -289,7 +318,11 @@ public class InventoryController : MonoBehaviour
         foreach (GameObject InventoryUI in allInventoryUI)
         {
             InventoryUIManager inventoryInstance = InventoryUI.GetComponent<InventoryUIManager>();
-            inventoryUIDict.Add(inventoryInstance.GetInventoryName(), InventoryUI);
+            if(!inventoryUIDict.ContainsKey(inventoryInstance.GetInventoryName()))
+            {
+                inventoryUIDict.Add(inventoryInstance.GetInventoryName(), InventoryUI);
+
+            }
             inventoryInstance.GetInventory().InitList();
             inventoryManager.Add(inventoryInstance.GetInventoryName(), inventoryInstance.GetInventory());
             foreach(char character in inventoryInstance.GetEnableDisable())
@@ -394,7 +427,7 @@ public class InventoryController : MonoBehaviour
                     {
                         InventoryItem copyItem = itemManager[item.name];
                         InventoryItem newItem = new InventoryItem(copyItem, item.amount);
-                        AddItem(pair.Key, newItem, item.position);
+                        AddItemSlot(pair.Key, newItem, item.position);
                     }
                 }
             }
@@ -444,7 +477,7 @@ public class InventoryController : MonoBehaviour
     {
         if(allInventoryUI.Count == 0 && Application.isPlaying)
         {
-            Debug.LogWarning("No InventoryUIManagers Detected, if Unexpected Try Unpacking InventoryController");
+            Debug.LogWarning("No InventoryUIManagers Detected. Ensure to initialize all inventories in editor mode. If Unexpected Try Unpacking InventoryController");
             return false;
         }
         foreach (GameObject inventories in allInventoryUI)
@@ -464,7 +497,7 @@ public class InventoryController : MonoBehaviour
     {
         if (inventoryManagerObj == null)
         {
-            Debug.LogError("Inventory Manager Object Not Set Correclty");
+            Debug.LogError("Inventory manager object is null");
             return false;
         }
         return true;
@@ -514,7 +547,7 @@ public class InventoryController : MonoBehaviour
     {
         if (instance == null)
         {
-            Debug.LogError("Read Instructions and Click The I Understand The Setup Bool");
+            Debug.LogError("Read Instructions and Click The I Understand The Setup Bool. Inventory Controller Destroyed");
             return false;
         }
         return true;
@@ -539,6 +572,14 @@ public class InventoryController : MonoBehaviour
             if(transform.childCount == 0)
             Debug.LogWarning("Inventory Controller Does Not Have Child Object with InventoryUIManager");
         }
+    }
+    public bool checkUI(GameObject obj)
+    {
+        if (inventoryUIDict.ContainsValue(obj))
+        {
+            return true;
+        }
+        return false;
     }
     public Inventory GetInventory(string inventoryName)
     {

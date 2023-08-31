@@ -21,6 +21,9 @@ public class Slot : MonoBehaviour, IPointerClickHandler
     private InventoryUIManager inventoryUIManager;
     private Vector3 initialChildScale;//holds the scale for the slot child to allow for it to be instantiated with the correct size
     private Vector3 initialSlotChildPosition;//This holds the position of the slot child so it can be instantiated with the correct location
+    float textSize;
+    Vector2 textOffset;
+    Vector2 slotChildImageSize;
     /// <summary>
     /// Sets essential variables for the inventory slot
     /// </summary>
@@ -41,7 +44,6 @@ public class Slot : MonoBehaviour, IPointerClickHandler
         item = inventoryUIManager.GetInventoryItem(position);
         UpdateSlot();
         initialSlotChildPosition = slotChildInstance.transform.position;
-
     }
     /// <summary>
     /// Updates the slot to display the item in the slots associated position
@@ -50,7 +52,7 @@ public class Slot : MonoBehaviour, IPointerClickHandler
     {
 
         item = transform.parent.GetComponent<InventoryUIManager>().GetInventoryItem(position);
-        if(item != null)
+        if (item != null)
         {
             if (!item.GetIsNull())
             {
@@ -76,27 +78,30 @@ public class Slot : MonoBehaviour, IPointerClickHandler
     /// </summary>
     public void ResetSlot()
     {
-        GameObject newInstance = Instantiate(slotChildPrefab, initialSlotChildPosition,Quaternion.identity);
+        GameObject newInstance = Instantiate(slotChildPrefab, initialSlotChildPosition, Quaternion.identity);
         newInstance.transform.SetParent(transform);
         newInstance.transform.localScale = initialChildScale;
+        Vector2 before = slotChildInstance.GetComponent<DragItem>().GetTextPosition();
         slotChildInstance = newInstance;
+        SetChildImageSize(slotChildImageSize);
+        slotChildInstance.GetComponent<DragItem>().SetTextPosition(before);
         inventoryUIManager.GetInventory().RemoveItemInPosition(position);
+        SetTextSize(textSize);
         slotChildInstance.SetActive(false);
+
 
     }
     public void OnPointerClick(PointerEventData eventData)
     {
-/*        if (!item.GetHighlightable())
-        {
-            return;
-        }*/
         inventoryUIManager.GetComponent<InventoryUIManager>().SetHightlighted(gameObject);
     }
-    public void SetTextSize(int size)
+    public void SetTextSize(float size)
     {
+        textSize = size;
         if(slotChildInstance != null)
         {
             slotChildInstance.GetComponent<DragItem>().SetTextSize(size);
+
         }
         else
         {
@@ -105,7 +110,8 @@ public class Slot : MonoBehaviour, IPointerClickHandler
     }
     public void SetTextOffset(Vector3 offset)
     {
-        if(slotChildInstance != null)
+        textOffset = offset;
+        if (slotChildInstance != null)
         {
             slotChildInstance.GetComponent<DragItem>().SetTextPositionOffset(offset);
 
@@ -115,6 +121,11 @@ public class Slot : MonoBehaviour, IPointerClickHandler
             Debug.LogError("Slot Child Null");
 
         }
+    }
+    public void SetChildImageSize(Vector2 size)
+    {
+        slotChildInstance.GetComponent<DragItem>().SetImageSize(size);
+        slotChildImageSize = size;
     }
     public float GetTextSize()
     {

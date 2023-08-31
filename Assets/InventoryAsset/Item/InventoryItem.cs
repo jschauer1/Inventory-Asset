@@ -15,10 +15,12 @@ public class InventoryItem
     private int maxStackAmount;
     private bool draggable;
     private bool highlightable;
-    private UnityEvent itemEvent;//Calls function on invoke
+    private InventoryItemEvent itemEvent;
     private GameObject linkedGameObject;
     private bool isNull = false;//Checks if item exists
     private bool displayAmount;
+    private int position;
+    private string inventory;
     public InventoryItem(ItemInitializer init)
     {
         this.amount = 1;
@@ -80,7 +82,7 @@ public class InventoryItem
     public void Selected()
     {
         if (itemEvent != null)
-            itemEvent.Invoke();
+            itemEvent.Invoke(this);
     }
     public bool GetHighlightable()
     {
@@ -109,5 +111,21 @@ public class InventoryItem
     public void SetHighlightable(bool highlightable)
     {
         this.highlightable = highlightable; 
+    }
+    public void SetPosition(int position)
+    {
+        this.position = position;
+    }
+    public int GetPosition()
+    {
+        return position;
+    }
+    public void SetInventory(string inventory)
+    {
+        this.inventory = inventory;
+    }
+    public string GetInventory()
+    {
+        return inventory;
     }
 }

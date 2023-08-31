@@ -4,22 +4,34 @@ using UnityEngine;
 [CustomEditor(typeof(InventoryUIManager))]
 internal class InventoryUIReact : Editor
 {
+    private bool needToUpdate = false;
+
     public override void OnInspectorGUI()
     {
-        // Reference to the InventoryUI script.
-        InventoryUIManager inventoryUI = (InventoryUIManager)target;
+        EditorGUI.BeginChangeCheck();
 
         // Draw default inspector content.
         DrawDefaultInspector();
 
-        // If any changes in the inspector.
-        if (GUI.changed)
+        // Check if anything was changed.
+        if (EditorGUI.EndChangeCheck())
         {
+            needToUpdate = true;
+        }
+
+        // If any changes in the inspector.
+        if (needToUpdate)
+        {
+            // Reference to the InventoryUI script.
+            InventoryUIManager inventoryUI = (InventoryUIManager)target;
+
             // Apply changes to inventory display.
             inventoryUI.UpdateInventoryUI();
 
             // Mark object as dirty.
             EditorUtility.SetDirty(inventoryUI);
+
+            needToUpdate = false;
         }
     }
 }

@@ -11,6 +11,7 @@ public class AddItem : MonoBehaviour
 
     void Start()
     {
+        if(InventoryController.instance != null)
         InventoryController.instance.AddItem(inventory, item, amount);
     }
 }
