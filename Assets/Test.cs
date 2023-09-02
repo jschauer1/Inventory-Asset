@@ -59,6 +59,7 @@ internal class Test : MonoBehaviour
     // Update is called once per frame
     public void RemoveItem(InventoryItem itemToRemove)
     {
+        Debug.Log(itemToRemove);
         InventoryController.instance.RemoveItem(itemToRemove.GetInventory(),itemToRemove);
     }
     public void TestRemoveItem(int pos)

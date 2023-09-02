@@ -93,7 +93,7 @@ public class Slot : MonoBehaviour, IPointerClickHandler
     }
     public void OnPointerClick(PointerEventData eventData)
     {
-        inventoryUIManager.GetComponent<InventoryUIManager>().SetHightlighted(gameObject);
+        inventoryUIManager.GetComponent<InventoryUIManager>().SetSelected(gameObject);
     }
     public void SetTextSize(float size)
     {
@@ -134,6 +134,10 @@ public class Slot : MonoBehaviour, IPointerClickHandler
     public Image GetSlotImage()
     {
         return slotImage;
+    }
+    public void SetSlotImage(Image newImage)
+    {
+        slotImage = newImage;
     }
     public GameObject GetSlotChildInstance()
     {

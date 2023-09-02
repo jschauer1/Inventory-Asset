@@ -13,14 +13,14 @@ internal class InventoryUIReact : Editor
         // Draw default inspector content.
         DrawDefaultInspector();
 
-        // Check if anything was changed.
-        if (EditorGUI.EndChangeCheck())
+        // Check if anything was changed and if there's no active GUI control.
+        if (EditorGUI.EndChangeCheck() && GUIUtility.hotControl == 0)
         {
             needToUpdate = true;
         }
 
-        // If any changes in the inspector.
-        if (needToUpdate)
+        // If any changes in the inspector and no active GUI control.
+        if (needToUpdate && GUIUtility.hotControl == 0)
         {
             // Reference to the InventoryUI script.
             InventoryUIManager inventoryUI = (InventoryUIManager)target;

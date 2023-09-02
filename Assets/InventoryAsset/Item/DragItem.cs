@@ -103,9 +103,11 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
     {
         Slot slot = result.gameObject.GetComponent<Slot>();
         if(slot.GetInventoryUI())
-        if (slot.GetItem().GetIsNull() &&slot.GetInventoryUI().GetInventory().CheckAcceptance(item.GetItemType()))
+        if ((slot.GetItem().GetIsNull()
+           || (!slot.GetItem().GetIsNull()) && (slot.GetItem().GetItemType() == item.GetItemType()) && (slot.GetItem().GetAmount() + item.GetAmount()) < slot.GetItem().GetItemStackAmount())
+           &&slot.GetInventoryUI().GetInventory().CheckAcceptance(item.GetItemType()))
         {
-            InventoryController.instance.AddItemSlot(slot.GetInventoryUI().GetInventoryName(), item, slot.GetPosition());
+            InventoryController.instance.AddItemPos(slot.GetInventoryUI().GetInventoryName(), item, slot.GetPosition());
             Destroy(gameObject);
         }
         else
@@ -119,7 +121,7 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
     /// </summary>
     private void ReturnToOriginalPosition()
     {
-        InventoryController.instance.AddItemSlot(CurrentSlot.GetInventoryUI().GetInventoryName(), item, CurrentSlot.GetPosition());
+        InventoryController.instance.AddItemPos(CurrentSlot.GetInventoryUI().GetInventoryName(), item, CurrentSlot.GetPosition());
         Destroy(gameObject);
     }
 

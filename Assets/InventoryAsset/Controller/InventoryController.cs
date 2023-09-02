@@ -38,6 +38,7 @@ public class InventoryController : MonoBehaviour
     [Space(10)] // Add some space
 
     [Header("========[ Items Setup ]========")]
+    [Header("NOTE: All changes to items must be made here")]
     [Tooltip("Add templates for each accepted item.")]
     [SerializeField]
     public List<ItemInitializer> items; // Accepted items to add to the inventory.
@@ -232,62 +233,92 @@ public class InventoryController : MonoBehaviour
     /// expected inventory and adding a deep copy of the expected item and adding into the lowest unused possition in the <see cref="Inventory.GetList()"/>
     /// uses <see cref="Inventory.AddItem(InventoryItem)"/>.
     /// </summary>
-    public void AddItem(string inventoryName, string itemType, int amount = 1)
+    public void AddItemPos(string inventoryName, InventoryItem itemType, int position)
     {
-
-        if(inventoryManager.ContainsKey(inventoryName))
+        if (!(TestInventoryDict(inventoryName)))
         {
-            Inventory inventory = inventoryManager[inventoryName];
-            if (itemManager.ContainsKey(itemType))
-            {
-                InventoryItem item = itemManager[itemType];
-                inventory.AddItem(item, amount);
-
-            }
-            else
-            {
-                Debug.LogError("No Initialized Item with item Type: " + itemType);
-
-            }
+            return;
         }
-        else
+        if (itemType.GetIsNull())
         {
-            Debug.LogError("No Initialized Inventory with Name: " + inventoryName);
+            Debug.LogError("Cannot add null item");
+            return;
         }
-
-    }
-    public void AddItemSlot(string inventoryName, InventoryItem itemType, int position)
-    {
         Inventory inventory = inventoryManager[inventoryName];
-        InventoryItem item = itemType;
-        inventory.AddItemSlot(position, item);
+        inventory.AddItemPos(position, itemType);
     }
     /// <summary>
-    /// Addits a new item to a specified inventory, in a specified location. Uses <see cref="Inventory.AddItem(InventoryItem, int)/>
+    /// Addits a new item to a specified inventory, in a specified location. Uses <see cref="Inventory.AddItemLinearly(InventoryItem, int)/>
     /// </summary>
     public void AddItemPos(string inventoryName, string itemType, int position, int amount = 1)
     {
+        if(!(TestInventoryDict(inventoryName) && TestItemDict(itemType)))
+        {
+            return;
+        }
         Inventory inventory = inventoryManager[inventoryName];
         InventoryItem item = new InventoryItem(itemManager[itemType], amount);
-        inventory.AddItemSlot(position, item);
+        inventory.AddItemPos(position, item);
     }
     public void AddItemLinearly(string inventoryName, string itemType, int amount = 1)
     {
+        if (!(TestInventoryDict(inventoryName) && TestItemDict(itemType)))
+        {
+            return;
+        }
         Inventory inventory = inventoryManager[inventoryName];
         InventoryItem item = new InventoryItem(itemManager[itemType], amount);
-        inventory.AddItem(item);
+        inventory.AddItemLinearly(item);
     }
 
     public void RemoveItemPos(string inventoryName, int position, int amount)
     {
+        if (!(TestInventoryDict(inventoryName)))
+        {
+            return;
+        }
         Inventory inventory = inventoryManager[inventoryName];
         inventory.RemoveItemInPosition(position, amount);
 
     }
     public void RemoveItem(string inventoryName, InventoryItem item, int amount = 1)
     {
+        if (!(TestInventoryDict(inventoryName)))
+        {
+            return;
+        }
+        if (item.GetIsNull())
+        {
+            Debug.LogError("Cannot remove null item");
+            return;
+        }
+
         Inventory inventory = inventoryManager[inventoryName];
         inventory.RemoveItemInPosition(item, amount);
+    }
+    private bool TestInventoryDict(string inventoryName)
+    {
+        if (inventoryManager.ContainsKey(inventoryName))
+        {
+            return true;
+        }
+        else
+        {
+            Debug.LogError("No existing inventory with name: " + inventoryName);
+            return false;
+        }
+    }
+    private bool TestItemDict(string itemType)
+    {
+        if (itemManager.ContainsKey(itemType))
+        {
+            return true;
+        }
+        else
+        {
+            Debug.LogError("No existing item with name: " + itemType);
+            return false;
+        }
     }
     /// <summary>
     /// This is a debug function used to reset all lists. This will delete any all existing inventories in the scnene
@@ -427,7 +458,7 @@ public class InventoryController : MonoBehaviour
                     {
                         InventoryItem copyItem = itemManager[item.name];
                         InventoryItem newItem = new InventoryItem(copyItem, item.amount);
-                        AddItemSlot(pair.Key, newItem, item.position);
+                        AddItemPos(pair.Key, newItem, item.position);
                     }
                 }
             }

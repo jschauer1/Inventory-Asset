@@ -128,4 +128,17 @@ public class InventoryItem
     {
         return inventory;
     }
+    public override string ToString()
+    {
+        string result = $@"
+        ItemType: {itemType}
+        Inventory: {inventory}
+        Item Position: {position}
+        Item Amount: {amount}
+        Max Item Amount: {maxStackAmount}";
+        return result;
+
+
+
+    }
 }

@@ -127,7 +127,7 @@ public class Inventory
     /// <summary>
     /// Adds an item to a specified position, updating the <see cref="itemPositions"/> for efficient tracking of the items
     /// </summary>
-    public void AddItemSlot(int index,InventoryItem item)
+    public void AddItemPos(int index,InventoryItem item)
     {
         if (inventoryList == null)
         {
@@ -149,21 +149,33 @@ public class Inventory
             Debug.LogWarning("Item Acceptance is false. Overruling and adding item.");
         }
         InventoryItem newItem = new InventoryItem(item, item.GetAmount());
-
-        if (inventoryList[index].GetIsNull())
+        InventoryItem curItem = inventoryList[index];
+        newItem.SetPosition(index);
+        newItem.SetInventory(inventoryName);
+        if (curItem.GetIsNull())
         {
-            Debug.Log("here");
-            inventoryList[index] = item;
+            inventoryList[index] = newItem;
             AddItemPosDict(newItem, index);
 
             InventoryUIManagerInstance.UpdateSlot(index);
+        }
+        else
+        {
+            if(curItem.GetItemType() == newItem.GetItemType())
+            {
+                if(curItem.GetAmount() + newItem.GetAmount() < curItem.GetItemStackAmount())
+                {
+                    curItem.SetAmount(curItem.GetAmount() + newItem.GetAmount());
+                    InventoryUIManagerInstance.UpdateSlot(index);
+                }
+            }
         }
     }
     /// <summary>
     /// Takes an item as input
     /// Adds the item at the lowest possible inventory location, adding it into the <see cref="itemPositions"/> to allow for efficient tracking of the inventory items
     /// </summary>
-    public void AddItem(InventoryItem item, int amount = 1)
+    public void AddItemLinearly(InventoryItem item, int amount = 1)
     {
         if (!CheckAcceptance(item.GetItemType()))
         {
@@ -199,9 +211,11 @@ public class Inventory
 
             if (inventoryList[i].GetIsNull())
             {
-
                 InventoryItem newItem = new InventoryItem(item, amount);
-                inventoryList[i] = item;
+                newItem.SetPosition(i);
+                Debug.Log(inventoryName);
+                newItem.SetInventory(inventoryName);
+                inventoryList[i] = newItem;
                 AddItemPosDict(newItem, i);
                 break;
             }
@@ -211,8 +225,6 @@ public class Inventory
     {
         if (!item.GetIsNull())
         {
-            item.SetPosition(pos);
-            item.SetInventory(inventoryName);
             if (!itemPositions.ContainsKey(item.GetItemType()))
             {
                 itemPositions.Add(item.GetItemType(), new List<int>() { pos });
