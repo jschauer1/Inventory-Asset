@@ -40,7 +40,7 @@ public class Inventory
     /// <summary>
     /// Assigns essential variables for the Inventory
     /// </summary>
-    public Inventory(GameObject InventoryUIManager,string name,int size, bool saveInventory)
+    public Inventory(GameObject InventoryUIManager,string name,int size)
     {
         this.InventoryUIManager = InventoryUIManager;
         this.inventoryName = name;
@@ -48,7 +48,6 @@ public class Inventory
         this.size = size;
         FillInventory(size);
         InventoryUIManagerInstance = InventoryUIManager.GetComponent<InventoryUIManager>();
-        this.saveInventory = saveInventory;
     }
     /// <summary>
     /// Initializes aspects of the inventory that do not transfer into play mode.
@@ -193,18 +192,18 @@ public class Inventory
                     return;
                 }
             }
-            AddNewItem(item, amount);
+            AddLinearly(item, amount);
         }
         else
         {
-            AddNewItem(item, amount);
+            AddLinearly(item, amount);
         }
 
     }
     /// <summary>
     /// Adds a new item in the lowest possible inventoryList position
     /// </summary>
-    private void AddNewItem(InventoryItem item, int amount = 1)
+    private void AddLinearly(InventoryItem item, int amount = 1)
     {
         for (int i = 0; i < inventoryList.Count; i++)
         {
@@ -213,7 +212,6 @@ public class Inventory
             {
                 InventoryItem newItem = new InventoryItem(item, amount);
                 newItem.SetPosition(i);
-                Debug.Log(inventoryName);
                 newItem.SetInventory(inventoryName);
                 inventoryList[i] = newItem;
                 AddItemPosDict(newItem, i);
@@ -221,6 +219,9 @@ public class Inventory
             }
         }
     }
+    /// <summary>
+    /// Adds itemstypes into <see cref="itemPositions"/> and tracks their positions for quick add/remove and count functions.
+    /// </summary>
     private void AddItemPosDict(InventoryItem item, int pos, bool invokeEnterExit = true)
     {
         if (!item.GetIsNull())
@@ -329,6 +330,26 @@ public class Inventory
                 Debug.LogWarning("ItemPositions Dictitonary Setup Incorrectly");
             }
         }
+    }
+    public int Count(string itemType)
+    {
+        if(itemType == null)
+        {
+            Debug.LogError("String null. Returning 0");
+            return 0;
+        }
+        if(!itemPositions.ContainsKey(itemType))
+        {
+            Debug.LogError("ItemPositions doesn contain itemType: " + itemType + ". Returning 0");
+            return 0;
+        }
+        List<int> items = itemPositions[itemType];
+        int itemsTotal = 0;
+        foreach(int item in items)
+        {
+            itemsTotal+= inventoryList[item].GetAmount();  
+        }
+        return itemsTotal;
     }
     /// <summary>
     /// Fills the inventory with empty items 

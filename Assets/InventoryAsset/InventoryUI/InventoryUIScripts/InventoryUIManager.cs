@@ -413,6 +413,38 @@ public class InventoryUIManager : MonoBehaviour
             previouslyHighlighted = slot;
         }
     }
+    public void Highlight(GameObject slot)
+    {
+        Slot slotInstance = slot.GetComponent<Slot>();
+        UnHighlight();
+        if (SlotImage.selected == null)
+        {
+            slotInstance.GetSlotImage().color = Color.grey;
+        }
+        else
+        {
+            slotInstance.GetComponent<Image>().sprite = SlotImage.selected;
+        }
+        previouslyHighlighted = slot;
+        
+    }
+    public void UnHighlight()
+    {
+        if(previouslyHighlighted != null)
+        {
+            Slot prevSlotInstance = previouslyHighlighted.GetComponent<Slot>();
+
+            if (SlotImage.selected == null)
+            {
+                prevSlotInstance.GetSlotImage().color = prevSlotInstance.GetColor();
+            }
+            else
+            {
+                previouslyHighlighted.GetComponent<Image>().sprite = SlotImage.regular;
+            }
+
+        }
+    }
     /// <summary>
     /// Uses <see cref="SetSelected"/>  to highlight a user defined slot on the press of a user defined button.
     /// </summary>

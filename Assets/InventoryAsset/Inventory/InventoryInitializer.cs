@@ -24,23 +24,6 @@ public class InventoryInitializer
     [SerializeField]
     private int col;
 
-    [Header("========[ Inventory Interactivity ]========")]
-
-    [Tooltip("Determines if items within the inventory can be dragged.")]
-    [SerializeField]
-    private bool draggable;
-
-    [Tooltip("Determines if items within the inventory can be highlighted when selected.")]
-    [SerializeField]
-    private bool highlightable;
-
-    [Tooltip("Enable saving the state of the inventory.")]
-    [SerializeField]
-    private bool SaveInventory;
-
-    [Tooltip("Character key that toggles the visibility/enabling of the inventory.")]
-    [SerializeField]
-    private List<char> ToggleVisabilityOnPress;
     [SerializeField, HideInInspector]
     private bool initialized = false;
     public string GetInventoryName()
@@ -54,14 +37,6 @@ public class InventoryInitializer
     public int GetCol()
     {
         return col;
-    }
-    public bool GetHightlightable()
-    {
-        return highlightable;
-    }
-    public bool GetDraggable()
-    {
-        return draggable;
     }
     public void SetRow(int row)
     {
@@ -82,14 +57,6 @@ public class InventoryInitializer
     public void SetInitialized(bool initialized)
     {
         this.initialized = initialized;
-    }
-    public List<char> GetToggle()
-    {
-        return ToggleVisabilityOnPress;
-    }
-    public bool GetSaveInventory()
-    {
-        return SaveInventory;
     }
     public override int GetHashCode()
     {

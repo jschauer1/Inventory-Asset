@@ -41,7 +41,11 @@ internal class Test : MonoBehaviour
         {
             TestAddItemPos();
         }
-        if(Input.GetKeyDown(KeyCode.Alpha0))
+        if (Input.GetKeyDown(KeyCode.Alpha6))
+        {
+            TestCountItems();
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha0))
         {
             PrintTests();
         }
@@ -53,18 +57,23 @@ internal class Test : MonoBehaviour
         Debug.Log("3. Test Inventory Toggling");
         Debug.Log("4. Test Add Item Linearly");
         Debug.Log("5. Test Add Item At Position");
+        Debug.Log("6. Test Count Items");
         Debug.Log("0. Print All Tests");
              
     }
     // Update is called once per frame
+    public void TestCountItems()
+    {
+       int count = InventoryController.instance.CountItems(inventoryName, testItem);
+       Debug.Log(testItem + ": " + count);
+    }
     public void RemoveItem(InventoryItem itemToRemove)
     {
-        Debug.Log(itemToRemove);
         InventoryController.instance.RemoveItem(itemToRemove.GetInventory(),itemToRemove);
     }
     public void TestRemoveItem(int pos)
     {
-        InventoryController.instance.RemoveItemPos(inventoryName, pos, testAmount);
+        InventoryController.instance.RemoveItemPos(inventoryName, pos, 11);
     }
     public void TestInventoryDictPos()
     {

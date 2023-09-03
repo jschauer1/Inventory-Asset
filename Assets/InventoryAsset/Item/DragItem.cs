@@ -20,12 +20,14 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
     /// The text UI element for displaying item information.
     /// </summary>
     [SerializeField] private TextMeshProUGUI text;
-
+    GameObject prevslot;
     /// <summary>
     /// Initializes the CurrentSlot on start.
     /// </summary>
     private void Start()
     {
+        prevslot = null;
+
         CurrentSlot = transform.parent.GetComponent<Slot>();
     }
 
@@ -35,13 +37,38 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
     public void OnDrag(PointerEventData eventData)
     {
         if (Draggable()) return;
-
         Canvas canvas = InventoryController.instance.GetUI().GetComponent<Canvas>();
         transform.parent.gameObject.transform.SetSiblingIndex(100);
         Vector2 position;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
             (RectTransform)canvas.transform, eventData.position, canvas.worldCamera, out position);
         transform.position = canvas.transform.TransformPoint(position);
+
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventData, results);
+        bool foundSlot = false;
+
+        foreach (RaycastResult result in results)
+        {
+            if (result.gameObject.CompareTag("Slot"))
+            {
+                prevslot = result.gameObject;
+                Slot slot = result.gameObject.GetComponent<Slot>();
+                if(slot.GetItem().GetIsNull())
+                {
+                    slot.GetInventoryUI().Highlight(result.gameObject);
+                    foundSlot = true;
+                }
+
+                break;
+            }
+        }
+
+        if (!foundSlot)
+        {
+            if(prevslot != null)
+                prevslot.GetComponent<Slot>().GetInventoryUI().UnHighlight();
+        }
     }
 
     /// <summary>
@@ -108,6 +135,7 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
            &&slot.GetInventoryUI().GetInventory().CheckAcceptance(item.GetItemType()))
         {
             InventoryController.instance.AddItemPos(slot.GetInventoryUI().GetInventoryName(), item, slot.GetPosition());
+            slot.GetInventoryUI().UnHighlight();
             Destroy(gameObject);
         }
         else
@@ -122,6 +150,7 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
     private void ReturnToOriginalPosition()
     {
         InventoryController.instance.AddItemPos(CurrentSlot.GetInventoryUI().GetInventoryName(), item, CurrentSlot.GetPosition());
+        CurrentSlot.GetInventoryUI().UnHighlight();
         Destroy(gameObject);
     }
 

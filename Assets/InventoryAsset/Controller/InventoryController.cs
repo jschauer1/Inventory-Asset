@@ -164,17 +164,13 @@ public class InventoryController : MonoBehaviour
 
                 string inventoryName = initializer.GetInventoryName();
                 int InventorySize = initializer.GetRow() * initializer.GetCol();
-                Inventory curInventory = new Inventory(tempinventoryUI,inventoryName, InventorySize,initializer.GetSaveInventory());
+                Inventory curInventory = new Inventory(tempinventoryUI,inventoryName, InventorySize);
 
                 inventoryManager.Add(inventoryName, curInventory);
 
                 InventoryUIManager inventoryUI = tempinventoryUI.GetComponent<InventoryUIManager>();
                 inventoryUI.SetVarsOnInit();
-                inventoryUI.SetSave(initializer.GetSaveInventory());
-                inventoryUI.SetInvToggle(initializer.GetToggle());
                 inventoryUI.SetInventory(ref curInventory);
-                inventoryUI.SetHighlightable(initializer.GetHightlightable());
-                inventoryUI.SetDraggable(initializer.GetDraggable());
                 inventoryUI.SetRowCol(initializer.GetRow(), initializer.GetCol());
                 inventoryUI.SetInventoryName(initializer.GetInventoryName());
                 inventoryUI.UpdateInventoryUI();
@@ -298,6 +294,11 @@ public class InventoryController : MonoBehaviour
     }
     private bool TestInventoryDict(string inventoryName)
     {
+        if(inventoryName == null)
+        {
+            Debug.LogError("Inventory name is null");
+            return false;
+        }
         if (inventoryManager.ContainsKey(inventoryName))
         {
             return true;
@@ -310,6 +311,11 @@ public class InventoryController : MonoBehaviour
     }
     private bool TestItemDict(string itemType)
     {
+        if (itemType == null)
+        {
+            Debug.LogError("Itemtype is null");
+            return false;
+        }
         if (itemManager.ContainsKey(itemType))
         {
             return true;
@@ -369,6 +375,15 @@ public class InventoryController : MonoBehaviour
                 }
             }
         }
+    }
+    public int CountItems(string inventoryName, string itemType)
+    {
+        if (!(TestInventoryDict(inventoryName) && TestItemDict(itemType)))
+        {
+            return 0;
+        }
+        Inventory inventory = inventoryManager[inventoryName];
+        return inventory.Count(itemType);
     }
     /// <summary>
     /// runs setup test sweet, returns false if there is a setup error.
@@ -476,7 +491,7 @@ public class InventoryController : MonoBehaviour
 
         tempinventoryUI.transform.position = instantiaterPos.position;
 
-        Inventory curInventory = new Inventory(tempinventoryUI, inventoryName, col * row, saveInventory);
+        Inventory curInventory = new Inventory(tempinventoryUI, inventoryName, col * row);
         inventoryManager.Add(inventoryName, curInventory);
 
         InventoryUIManager inventoryUI = tempinventoryUI.GetComponent<InventoryUIManager>();

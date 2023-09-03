@@ -1360,7 +1360,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -1625771724985160219, guid: f1ed810c400ae5645a48e3a2b33c998f, type: 3}
       propertyPath: amount
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -1625771724985160219, guid: f1ed810c400ae5645a48e3a2b33c998f, type: 3}
       propertyPath: inventory
@@ -1429,7 +1429,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -1625771724985160219, guid: f1ed810c400ae5645a48e3a2b33c998f, type: 3}
       propertyPath: amount
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -1625771724985160219, guid: f1ed810c400ae5645a48e3a2b33c998f, type: 3}
       propertyPath: inventory
@@ -3701,6 +3701,10 @@ PrefabInstance:
     - target: {fileID: 3441577039228690664, guid: af13da878eeccb041983d84b7857abd4, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3441577039228690665, guid: af13da878eeccb041983d84b7857abd4, type: 3}
+      propertyPath: inventoryName
+      value: Hotbar
       objectReference: {fileID: 0}
     - target: {fileID: 3441577039228690667, guid: af13da878eeccb041983d84b7857abd4, type: 3}
       propertyPath: m_Name
