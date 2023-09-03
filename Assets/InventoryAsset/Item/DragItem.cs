@@ -3,27 +3,25 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-
+//Author: Jaxon Schauer
+/// <summary>
+/// Controls the dragging of an item.
+/// </summary>
 public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
 {
-    /// <summary>
-    /// The current slot associated with the drag item.
-    /// </summary>
+    /// The current slot associated with the drag item
     private Slot CurrentSlot;
 
-    /// <summary>
-    /// The inventory item being dragged.
-    /// </summary>
+    /// The inventory item being dragged
     private InventoryItem item;
 
-    /// <summary>
-    /// The text UI element for displaying item information.
-    /// </summary>
-    [SerializeField] private TextMeshProUGUI text;
+    /// The text UI element for displaying item information
+    [SerializeField] 
+    private TextMeshProUGUI text;
+
+    /// The text UI element for displaying item information
     GameObject prevslot;
-    /// <summary>
-    /// Initializes the CurrentSlot on start.
-    /// </summary>
+    /// Initializes the CurrentSlot on start
     private void Start()
     {
         prevslot = null;
@@ -32,7 +30,7 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
     }
 
     /// <summary>
-    /// Handles the drag event.
+    /// Handles the drag event
     /// </summary>
     public void OnDrag(PointerEventData eventData)
     {
@@ -54,7 +52,7 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
             {
                 prevslot = result.gameObject;
                 Slot slot = result.gameObject.GetComponent<Slot>();
-                if(slot.GetItem().GetIsNull())
+                if(slot.GetItem().GetIsNull() && slot.GetInventoryUI().GetInventory().CheckAcceptance(item.GetItemType()))
                 {
                     slot.GetInventoryUI().Highlight(result.gameObject);
                     foundSlot = true;
@@ -67,12 +65,18 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
         if (!foundSlot)
         {
             if(prevslot != null)
-                prevslot.GetComponent<Slot>().GetInventoryUI().UnHighlight();
+            {
+                prevslot.GetComponent<Slot>().GetInventoryUI().UnHighlight(prevslot);
+                prevslot.GetComponent<Slot>().GetInventoryUI().ResetHighlight();
+
+
+            }
+
         }
     }
 
     /// <summary>
-    /// Handles the beginning of the drag event.
+    /// Handles the beginning of the drag event
     /// </summary>
     public void OnBeginDrag(PointerEventData eventData)
     {
@@ -89,7 +93,7 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
     }
 
     /// <summary>
-    /// Handles the end of the drag event.
+    /// Handles the end of the drag event
     /// </summary>
     public void OnEndDrag(PointerEventData eventData)
     {
@@ -124,7 +128,7 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
     }
 
     /// <summary>
-    /// Processes the slot result after dragging.
+    /// Processes the slot result after dragging
     /// </summary>
     private void HandleSlot(RaycastResult result)
     {
@@ -135,7 +139,8 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
            &&slot.GetInventoryUI().GetInventory().CheckAcceptance(item.GetItemType()))
         {
             InventoryController.instance.AddItemPos(slot.GetInventoryUI().GetInventoryName(), item, slot.GetPosition());
-            slot.GetInventoryUI().UnHighlight();
+            slot.GetInventoryUI().UnHighlight(result.gameObject);
+            prevslot.GetComponent<Slot>().GetInventoryUI().ResetHighlight();
             Destroy(gameObject);
         }
         else
@@ -145,17 +150,17 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
     }
 
     /// <summary>
-    /// Returns the item to its original position if not placed in a valid slot.
+    /// Returns the item to its original position if not placed in a valid slot
     /// </summary>
     private void ReturnToOriginalPosition()
     {
         InventoryController.instance.AddItemPos(CurrentSlot.GetInventoryUI().GetInventoryName(), item, CurrentSlot.GetPosition());
-        CurrentSlot.GetInventoryUI().UnHighlight();
+        CurrentSlot.GetInventoryUI().UnHighlight(CurrentSlot.gameObject);
         Destroy(gameObject);
     }
 
     /// <summary>
-    /// Checks if the item is draggable.
+    /// Checks if the item is draggable
     /// </summary>
     private bool Draggable()
     {
@@ -163,7 +168,7 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
     }
 
     /// <summary>
-    /// Sets the inventory item for the drag item.
+    /// Sets the inventory item for the drag item
     /// </summary>
     public void SetItem(InventoryItem newItem)
     {
@@ -171,7 +176,7 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
     }
 
     /// <summary>
-    /// Updates the text UI based on the item's properties.
+    /// Updates the text UI based on the item's properties
     /// </summary>
     public void SetText()
     {
@@ -184,37 +189,39 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
             }
         }
     }
+
     /// <summary>
-    /// Sets the offset for the text position.
+    /// Sets the offset for the text position
     /// </summary>
     public void SetTextPositionOffset(Vector3 offset)
     {
         text.gameObject.transform.position += offset;
     }
+
     /// <summary>
-    /// Sets the font size for the text UI.
+    /// Sets the font size for the text UI
     /// </summary>
     public void SetTextSize(float size)
     {
         text.fontSize = size;
     }
+
     public void SetImageSize(Vector2 size)
     {
         RectTransform imageRect = GetComponent<RectTransform>();
         imageRect.sizeDelta = size;
     }
 
-    /// <summary>
-    /// Gets the font size of the text UI.
-    /// </summary>
     public float GetTextSize()
     {
         return text.fontSize;
     }
+
     public Vector2 GetTextPosition()
     {
         return text.transform.localPosition;
     }
+
     public void SetTextPosition(Vector2 textposition)
     {
         text.transform.localPosition = textposition;

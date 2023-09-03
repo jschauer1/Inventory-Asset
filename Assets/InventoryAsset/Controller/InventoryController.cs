@@ -72,8 +72,6 @@ public class InventoryController : MonoBehaviour
 
     public static InventoryController instance; // Shared instance of the InventoryController to enforce only one being created.
 
-    // TODO: rename this
-
 
     /// <summary>
     /// Check whether an instance of InventoryController has already been created. If it has, delete this instance.
@@ -81,6 +79,11 @@ public class InventoryController : MonoBehaviour
     /// </summary>
     private void Awake()
     {
+        if(instance != null)
+        {
+            Destroy(gameObject);
+            Debug.LogError("There should only be one inventory controller in the scene");
+        }
         if (iUnderstandTheSetup)
         {
             instance = this;
@@ -95,6 +98,7 @@ public class InventoryController : MonoBehaviour
         AllignDictionaries();
         InitializeItems();
     }
+
     /// <summary>
     /// Loads any saved inventories on start <see cref="LoadSave"/>
     /// </summary>
@@ -102,6 +106,7 @@ public class InventoryController : MonoBehaviour
     {
         LoadSave();
     }
+
     /// <summary>
     /// Constantly checks for input to pass to HighLightOnButtonPress
     /// </summary>
@@ -129,6 +134,7 @@ public class InventoryController : MonoBehaviour
         UpdateInventoryTracker();
         InitializeItems();
     }
+
     /// <summary>
     /// Handles the prevInventoryTracker list, allowing it to track the changes made from the previous initialization and stopping it from initializing
     /// or deleting the unecessary information in the functions running of <see cref="InitializeNewInventories"/>  
@@ -144,6 +150,7 @@ public class InventoryController : MonoBehaviour
             prevInventoryTracker.Add(InitilizerCopy);
         }
     }
+
     /// <summary>
     /// Initializes any new inventories, giving the necessary information to the <see cref="Inventory"/> class 
     /// and the <see cref="InventoryUIManager"/>, allowing them to work together displaying and maintaining the information of the inventory
@@ -181,6 +188,7 @@ public class InventoryController : MonoBehaviour
             inObjects.GetComponent<InventoryUIManager>().UpdateInventoryUI();
         }
     }
+
     /// <summary>
     /// Initializes any new inventories, giving the necessary information to the <see cref="Inventory"/> class 
     /// and the <see cref="InventoryUIManager"/>, allowing them to work together displaying and maintaining the information of the inventory
@@ -212,6 +220,7 @@ public class InventoryController : MonoBehaviour
 
         }
     }
+
     /// <summary>
     /// Initializes the items into <see cref="itemManager"/>, allowing for the inventory to make deep copies of the items when needed
     /// </summary>
@@ -224,6 +233,7 @@ public class InventoryController : MonoBehaviour
             itemManager.Add(item.GetItemType(), newItem);
         }
     }
+
     /// <summary>
     /// Takes in input of two strings, one that is inputted into the <see cref="inventoryManager"/> and a reference to an item in <see cref="itemManager"/>, passing the item to the 
     /// expected inventory and adding a deep copy of the expected item and adding into the lowest unused possition in the <see cref="Inventory.GetList()"/>
@@ -243,8 +253,9 @@ public class InventoryController : MonoBehaviour
         Inventory inventory = inventoryManager[inventoryName];
         inventory.AddItemPos(position, itemType);
     }
+
     /// <summary>
-    /// Addits a new item to a specified inventory, in a specified location. Uses <see cref="Inventory.AddItemLinearly(InventoryItem, int)/>
+    /// Adds a new item to a specified inventory, in a specified location. Uses <see cref="Inventory.AddItemPos(int, InventoryItem)"/>
     /// </summary>
     public void AddItemPos(string inventoryName, string itemType, int position, int amount = 1)
     {
@@ -256,6 +267,10 @@ public class InventoryController : MonoBehaviour
         InventoryItem item = new InventoryItem(itemManager[itemType], amount);
         inventory.AddItemPos(position, item);
     }
+
+    /// <summary>
+    /// Adds a new item to a specified inventory, in the lowest possible location. Uses <see cref="Inventory.AddItemLinearly(InventoryItem, int)/>
+    /// </summary>
     public void AddItemLinearly(string inventoryName, string itemType, int amount = 1)
     {
         if (!(TestInventoryDict(inventoryName) && TestItemDict(itemType)))
@@ -267,6 +282,9 @@ public class InventoryController : MonoBehaviour
         inventory.AddItemLinearly(item);
     }
 
+    /// <summary>
+    /// Removes items from a specific index of <see cref="Inventory.inventoryList"/>
+    /// </summary>
     public void RemoveItemPos(string inventoryName, int position, int amount)
     {
         if (!(TestInventoryDict(inventoryName)))
@@ -277,6 +295,10 @@ public class InventoryController : MonoBehaviour
         inventory.RemoveItemInPosition(position, amount);
 
     }
+
+    /// <summary>
+    /// Removes the item passed into the function
+    /// </summary>
     public void RemoveItem(string inventoryName, InventoryItem item, int amount = 1)
     {
         if (!(TestInventoryDict(inventoryName)))
@@ -292,6 +314,10 @@ public class InventoryController : MonoBehaviour
         Inventory inventory = inventoryManager[inventoryName];
         inventory.RemoveItemInPosition(item, amount);
     }
+
+    /// <summary>
+    /// Checks the input string exist in the <see cref="inventoryManager"/> and is not null.
+    /// </summary>
     private bool TestInventoryDict(string inventoryName)
     {
         if(inventoryName == null)
@@ -309,6 +335,10 @@ public class InventoryController : MonoBehaviour
             return false;
         }
     }
+
+    /// <summary>
+    /// Checks the input string exist in the <see cref="itemManager"/> and is not null.
+    /// </summary>
     private bool TestItemDict(string itemType)
     {
         if (itemType == null)
@@ -326,8 +356,9 @@ public class InventoryController : MonoBehaviour
             return false;
         }
     }
+
     /// <summary>
-    /// This is a debug function used to reset all lists. This will delete any all existing inventories in the scnene
+    /// This is a debug function used to reset all lists and dictionaries. This will delete all existing inventories in the scnene
     /// </summary>
     public void ResetInventory()
     {
@@ -346,6 +377,7 @@ public class InventoryController : MonoBehaviour
         inventoryUIDict.Clear();
         InventorySaveSystem.Reset();
     }
+
     /// <summary>
     /// This utilizes the serialized list allInventoryUI to setup the dictionaries <see cref="inventoryManager"/> and <see cref="EnableDisableDict"/>
     /// </summary>
@@ -376,6 +408,10 @@ public class InventoryController : MonoBehaviour
             }
         }
     }
+
+    /// <summary>
+    /// Counts the amount of items with the itemtype of the input string exist in the input inventory string
+    /// </summary>
     public int CountItems(string inventoryName, string itemType)
     {
         if (!(TestInventoryDict(inventoryName) && TestItemDict(itemType)))
@@ -385,9 +421,10 @@ public class InventoryController : MonoBehaviour
         Inventory inventory = inventoryManager[inventoryName];
         return inventory.Count(itemType);
     }
+
     /// <summary>
-    /// runs setup test sweet, returns false if there is a setup error.
-    /// </summary>
+    /// Adds the Toggle key from the given input char for a specific inventory 
+    /// </summary> 
     public void AddToggleKey(string InventoryName, char character)
     {
         if (EnableDisableDict.ContainsKey(character.ToString().ToLower()))
@@ -405,6 +442,10 @@ public class InventoryController : MonoBehaviour
             EnableDisableDict[character.ToString().ToLower()].Add(inventoryUIDict[InventoryName]);
         }
     }
+
+    /// <summary>
+    /// Removes the Toggle key from the given input char for a specific inventory 
+    /// </summary> 
     public void RemoveToggleKey(string InventoryName, char character)
     {
         if (EnableDisableDict.ContainsKey(character.ToString().ToLower()))
@@ -421,10 +462,11 @@ public class InventoryController : MonoBehaviour
             Debug.LogWarning("Given character is not attached to a InventoryUIManager");
         }
     }
-        /// <summary>
-        /// called by <see cref="Update"/> to check if a user given keyinput has been pressed, and if so disable/enable the inventory. 
-        /// </summary>
-        private void ToggleOnKeyInput()
+
+    /// <summary>
+    /// called by <see cref="Update"/> to check if a user given keyinput has been pressed, and if so disable/enable the inventory. 
+    /// </summary>
+    private void ToggleOnKeyInput()
     {
         if (Input.anyKeyDown)
         {
@@ -447,6 +489,7 @@ public class InventoryController : MonoBehaviour
             }
         }
     }
+
     /// <summary>
     /// Loads saved file on <see cref="Start"/> 
     /// </summary>
@@ -479,6 +522,7 @@ public class InventoryController : MonoBehaviour
             }
         }
     }
+
     /// <summary>
     /// Can be used to programatically create inventoryUI. This is a skeleton of what is likely needed. More customization is recommended for your situation.
     /// </summary>
@@ -516,6 +560,7 @@ public class InventoryController : MonoBehaviour
             
 
     }
+
     /// <summary>
     /// Tests that the inventories in allInventoryUI are correctly instantiated
     /// </summary>
@@ -523,19 +568,20 @@ public class InventoryController : MonoBehaviour
     {
         if(allInventoryUI.Count == 0 && Application.isPlaying)
         {
-            Debug.LogWarning("No InventoryUIManagers Detected. Ensure to initialize all inventories in editor mode. If Unexpected Try Unpacking InventoryController");
+            Debug.LogWarning("No InventoryUIManagers detected. Ensure to initialize all inventories in editor mode. If unexpected try unpacking InventoryController");
             return false;
         }
         foreach (GameObject inventories in allInventoryUI)
         {
             if (inventories == null)
             {
-                Debug.LogError("Inventories in allInventoryUI Are Null, Try hitting button \"Delete All Instantiated Objects\"");
+                Debug.LogError("Inventories in allInventoryUI are null, try unpacking InventoryController and hitting \"Delete All Instantiated Objects\" button");
                 return false;
             }
         }
         return true;
     }
+
     /// <summary>
     /// Checks the InventoryManagerUI exists in context
     /// </summary
@@ -548,6 +594,7 @@ public class InventoryController : MonoBehaviour
         }
         return true;
     }
+
     /// <summary>
     /// Checks there are no duplicate named inventories
     /// </summary
@@ -574,6 +621,7 @@ public class InventoryController : MonoBehaviour
         }
         return true;
     }
+
     /// <summary>
     /// Tests the UI object has been chosen
     /// </summary
@@ -586,6 +634,7 @@ public class InventoryController : MonoBehaviour
         }
         return true;
     }
+
     /// <summary>
     /// Test that an instance has been chosen
     /// </summary
@@ -593,11 +642,12 @@ public class InventoryController : MonoBehaviour
     {
         if (instance == null)
         {
-            Debug.LogError("Read Instructions and Click The I Understand The Setup Bool. Inventory Controller Destroyed");
+            Debug.LogError("Read instructions and click The I understand The setup bool. InventoryController destroyed");
             return false;
         }
         return true;
     }
+
     /// <summary>
     /// Test whether or not the inventory controller rhas the correct child object
     /// </summary
@@ -619,6 +669,7 @@ public class InventoryController : MonoBehaviour
             Debug.LogWarning("Inventory Controller Does Not Have Child Object with InventoryUIManager");
         }
     }
+
     public bool checkUI(GameObject obj)
     {
         if (inventoryUIDict.ContainsValue(obj))
@@ -627,22 +678,27 @@ public class InventoryController : MonoBehaviour
         }
         return false;
     }
+
     public Inventory GetInventory(string inventoryName)
     {
         return inventoryManager[inventoryName];
     }
+
     public InventoryItem GetItem(string inventoryName, int index)
     {
         return inventoryManager[inventoryName].InventoryGetItem(index);
     }
+
     public Transform GetUI()
     {
         return UI;
     }
+
     public List<ItemInitializer> GetItems()
     {
         return items;
     }
+
     private void OnDestroy()
     {
         InventorySaveSystem.SaveInventory(inventoryManager);

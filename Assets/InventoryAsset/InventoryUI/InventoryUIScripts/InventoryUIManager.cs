@@ -124,6 +124,7 @@ public class InventoryUIManager : MonoBehaviour
     private List<Vector2> slotsvec = new List<Vector2>();
     private Dictionary<Vector2, GameObject> slotPositionsVec = new Dictionary<Vector2, GameObject>();
     private Dictionary<int, GameObject> slotPos = new Dictionary<int, GameObject>();
+
     public void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
@@ -143,7 +144,12 @@ public class InventoryUIManager : MonoBehaviour
     private void Update()
     {
         HighLightOnButtonPress();
+        if(Input.GetKeyDown(KeyCode.Mouse0))
+        {
+            ResetHighlight();
+        }
     }
+
     /// <summary>
     /// Called only when Initialize Inventories is pressed
     /// </summary>
@@ -157,6 +163,7 @@ public class InventoryUIManager : MonoBehaviour
         ItemImageSizeFactor = new Vector2(slotChildRect.sizeDelta.x/slot.GetComponent<RectTransform>().sizeDelta.x, slotChildRect.sizeDelta.y/slot.GetComponent<RectTransform>().sizeDelta.y);
         textSize = slot.GetComponent<Slot>().GetSlotChildInstance().GetComponent<DragItem>().GetTextSize();
     }
+
     /// <summary>
     /// Checks if any meaningful variables have been changed and if so calls the functions, creating the expected UI
     /// </summary>
@@ -189,6 +196,7 @@ public class InventoryUIManager : MonoBehaviour
 
         }
     }
+
     /// <summary>
     /// Sets all the values to be checked for change in <see cref="CheckEditorChange"/> and resets any values that may cary over after a change
     /// </summary>
@@ -223,6 +231,7 @@ public class InventoryUIManager : MonoBehaviour
     {
         return true;
     }
+
     /// <summary>
     /// Aligns the background with the slots while account of other user based offsets in relationship to the background vs the slots
     /// </summary>
@@ -241,6 +250,7 @@ public class InventoryUIManager : MonoBehaviour
         rectTransform.sizeDelta = new Vector2((Mathf.Abs(backGroundArea.x) + backgroundBoarder.x), Mathf.Abs(backGroundArea.y) + backgroundBoarder.y);
         background.transform.position = new Vector2(transform.position.x + slotOffSetToBackground.x, transform.position.y+slotOffSetToBackground.y);
     }
+
     /// <summary>
     /// Creates all slots on the inventory UI, applying the slot gap and other offsets accordingly
     /// Adds the slots into dictionaries and lists to track them
@@ -280,6 +290,7 @@ public class InventoryUIManager : MonoBehaviour
             }
         }
     }
+
     /// <summary>
     /// Checks chosen StartPosition and uses <see cref="SetSlotOrder"/> to fill order each slot, counting in a understandable fashion
     /// </summary>
@@ -305,6 +316,7 @@ public class InventoryUIManager : MonoBehaviour
         }
 
     }
+
     /// <summary>
     /// Loads information into <see cref="Inventory"/> class about what items to accept or reject
     /// </summary>
@@ -377,9 +389,9 @@ public class InventoryUIManager : MonoBehaviour
             currentPos = new Vector2(currentPos.x + rowChange, startPosition.y); // Reset the horizontal position and move vertically
         }
     }
+
     /// <summary>
-    /// takes as input a Slot
-    /// Highlights said slot and deslects any other currently highlighted slots.
+    /// Sets slot selected calling <see cref="InventoryItem.Selected"/> when invoked
     /// </summary>
     public void SetSelected(GameObject slot)
     {
@@ -396,27 +408,21 @@ public class InventoryUIManager : MonoBehaviour
                     slotInstance.GetItem().Selected();
                     return;
                 }
-                previouslyHighlighted.GetComponent<Image>().sprite = SlotImage.regular;
-                prevSlotInstance.GetSlotImage().color = prevSlotInstance.GetColor();
+                UnHighlight(previouslyHighlighted);
             }
-            if (SlotImage.selected == null)
-            {
-                slotInstance.GetSlotImage().color = Color.grey;
-
-            }
-            else
-            {
-                slotInstance.GetComponent<Image>().sprite = SlotImage.selected;
-
-            }
+            Highlight(slot);
             slotInstance.GetItem().Selected();
             previouslyHighlighted = slot;
         }
     }
+
+    /// <summary>
+    /// Highlights the given slot and unhighlights the previous slot. Assigns selected image for slot or makes slot grey if selected image is null
+    /// </summary>
     public void Highlight(GameObject slot)
     {
         Slot slotInstance = slot.GetComponent<Slot>();
-        UnHighlight();
+        UnHighlight(previouslyHighlighted);
         if (SlotImage.selected == null)
         {
             slotInstance.GetSlotImage().color = Color.grey;
@@ -428,11 +434,15 @@ public class InventoryUIManager : MonoBehaviour
         previouslyHighlighted = slot;
         
     }
-    public void UnHighlight()
+
+    /// <summary>
+    /// UnHighlights slots, applying regular image for slots.
+    /// </summary>
+    public void UnHighlight(GameObject slot)
     {
-        if(previouslyHighlighted != null)
+        if(slot != null)
         {
-            Slot prevSlotInstance = previouslyHighlighted.GetComponent<Slot>();
+            Slot prevSlotInstance = slot.GetComponent<Slot>();
 
             if (SlotImage.selected == null)
             {
@@ -440,11 +450,21 @@ public class InventoryUIManager : MonoBehaviour
             }
             else
             {
-                previouslyHighlighted.GetComponent<Image>().sprite = SlotImage.regular;
+                slot.GetComponent<Image>().sprite = SlotImage.regular;
             }
 
         }
     }
+
+    /// <summary>
+    /// Resets the slot in rare cases where the previouslyhighlighted slot should be disregaurded
+    /// </summary>
+    public void ResetHighlight()
+    {
+        UnHighlight(previouslyHighlighted);
+        previouslyHighlighted = null;
+    }
+
     /// <summary>
     /// Uses <see cref="SetSelected"/>  to highlight a user defined slot on the press of a user defined button.
     /// </summary>
@@ -460,6 +480,7 @@ public class InventoryUIManager : MonoBehaviour
             }
         }
     }
+
     /// <summary>
     /// Defines the <see cref="slotPress"/> dictionary, allowing for <see cref="HighLightOnButtonPress"/> to efficiently detect a button click
     /// </summary>
@@ -478,6 +499,10 @@ public class InventoryUIManager : MonoBehaviour
             }
         }
     }
+
+    /// <summary>
+    /// Initializes enterexit dictionary in <see cref="Inventory.SetExitEntranceDict(Dictionary{int, UnityEvent}, Dictionary{int, UnityEvent}, Dictionary{int, bool})"/>
+    /// </summary>
     private void InitSlotEnterExitDict()
     {
 
@@ -493,7 +518,6 @@ public class InventoryUIManager : MonoBehaviour
                     if(!exit.ContainsKey(enterExit.slotpos))
                     {
                         exit.Add(enterExit.slotpos, enterExit.action);
-                       // actItem.Add(enterExit.slotpos, enterExit.ItemActOnEnter);
                         inventory.SetExitEntranceDict(enter, exit, actItem);
                     }
                     else
@@ -519,6 +543,7 @@ public class InventoryUIManager : MonoBehaviour
 
         }
     }
+
     /// <summary>
     /// Tests that InventoryController is Setup to support the InventoryUIManager, destroying the InventoryUIManager if not
     /// </summary>
@@ -544,10 +569,10 @@ public class InventoryUIManager : MonoBehaviour
         }
         return true;
     }
+    
     /// <summary>
     /// Connects the button press and position values.
     /// </summary>
-    /// 
     [System.Serializable]
     private struct PressableSlot
     {
@@ -555,6 +580,10 @@ public class InventoryUIManager : MonoBehaviour
 
         public char buttonPress;
     }
+
+    /// <summary>
+    /// Connects the highlighted image with the regular image.
+    /// </summary>
     [System.Serializable]
     private struct slotImages
     {
@@ -563,6 +592,10 @@ public class InventoryUIManager : MonoBehaviour
         [Tooltip("OPTIONAL: Displays slot Image when selected")]
         public Sprite selected;
     }
+
+    /// <summary>
+    /// Connects values and invokes enter exit actions
+    /// </summary>
     [System.Serializable]
     private struct invokeOnExit
     {
@@ -574,6 +607,7 @@ public class InventoryUIManager : MonoBehaviour
 
         public bool ItemActOnEnter;
     }
+
     /// <summary>
     /// Returns the item at a given inventory position
     /// </summary>
@@ -581,37 +615,45 @@ public class InventoryUIManager : MonoBehaviour
     {
         return inventory.InventoryGetItem(index);
     }
+
     public void SetSave(bool save)
     {
         saveInventory = save;
     }
+
     public void SetSaveInventory()
     {
         inventory.SetSave(saveInventory);
     }
+
     public void SetRowCol(int row, int col)
     {
         this.row = row;
         this.col = col;
         UpdateInventoryUI();
     }
+
     public void SetInventoryName(string inventoryName)
     {
         this.inventoryName = inventoryName;
     }
+
     public string GetInventoryName()
     {
         return inventory.GetName();
 
     }
+
     public ref Inventory GetInventory()
     {
         return ref inventory;
     }
+
     public void SetInventory(ref Inventory inventory)
     {
         this.inventory = inventory;
     }
+
     public void UpdateSlot(int location)
     {
         if(slotPos.ContainsKey(location))
@@ -624,22 +666,27 @@ public class InventoryUIManager : MonoBehaviour
             Debug.LogError("Dictionary does not contain slot at: "  + location);
         }
     }
+
     public Transform GetUI()  
     {
         return UI;
     }
+
     public void SetDraggable(bool draggable)
     {
         this.draggable = draggable;
     }
+
     public void SetHighlightable(bool highlightable)
     {
         this.clickable = highlightable;
     }
+
     public bool GetDraggable()
     {
         return draggable;
     }
+
     private void OnDestroy()
     {
         inventory = null;
@@ -649,10 +696,12 @@ public class InventoryUIManager : MonoBehaviour
     {
         this.toggleOnButtonPress = EnableDisableOnPress;
     }
+
     public List<char> GetEnableDisable()
     {
         return toggleOnButtonPress;
     }
+
     private enum StartPositions
     {
         BottomLeft,
@@ -660,15 +709,16 @@ public class InventoryUIManager : MonoBehaviour
         TopRight,
         BottomRight,
     }
+
     private enum ItemAcceptance
     {
         AcceptAll,
         RejectAll
     }
+
     private enum EnterExit
     {
         Enter,
         Exit
     }
-
 }
