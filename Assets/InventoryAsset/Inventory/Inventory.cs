@@ -1,10 +1,8 @@
 
 using System.Collections.Generic;
 using System.Text;
-using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
 using UnityEngine.Events;
-using static UnityEditor.PlayerSettings;
 //Author: Jaxon Schauer
 /// <summary>
 /// This class creates an Inventory that tracks and controls the inventory list. This class tells the InventoryUIManager what objects each slot holds
@@ -12,7 +10,7 @@ using static UnityEditor.PlayerSettings;
 
 
 [System.Serializable]
-public class Inventory 
+internal class Inventory 
 {
     private Dictionary<string, List<int>> itemPositions;//Holds all positions of a given itemType in the list
 
@@ -28,7 +26,6 @@ public class Inventory
     int size;
     [SerializeField, HideInInspector]
     bool saveInventory;//is true if the user decides to save the inventory
-    private bool clickItemOnEnter;
     private bool acceptAll;
     private bool rejectAll;
     private HashSet<string> exceptions;
@@ -49,6 +46,7 @@ public class Inventory
         FillInventory(size);
         InventoryUIManagerInstance = InventoryUIManager.GetComponent<InventoryUIManager>();
     }
+
     /// <summary>
     /// Initializes aspects of the inventory that do not transfer into play mode.
     /// </summary>
@@ -62,6 +60,7 @@ public class Inventory
         inventoryList = new List<InventoryItem>(size);
         FillInventory(size);
     }
+
     /// <summary>
     /// Resizes the inventory when <see cref="InventoryUIManager.UpdateInventoryUI"/> is called
     /// </summary>
@@ -104,25 +103,7 @@ public class Inventory
         }
         size = newSize;
     }
-    public Dictionary<string, List<int>> TestPrintItemPosDict()
-    {
-        StringBuilder output = new StringBuilder();
 
-        output.Append(itemPositions.Count + " | ");
-
-        foreach (KeyValuePair<string, List<int>> pair in itemPositions)
-        {
-            output.Append(pair.Key + ": ");
-            foreach (int position in pair.Value)
-            {
-                output.Append(position + " ");
-            }
-            output.Append("| ");
-        }
-
-        Debug.Log(output.ToString());
-        return itemPositions;
-    }
     /// <summary>
     /// Adds an item to a specified position, updating the <see cref="itemPositions"/> for efficient tracking of the items
     /// </summary>
@@ -170,6 +151,7 @@ public class Inventory
             }
         }
     }
+
     /// <summary>
     /// Takes an item as input
     /// Adds the item at the lowest possible inventory location, adding it into the <see cref="itemPositions"/> to allow for efficient tracking of the inventory items
@@ -178,7 +160,7 @@ public class Inventory
     {
         if (!CheckAcceptance(item.GetItemType()))
         {
-            Debug.LogWarning("Item Acceptance is false. Overruling and adding item.");
+            Debug.LogWarning("Inventory is set to not accept this item. Overruling and adding item.");
         }
         if (itemPositions.ContainsKey(item.GetItemType()))
         {
@@ -200,6 +182,7 @@ public class Inventory
         }
 
     }
+
     /// <summary>
     /// Adds a new item in the lowest possible inventoryList position
     /// </summary>
@@ -249,7 +232,6 @@ public class Inventory
         }
     }
 
-
     /// <summary>
     /// Takes as input a position, remove the item from the given inventory position.
     /// </summary>
@@ -266,6 +248,7 @@ public class Inventory
                 Debug.LogWarning("ItemPositions Dictitonary Setup Incorrectly");
             }
         }
+
         InventoryItem filler = new InventoryItem(true);
         inventoryList[pos] = filler;
         InventoryUIManagerInstance.UpdateSlot(pos);
@@ -274,6 +257,7 @@ public class Inventory
             exitDict[pos].Invoke();
         }
     }
+
     public void RemoveItemInPosition(int pos, int amount)
     {
         InventoryItem item = inventoryList[pos];
@@ -331,6 +315,10 @@ public class Inventory
             }
         }
     }
+
+    /// <summary>
+    /// returns the count of a input item
+    /// </summary>
     public int Count(string itemType)
     {
         if(itemType == null)
@@ -351,6 +339,7 @@ public class Inventory
         }
         return itemsTotal;
     }
+
     /// <summary>
     /// Fills the inventory with empty items 
     /// </summary>
@@ -363,10 +352,11 @@ public class Inventory
         for (int i = 0; i < size; i ++)
         {
             InventoryItem filler = new InventoryItem(true);
-            filler.SetHighlightable(highlightable);
+            filler.SetPressable(highlightable);
             inventoryList.Add(filler);
         }
     }
+
     /// <summary>
     /// Returns the item at a specific index of the inventory, returning the closest value if out of range
     /// </summary>
@@ -389,6 +379,7 @@ public class Inventory
         }
         return inventoryList[index];
     }
+
     /// <summary>
     /// Sets up values for the inventory to determine if an item should be accepted or rejected from the inventory
     /// </summary>
@@ -420,6 +411,29 @@ public class Inventory
             }
         }
     }
+    /// <summary>
+    /// Prints <see cref="itemPositions"/>
+    /// </summary>
+    public Dictionary<string, List<int>> TestPrintItemPosDict()
+    {
+        StringBuilder output = new StringBuilder();
+
+        output.Append(itemPositions.Count + " | ");
+
+        foreach (KeyValuePair<string, List<int>> pair in itemPositions)
+        {
+            output.Append(pair.Key + ": ");
+            foreach (int position in pair.Value)
+            {
+                output.Append(position + " ");
+            }
+            output.Append("| ");
+        }
+
+        Debug.Log(output.ToString());
+        return itemPositions;
+    }
+
     /// <summary>
     /// Returns a bool, true if an item can be transfered into an inventory and false otherwise.
     /// </summary>
@@ -460,14 +474,11 @@ public class Inventory
     {
         return saveInventory;
     }
-    public void SetclickItemOnEnter(bool clickItemOnEnter)
-    {
-        this.clickItemOnEnter = clickItemOnEnter;
-    }
     public void SetExitEntranceDict(Dictionary<int, UnityEvent> enterDict, Dictionary<int, UnityEvent> exitDict, Dictionary<int, bool> itemAction)
     {
         this.enterDict = enterDict;
         this.exitDict = exitDict;
         this.itemAction = itemAction;
     }
+
 }

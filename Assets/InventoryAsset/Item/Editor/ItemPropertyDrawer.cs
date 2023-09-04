@@ -2,7 +2,7 @@ using UnityEditor;
 using UnityEngine;
 
 [CustomPropertyDrawer(typeof(ItemInitializer))]
-public class ItemPropertyDrawer : PropertyDrawer
+internal class ItemPropertyDrawer : PropertyDrawer
 {
     int count = 0;
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
@@ -20,9 +20,9 @@ public class ItemPropertyDrawer : PropertyDrawer
             count++;
         }
 
-        if (property.FindPropertyRelative("highlightable").boolValue)
+        if (property.FindPropertyRelative("pressable").boolValue)
         {
-            makeUIComp(ref position, property, "myEvent", "Choose Function on Highlight", 5);
+            makeUIComp(ref position, property, "myEvent", "Choose function on presseed", 5);
         }
         EditorGUI.EndProperty();
     }
@@ -43,7 +43,7 @@ public class ItemPropertyDrawer : PropertyDrawer
             height += EditorGUIUtility.singleLineHeight;
         }
 
-        if (property.FindPropertyRelative("highlightable").boolValue)
+        if (property.FindPropertyRelative("pressable").boolValue)
         {
             EditorGUI.indentLevel++;
             height += EditorGUIUtility.singleLineHeight;

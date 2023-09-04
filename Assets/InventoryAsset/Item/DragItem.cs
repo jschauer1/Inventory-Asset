@@ -7,7 +7,7 @@ using UnityEngine.UI;
 /// <summary>
 /// Controls the dragging of an item.
 /// </summary>
-public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
+internal class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
 {
     /// The current slot associated with the drag item
     private Slot CurrentSlot;
@@ -190,6 +190,11 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
         }
     }
 
+    public void SetTextTestImage(int amount)
+    {
+        text.SetText(amount.ToString());
+    }
+
     /// <summary>
     /// Sets the offset for the text position
     /// </summary>
@@ -212,6 +217,10 @@ public class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDrag
         imageRect.sizeDelta = size;
     }
 
+    public void SetImage(Sprite image)
+    {
+        GetComponent<Image>().sprite = image;
+    }
     public float GetTextSize()
     {
         return text.fontSize;

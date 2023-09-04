@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 [System.Serializable]
-public class InventoryData
+internal class InventoryData
 {
     public Dictionary<string, List<ItemData>> inventories;
 

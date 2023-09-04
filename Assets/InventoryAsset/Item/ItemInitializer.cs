@@ -42,7 +42,7 @@ public class ItemInitializer
 
     [Tooltip("Determines if the item can be highlighted when selected.")]
     [SerializeField]
-    private bool highlightable;
+    private bool pressable;
 
     [SerializeField, HideInInspector]
     private bool isNull = false;
@@ -71,9 +71,9 @@ public class ItemInitializer
     {
         return maxStackAmount;
     }
-    public bool GetHighlightable()
+    public bool GetPressable()
     {
-        return highlightable;
+        return pressable;
     }
     public bool GetDraggable()
     {

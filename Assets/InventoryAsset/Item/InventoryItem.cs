@@ -14,21 +14,21 @@ public class InventoryItem
     private Sprite itemImage;//Holds image of item
     private int maxStackAmount;
     private bool draggable;
-    private bool highlightable;
+    private bool pressable;
     private InventoryItemEvent itemEvent;
     private GameObject linkedGameObject;
     private bool isNull = false;//Checks if item exists
     private bool displayAmount;
     private int position;
     private string inventory;
-    public InventoryItem(ItemInitializer init)
+    internal InventoryItem(ItemInitializer init)
     {
         this.amount = 1;
         this.itemType = init.GetItemType();
         this.itemImage = init.GetItemImage();
         this.maxStackAmount = init.GetItemStackAmount();
         this.draggable = init.GetDraggable();
-        this.highlightable = init.GetHighlightable();
+        this.pressable = init.GetPressable();
         this.itemEvent = init.GetEvent();
         this.isNull = init.GetIsNull();
         this.linkedGameObject=init.GetGameObjectAction();
@@ -47,7 +47,7 @@ public class InventoryItem
 
         this.maxStackAmount = other.maxStackAmount;
         this.draggable = other.draggable;
-        this.highlightable = other.highlightable;
+        this.pressable = other.pressable;
         this.itemEvent = other.itemEvent;
         this.isNull = other.isNull;
         this.linkedGameObject = other.GetLinkedGameObject();
@@ -84,9 +84,9 @@ public class InventoryItem
         if (itemEvent != null)
             itemEvent.Invoke(this);
     }
-    public bool GetHighlightable()
+    public bool GetPressable()
     {
-        return highlightable;
+        return pressable;
     }
     public bool GetDraggable()
     {
@@ -108,9 +108,9 @@ public class InventoryItem
     {
         return linkedGameObject;
     }
-    public void SetHighlightable(bool highlightable)
+    public void SetPressable(bool pressable)
     {
-        this.highlightable = highlightable; 
+        this.pressable = pressable; 
     }
     public void SetPosition(int position)
     {

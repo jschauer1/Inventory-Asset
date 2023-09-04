@@ -6,7 +6,7 @@ using UnityEngine.UI;
 /*Author: Jaxon Schauer
  * This class creates a slot gameObject that displays an image of the item when notified by the assigned inventory
  */
-public class Slot : MonoBehaviour, IPointerClickHandler
+internal class Slot : MonoBehaviour, IPointerClickHandler
 {
     [SerializeField]
     private int position;//The position if the inventories items list

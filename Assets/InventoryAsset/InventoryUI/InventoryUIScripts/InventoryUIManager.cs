@@ -105,11 +105,15 @@ public class InventoryUIManager : MonoBehaviour
     [Tooltip("Key that toggles the visibility/enabling of the inventory. Must be a character.")]
     [SerializeField]
     private List<char> toggleOnButtonPress;
-    [Tooltip("Map between keys and inventory slots for slot highlighting.")]
+    [Tooltip("Connection between keys and inventory slots for slot highlighting.")]
     [SerializeField]
     List<PressableSlot> highLightSlotOnPress;
+    [Tooltip("Sets actions for when an item enter or exits a specific inventory slot.")]
     [SerializeField] 
     List<invokeOnExit> itemEntryExitAction;
+    [Tooltip("Makes test items for setting up how items appear in inventory")]
+    [SerializeField]
+    List<TestItem> testItems;
 
 
     Dictionary<string, int> slotPress = new Dictionary<string, int>();//Links the string and the position to highlight on press.
@@ -134,6 +138,7 @@ public class InventoryUIManager : MonoBehaviour
     public void Start()
     {
         if (!TestSetup()) return;
+        UpdateInventoryUI(true);
         UI = InventoryController.instance.GetUI();
 
     }
@@ -164,6 +169,28 @@ public class InventoryUIManager : MonoBehaviour
         textSize = slot.GetComponent<Slot>().GetSlotChildInstance().GetComponent<DragItem>().GetTextSize();
     }
 
+    public void initializeItems()
+    {
+        if(testItems != null && !Application.isPlaying)
+        {
+            foreach (TestItem item in testItems)
+            {
+                if (slotPos.ContainsKey(item.position))
+                {
+                    Slot slot = slotPos[item.position].GetComponent<Slot>();
+                    slot.GetSlotChildInstance().GetComponent<DragItem>().SetImage(item.image);
+                    slot.GetSlotChildInstance().GetComponent<DragItem>().SetTextTestImage(item.amount);
+                    slot.GetSlotChildInstance().SetActive(true);
+                }
+                else
+                {
+                    Debug.LogWarning("Position does not exist");
+                }
+            }
+        }
+
+    }
+
     /// <summary>
     /// Checks if any meaningful variables have been changed and if so calls the functions, creating the expected UI
     /// </summary>
@@ -192,7 +219,7 @@ public class InventoryUIManager : MonoBehaviour
             {
                 background.SetActive(true);
             }
-            inventory.SetclickItemOnEnter(clickItemOnEnter);
+            initializeItems();
 
         }
     }
@@ -393,16 +420,14 @@ public class InventoryUIManager : MonoBehaviour
     /// <summary>
     /// Sets slot selected calling <see cref="InventoryItem.Selected"/> when invoked
     /// </summary>
-    public void SetSelected(GameObject slot)
+    public void SetSelected(GameObject slot, bool overRide = false)
     {
         Slot slotInstance = slot.GetComponent<Slot>();
         InventoryItem item = slotInstance.GetItem();
-        if (item.GetHighlightable() && clickable || item.GetIsNull() && clickable)
+        if (item.GetPressable() && clickable || item.GetIsNull() && clickable || item.GetPressable()&&overRide || overRide&&item.GetIsNull())
         {
             if (previouslyHighlighted != null)
             {
-                Slot prevSlotInstance = previouslyHighlighted.GetComponent<Slot>();
-
                 if (previouslyHighlighted == slot)
                 {
                     slotInstance.GetItem().Selected();
@@ -476,7 +501,7 @@ public class InventoryUIManager : MonoBehaviour
             if (slotPress.ContainsKey(input))
             {
                 int position = slotPress[input];
-                SetSelected(slotPos[position]);
+                SetSelected(slotPos[position],true);
             }
         }
     }
@@ -522,7 +547,7 @@ public class InventoryUIManager : MonoBehaviour
                     }
                     else
                     {
-                        Debug.LogError("Each slot can only have one Exit action, ignoring: " + enterExit.slotpos);
+                        Debug.LogWarning("Each slot can only have one Exit action, ignoring: " + enterExit.slotpos);
                     }
                 }
                 else
@@ -536,7 +561,7 @@ public class InventoryUIManager : MonoBehaviour
                     }
                     else
                     {
-                        Debug.LogError("Each slot can only have one Enter action, ignoring: "+ enterExit.slotpos);
+                        Debug.LogWarning("Each slot can only have one Enter action, ignoring: "+ enterExit.slotpos);
                     }
                 }
             }
@@ -607,6 +632,15 @@ public class InventoryUIManager : MonoBehaviour
 
         public bool ItemActOnEnter;
     }
+    [System.Serializable]
+    private struct TestItem
+    {
+        public Sprite image;
+
+        public int amount;
+
+        public int position;
+    }
 
     /// <summary>
     /// Returns the item at a given inventory position
@@ -644,12 +678,12 @@ public class InventoryUIManager : MonoBehaviour
 
     }
 
-    public ref Inventory GetInventory()
+    internal ref Inventory GetInventory()
     {
         return ref inventory;
     }
 
-    public void SetInventory(ref Inventory inventory)
+    internal void SetInventory(ref Inventory inventory)
     {
         this.inventory = inventory;
     }

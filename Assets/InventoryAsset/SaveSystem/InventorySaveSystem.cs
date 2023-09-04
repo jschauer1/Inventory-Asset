@@ -4,7 +4,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 
-public static class InventorySaveSystem
+internal static class InventorySaveSystem
 {
     public static void SaveInventory(Dictionary<string, Inventory> inventoryManager)
     {

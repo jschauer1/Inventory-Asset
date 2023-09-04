@@ -1,11 +1,5 @@
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.TextCore.Text;
-using UnityEngine.UIElements;
-using UnityEngine.XR;
-using static UnityEditor.Progress;
-
 
 
 //Author: Jaxon Schauer
@@ -70,6 +64,7 @@ public class InventoryController : MonoBehaviour
     private Dictionary<string, InventoryItem> itemManager = new Dictionary<string, InventoryItem>(); // Dictionary to map item names to their objects.
     private Dictionary<string, List<GameObject>> EnableDisableDict = new Dictionary<string, List<GameObject>>();
 
+    [SerializeField, HideInInspector]
     public static InventoryController instance; // Shared instance of the InventoryController to enforce only one being created.
 
 
@@ -123,7 +118,6 @@ public class InventoryController : MonoBehaviour
     {
 
         if (!TestSetup()) return;
-
         if (iUnderstandTheSetup)
         {
             instance = this;
@@ -279,7 +273,7 @@ public class InventoryController : MonoBehaviour
         }
         Inventory inventory = inventoryManager[inventoryName];
         InventoryItem item = new InventoryItem(itemManager[itemType], amount);
-        inventory.AddItemLinearly(item);
+        inventory.AddItemLinearly(item, amount);
     }
 
     /// <summary>
@@ -551,7 +545,7 @@ public class InventoryController : MonoBehaviour
     /// <summary>
     /// runs setup test sweet, returns false if there is a setup error.
     /// </summary>
-    public bool TestSetup()
+    private bool TestSetup()
     {
         return TestinventoryManagerObjSetup()
             && TestInventoryUI()
@@ -638,7 +632,7 @@ public class InventoryController : MonoBehaviour
     /// <summary>
     /// Test that an instance has been chosen
     /// </summary
-    public bool TestInstance()
+    private bool TestInstance()
     {
         if (instance == null)
         {
@@ -679,7 +673,7 @@ public class InventoryController : MonoBehaviour
         return false;
     }
 
-    public Inventory GetInventory(string inventoryName)
+    internal Inventory GetInventory(string inventoryName)
     {
         return inventoryManager[inventoryName];
     }
