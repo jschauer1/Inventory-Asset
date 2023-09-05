@@ -14,7 +14,6 @@ public class InventoryUIManager : MonoBehaviour
 
     // Inventory UI Configuration
     [Header("============[ Inventory UI Setup ]============")]
-
     [Tooltip("Name of the inventory for identification purposes.")]
     [SerializeField]
     private string inventoryName;

@@ -44,7 +44,7 @@ public class InventoryController : MonoBehaviour
     [Header("Modify the inventory under the UI component.")]
     [Tooltip("Add templates for each inventory to be initialized.")]
     [SerializeField]
-    private List<InventoryInitializer> initializeInventory = new List<InventoryInitializer>(); // Information about inventory setup.
+    public List<InventoryInitializer> initializeInventory = new List<InventoryInitializer>(); // Information about inventory setup.
 
 
 
@@ -425,7 +425,6 @@ public class InventoryController : MonoBehaviour
         {
             if (EnableDisableDict[character.ToString().ToLower()].Contains(inventoryUIDict[InventoryName]))
             {
-                Debug.LogWarning("Dict Already Contains obj");
                 return;
             }
             EnableDisableDict[character.ToString().ToLower()].Add(inventoryUIDict[InventoryName]);
@@ -446,14 +445,9 @@ public class InventoryController : MonoBehaviour
         {
             if (!EnableDisableDict[character.ToString().ToLower()].Contains(inventoryUIDict[InventoryName]))
             {
-                Debug.LogWarning("Dict Does Not Contain Object attached to char");
                 return;
             }
             EnableDisableDict[character.ToString().ToLower()].Remove(inventoryUIDict[InventoryName]);
-        }
-        else
-        {
-            Debug.LogWarning("Given character is not attached to a InventoryUIManager");
         }
     }
 

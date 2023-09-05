@@ -105,7 +105,7 @@ internal class Inventory
     }
 
     /// <summary>
-    /// Adds an item to a specified position, updating the <see cref="itemPositions"/> for efficient tracking of the items
+    /// Adds an item to a specified position, updating the <see cref="itemPositions"/> for efficient tracking of the inventory items
     /// </summary>
     public void AddItemPos(int index,InventoryItem item)
     {
@@ -143,10 +143,14 @@ internal class Inventory
         {
             if(curItem.GetItemType() == newItem.GetItemType())
             {
-                if(curItem.GetAmount() + newItem.GetAmount() < curItem.GetItemStackAmount())
+                if(curItem.GetAmount() + newItem.GetAmount() <= curItem.GetItemStackAmount())
                 {
                     curItem.SetAmount(curItem.GetAmount() + newItem.GetAmount());
                     InventoryUIManagerInstance.UpdateSlot(index);
+                }
+                else
+                {
+                    AddItemLinearly(newItem,newItem.GetAmount());
                 }
             }
         }
@@ -167,7 +171,7 @@ internal class Inventory
             for (int i = 0; i < itemPositions[item.GetItemType()].Count; i++)
             {
                 int position = itemPositions[item.GetItemType()][i];
-                if (inventoryList[position].GetItemStackAmount() > inventoryList[position].GetAmount())
+                if (inventoryList[position].GetItemStackAmount() >= inventoryList[position].GetAmount() + amount)
                 {
                     inventoryList[position].SetAmount(inventoryList[position].GetAmount() + item.GetAmount());
                     InventoryUIManager.GetComponent<InventoryUIManager>().UpdateSlot(position);
@@ -258,6 +262,9 @@ internal class Inventory
         }
     }
 
+    /// <summary>
+    /// Removes items in a specified position.
+    /// </summary>
     public void RemoveItemInPosition(int pos, int amount)
     {
         InventoryItem item = inventoryList[pos];
@@ -290,6 +297,10 @@ internal class Inventory
             }
         }
     }
+
+    /// <summary>
+    /// Removes items in a specified position, given the item as input
+    /// </summary>
     public void RemoveItemInPosition(InventoryItem item, int amount)
     {
         int position = item.GetPosition();
