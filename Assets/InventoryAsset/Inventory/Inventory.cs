@@ -314,10 +314,11 @@ public class Inventory
                 if(item.GetAmount() - amount > 0)
                 {
                     item.SetAmount(item.GetAmount() - amount);
+                    InventoryUIManagerInstance.UpdateSlot(pos);
                 }
                 else
                 {
-                    RemoveItemHelper(item,item.GetPosition());
+                    RemoveItemHelper(item,pos);
                 }
             }
             else

@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 398842361}
   - component: {fileID: 398842365}
   m_Layer: 0
-  m_Name: RedHat
+  m_Name: TurqoiseHat
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -76,7 +76,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 05cab5a2474012d469d761af5b17a79d, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 224805dfcadb0454186e72a3cdf63075, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -125,7 +125,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 3.12, y: 1.76}
+    oldSize: {x: 3.1, y: 1.82}
     newSize: {x: 3.12, y: 1.76}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -146,4 +146,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed4daf60c3a7fad48a093334f1f92177, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hatName: RedHat
+  hatName: TurqoiseHat

@@ -49,7 +49,11 @@ internal class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDr
         List < RaycastResult> results = new List<RaycastResult>();
         EventSystem.current.RaycastAll(eventData, results);
         bool foundSlot = false;
-
+        
+        if(prevslot!=null)
+        {
+            prevslot.GetComponent<Slot>().GetInventoryUI().UnHighlight(prevslot);
+        }
         foreach (RaycastResult result in results)
         {
             if (result.gameObject.CompareTag("Slot"))
@@ -161,7 +165,6 @@ internal class DragItem : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDr
         Vector3 mousePosition = Input.mousePosition;
         Camera cam = Camera.main;
         Vector3 worldPosition = cam.ScreenToWorldPoint(new Vector3(mousePosition.x, mousePosition.y, cam.nearClipPlane));
-        Debug.Log(returnOnMiss);
         if (returnOnMiss)
         {
             InventoryController.instance.AddItemPos(CurrentSlot.GetInventoryUI().GetInventoryName(), item, CurrentSlot.GetPosition());

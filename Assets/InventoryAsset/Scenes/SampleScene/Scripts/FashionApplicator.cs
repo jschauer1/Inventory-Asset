@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-internal class FassionApplicator : MonoBehaviour
+internal class FashionApplicator : MonoBehaviour
 {
     [SerializeField] GameObject hatFlippedFalse;
     [SerializeField] GameObject hatFlippedTrue;
@@ -36,6 +36,6 @@ internal class FassionApplicator : MonoBehaviour
     }
     public void DropItem(Vector3 pos, InventoryItem item)
     {
-        Instantiate(redHatobj, pos, Quaternion.identity);
+        Instantiate(item.GetRelatedGameObject(), pos, Quaternion.identity);
     }
 }

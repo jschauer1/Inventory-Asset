@@ -6,7 +6,7 @@ using UnityEngine.UI;
 //Author: Jaxon Schauer
 /// <summary>
 /// This class uses information given by the inventory controller to build a UI interface. This interface is linked with the <see cref="Inventory"/> class
-/// displaying the items contained inside the associated object
+/// displaying the items contained inside the associated object.
 /// </summary>
 public class InventoryUIManager : MonoBehaviour
 {
@@ -18,7 +18,6 @@ public class InventoryUIManager : MonoBehaviour
     [SerializeField]
     private string inventoryName;
 
-    // This field isn't intended for direct modifications hence hidden.
     [SerializeField, HideInInspector]
     private Inventory inventory; // Reference to the associated inventory object.
 
@@ -73,7 +72,6 @@ public class InventoryUIManager : MonoBehaviour
     [SerializeField]
     private Vector2 slotOffsetToBackground;
 
-    // Item Acceptance Configuration
     [Header("========[ Item Acceptance Configuration ]========")]
 
     [Tooltip("Specify the general rules for item acceptance in this inventory.")]
@@ -83,6 +81,7 @@ public class InventoryUIManager : MonoBehaviour
     [Tooltip("Define any exceptions to the general item acceptance rules.")]
     [SerializeField]
     private List<string> exceptions;
+
     // Additional Configuration Options
     [Header("========[ Additional Options ]========")]
 
@@ -113,15 +112,15 @@ public class InventoryUIManager : MonoBehaviour
     [SerializeField]
     List<TestItem> testItems;
     [SerializeField]
-    private onMiss invokeOnMiss;
+    private ItemMissInfo invokeOnMiss;
 
-    Dictionary<string, int> slotPress = new Dictionary<string, int>();//Links the string and the position to highlight on press.
+    Dictionary<string, int> slotPress = new Dictionary<string, int>(); //Links the string and the position to highlight on press.
 
     private Transform UI;
 
     private RectTransform rectTransform;
 
-    //Holds and organizes slots
+    // Holds and organizes slots
     [SerializeField, HideInInspector]
     private List<GameObject> slots = new List<GameObject>();
     private List<Vector2> AllSlotVectorPos = new List<Vector2>();
@@ -131,19 +130,19 @@ public class InventoryUIManager : MonoBehaviour
     public void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
-        UpdateInventoryUI(true);
+        UpdateInventoryUI();
     }
 
     public void Start()
     {
         if (!TestSetup()) return;
-        UpdateInventoryUI(true);
+        UpdateInventoryUI();
         UI = InventoryController.instance.GetUI();
 
     }
 
     /// <summary>
-    /// Constantly checks for input to pass to HighLightOnButtonPress
+    ///  Checks for input to pass to <see cref="HighLightOnButtonPress"/> on each frame
     /// </summary>
     private void Update()
     {
@@ -152,7 +151,7 @@ public class InventoryUIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Initializes essential variables only when Initialize Inventory button is pressed. Sets up a default inventoryUI
+    /// Initializes essential variables only when the Initialize Inventory button is pressed. Sets up a default inventoryUI
     /// </summary>
     public void SetVarsOnInit()
     {
@@ -166,67 +165,37 @@ public class InventoryUIManager : MonoBehaviour
 
         textSize = slot.GetComponent<Slot>().GetItemHolder().GetComponent<DragItem>().GetTextSize();
     }
-    /// <summary>
-    /// Creates test reference items to hellp design UI.
-    /// NOTE: Only for reference, will not be added at runtime.
-    /// </summary>
-    public void initializeTestItems()
-    {
-        if(testItems != null && !Application.isPlaying)
-        {
-            foreach (TestItem item in testItems)
-            {
-                if (positionToSlotDict.ContainsKey(item.position))
-                {
-                    Slot slot = positionToSlotDict[item.position].GetComponent<Slot>();
-                    slot.GetItemHolder().GetComponent<DragItem>().SetImage(item.image);
-                    slot.GetItemHolder().GetComponent<DragItem>().SetTextTestImage(item.amount);
-                    slot.GetItemHolder().SetActive(true);
-                }
-                else
-                {
-                    Debug.LogWarning("Test Position does not exist");
-                }
-            }
-        }
 
+    /// <summary>
+    /// Checks if any meaningful variables have been changed and, if so, calls the functions, creating the expected UI
+    /// </summary>
+    public void UpdateInventoryUI()
+    {
+        inventory.Init();
+
+        SetSaveInventory();
+        inventory.Resize(rows * cols);
+
+        InventoryUIReset();
+
+        createSlots();
+        SetSlotOrder();
+        SetBackground();
+        UpdateInventory();
+        InitSlotEnterExitDict();
+        if (background!=null && !activeBackground)
+        {
+            background.SetActive(false);
+        }
+        else if(background!=null && activeBackground)
+        {
+            background.SetActive(true);
+        }
+        initializeTestItems();
     }
 
     /// <summary>
-    /// Checks if any meaningful variables have been changed and if so calls the functions, creating the expected UI
-    /// </summary>
-    public void UpdateInventoryUI(bool isOverride = false)
-    {
-
-        if (CheckEditorChange() || isOverride)
-        {
-            inventory.Init();
-
-            SetSaveInventory();
-            inventory.Resize(rows * cols);
-
-            InventoryUIReset();
-
-            createSlots();
-            SetSlotPositions();
-            SetBackground();
-            UpdateInventory();
-            InitSlotEnterExitDict();
-            if (background!=null && !activeBackground)
-            {
-                background.SetActive(false);
-            }
-            else if(background!=null && activeBackground)
-            {
-                background.SetActive(true);
-            }
-            initializeTestItems();
-
-        }
-    }
-
-    /// <summary>
-    /// Sets all the values to be checked for change in <see cref="CheckEditorChange"/> and resets any values that may cary over after a change
+    /// Resets any values that may carry over after changing the UI manager
     /// </summary>
     private void InventoryUIReset()
     {
@@ -253,15 +222,7 @@ public class InventoryUIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Checks if any values have changed, determining if the UI needs to be updated.
-    /// </summary>
-    private bool CheckEditorChange()
-    {
-        return true;
-    }
-
-    /// <summary>
-    /// Aligns the background with the slots while account of other user based offsets in relationship to the background vs the slots
+    /// Aligns the background with the slots while accounting for other user-defined offsets for the background
     /// </summary>
     private void SetBackground()
     {
@@ -280,9 +241,8 @@ public class InventoryUIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Creates all slots on the inventory UI, applying the slot gap and other offsets accordingly.
+    /// Creates all slot UI on the inventoryUI based on the order created by <see cref="SetSlotPosition"/>, applying the slot gap and other offsets accordingly.
     /// Adds the slots into dictionaries and lists to track them
-    /// Uses <see cref="SetSlotOrder"/> 
     /// </summary>
 
     private void createSlots()
@@ -320,54 +280,37 @@ public class InventoryUIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Checks chosen StartPosition and uses <see cref="SetSlotOrder"/> to fill order each slot, counting in a understandable fashion
+    /// Checks chosen StartPosition and uses <see cref="SetSlotPosition"/> to numerically order each slot, ordering in the given format
     /// </summary>
-    public void SetSlotPositions()
+    public void SetSlotOrder()
     {
         switch (slotStartPosition)
         {
             case StartPositions.TopRight:
-                SetSlotOrder(new Vector2(0, cols-1), "down", "left");
+                SetSlotPosition(new Vector2(0, cols-1), "down", "left");
                 break;
             case StartPositions.TopLeft:
-                SetSlotOrder(new Vector2(0, 0), "down", "right");
+                SetSlotPosition(new Vector2(0, 0), "down", "right");
                 break;
             case StartPositions.BottomLeft:
-                SetSlotOrder(new Vector2(rows - 1, 0), "up", "right");
+                SetSlotPosition(new Vector2(rows - 1, 0), "up", "right");
                 break;
             case StartPositions.BottomRight:
-                SetSlotOrder(new Vector2(rows - 1, cols - 1), "up", "left");
+                SetSlotPosition(new Vector2(rows - 1, cols - 1), "up", "left");
                 break;
             default:
-                SetSlotOrder(new Vector2(rows-1, 0), "up", "right");
+                SetSlotPosition(new Vector2(rows-1, 0), "up", "right");
                 break;
         }
 
     }
-
     /// <summary>
-    /// Loads information into <see cref="Inventory"/> class about what items to accept or reject
+    /// Determines item ordering based on the ordering option that was chosen. Takes as input a startPosition and the ordering directions.
     /// </summary>
-    private void UpdateInventory()
-   {
-        if(acceptance == ItemAcceptance.AcceptAll)
-        {
-            inventory.SetupItemAcceptance(true, false, exceptions);
-        }
-        else
-        {
-            inventory.SetupItemAcceptance(false, true, exceptions);
-        }
-    }
-
-    /// <summary>
-    /// Takes as input a startPosition, and a movement
-    /// Gives logical order to inventories
-    /// </summary>
-    private void SetSlotOrder(Vector2 startPosition, string moveVerticle, string moveHorizontal)
+    private void SetSlotPosition(Vector2 startPosition, string moveVerticle, string moveHorizontal)
     {
         if (positionToSlotDict == null)
-             Debug.LogError("SlotPos Null");
+            Debug.LogError("SlotPos Null");
 
 
         if (VectorPositionToSlotDict == null)
@@ -417,9 +360,25 @@ public class InventoryUIManager : MonoBehaviour
             currentPos = new Vector2(currentPos.x + rowChange, startPosition.y); // Reset the horizontal position and move vertically
         }
     }
+    /// <summary>
+    /// Loads information into the <see cref="Inventory"/> class about what items to accept or reject
+    /// </summary>
+    private void UpdateInventory()
+   {
+        if(acceptance == ItemAcceptance.AcceptAll)
+        {
+            inventory.SetupItemAcceptance(true, false, exceptions);
+        }
+        else
+        {
+            inventory.SetupItemAcceptance(false, true, exceptions);
+        }
+    }
+
+
 
     /// <summary>
-    /// Sets slot selected calling <see cref="InventoryItem.Selected"/> when invoked
+    /// Sets slot as pressed, calling <see cref="InventoryItem.Selected"/>
     /// </summary>
     public void SetPressed(GameObject slot, bool overRide = false)
     {
@@ -462,7 +421,7 @@ public class InventoryUIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// UnHighlights slots, applying regular image for slots.
+    /// Unhighlights slots, applying regular image for slots.
     /// </summary>
     public void UnHighlight(GameObject slot)
     {
@@ -483,7 +442,7 @@ public class InventoryUIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Resets the slot in rare cases where the previouslyhighlighted slot should be disregaurded
+    /// Resets the slot in rare cases where the previously highlighted slot should be disregarded
     /// </summary>
     public void ResetHighlight()
     {
@@ -492,10 +451,14 @@ public class InventoryUIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Uses <see cref="SetPressed"/>  to highlight a user defined slot on the press of a user defined button.
+    /// Uses <see cref="SetPressed"/> to highlight a user-defined slot on the press of a user-defined button.
     /// </summary>
     private void HighLightOnButtonPress()
     {
+        if(Input.GetKeyDown(KeyCode.Mouse0))
+        {
+            ResetHighlight();
+        }
         if (Input.anyKeyDown)
         {
             string input = Input.inputString;
@@ -506,7 +469,6 @@ public class InventoryUIManager : MonoBehaviour
             }
         }
     }
-
     /// <summary>
     /// Defines the <see cref="slotPress"/> dictionary, allowing for <see cref="HighLightOnButtonPress"/> to efficiently detect a button click
     /// </summary>
@@ -524,10 +486,35 @@ public class InventoryUIManager : MonoBehaviour
                 Debug.LogWarning("Each press position must be unique");
             }
         }
+    } 
+    /// <summary>
+    /// Creates test reference items to help design UI.
+    /// NOTE: Only for reference, will not be added at runtime.
+    /// </summary>
+    public void initializeTestItems()
+    {
+        if (testItems != null && !Application.isPlaying)
+        {
+            foreach (TestItem item in testItems)
+            {
+                if (positionToSlotDict.ContainsKey(item.position))
+                {
+                    Slot slot = positionToSlotDict[item.position].GetComponent<Slot>();
+                    slot.GetItemHolder().GetComponent<DragItem>().SetImage(item.image);
+                    slot.GetItemHolder().GetComponent<DragItem>().SetTextTestImage(item.amount);
+                    slot.GetItemHolder().SetActive(true);
+                }
+                else
+                {
+                    Debug.LogWarning("Test Position does not exist");
+                }
+            }
+        }
     }
 
     /// <summary>
-    /// Initializes enterexit dictionary in <see cref="Inventory.SetExitEntranceDict(Dictionary{int, UnityEvent}, Dictionary{int, UnityEvent}, Dictionary{int, bool})"/>
+    /// Passes needed information to map enter/exit actions for items 
+    /// into <see cref="Inventory.SetExitEntranceDict(Dictionary{int, InventoryItemEvent}, Dictionary{int, InventoryItemEvent}, Dictionary{int, bool})"/>
     /// </summary>
     private void InitSlotEnterExitDict()
     {
@@ -583,13 +570,13 @@ public class InventoryUIManager : MonoBehaviour
         }
         if (InventoryController.instance == null)
         {
-            Debug.LogError("Inventory Controller Instance Null. Destroying Inventory: " + inventoryName);
+            Debug.LogError("Inventory Controller instance is null. Destroying inventory: " + inventoryName);
             Destroy(gameObject);
             return false;
         }
         if (!InventoryController.instance.TestinventoryManagerObjSetup())
         {
-            Debug.LogError("Inventory Object Setup Incorrect. Destroying Inventory: " + inventoryName);
+            Debug.LogError("Inventory object setup is incorrect. Destroying inventory: " + inventoryName);
             Destroy(gameObject);
             return false;
         }
@@ -619,7 +606,7 @@ public class InventoryUIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Connects values and invokes enter exit actions
+    /// Connects values and invokes enter/exit actions
     /// </summary>
     [System.Serializable]
     private struct invokeOnExit
@@ -632,6 +619,9 @@ public class InventoryUIManager : MonoBehaviour
 
         public bool ItemActOnEnter;
     }
+    /// <summary>
+    /// Takes information for test items
+    /// </summary>
     [System.Serializable]
     private struct TestItem
     {
@@ -641,8 +631,11 @@ public class InventoryUIManager : MonoBehaviour
 
         public int position;
     }
+    /// <summary>
+    /// holds information for when item misses
+    /// </summary>
     [System.Serializable]
-    private struct onMiss
+    private struct ItemMissInfo
     {
         public bool destroyOnMiss;
 

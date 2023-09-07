@@ -75,7 +75,7 @@ internal class Test : MonoBehaviour
     }
     public void RemoveItem(InventoryItem itemToRemove)
     {
-        InventoryController.instance.RemoveItem(itemToRemove.GetInventory(),itemToRemove);
+        InventoryController.instance.RemoveItem(itemToRemove.GetInventory(),itemToRemove, testAmount);
     }
     public void TestRemoveItem(int pos)
     {

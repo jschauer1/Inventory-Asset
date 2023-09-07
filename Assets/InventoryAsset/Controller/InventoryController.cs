@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 /// <summary>
 /// This class defines an inventory controller, which allows for creating new inventories and defining valid types of objects.
 /// Only one InventoryController should be instantiated within a project. Multiple inventories can be created from one controller.
-/// This controller manages all information being given to an inventory
+/// This controller manages all information being given to an inventory.
 /// </summary>
 
 public class InventoryController : MonoBehaviour 
@@ -20,9 +20,9 @@ public class InventoryController : MonoBehaviour
     [Header("**********************************************")]
     [Tooltip("Toggle to confirm you understand the setup requirements.")]
     [SerializeField]
-    private bool iUnderstandTheSetup = false; // Ensure this is true for the sole instance of InventoryController.
+    private bool iUnderstandTheSetup = false; // Ensure this is the sole instance of InventoryController.
 
-    [Space(10)] // Add some space for better organization
+    [Space(10)] // Add some space for better organization.
 
     [Header("============[ Inventory Controller Setup ]============")]
     [Space(20)] 
@@ -30,7 +30,7 @@ public class InventoryController : MonoBehaviour
     [SerializeField]
     private Transform UI; // UI canvas to build inventories on.
 
-    [Space(10)] // Add some space
+    [Space(10)] // Add some space/
 
     [Header("========[ Items Setup ]========")]
     [Header("NOTE: All changes to items must be made here")]
@@ -38,7 +38,7 @@ public class InventoryController : MonoBehaviour
     [SerializeField]
     public List<ItemInitializer> items; // Accepted items to add to the inventory.
 
-    [Space(10)] // Add some space
+    [Space(10)] // Add some space.
 
     [Header("========[ Inventory Setup ]========")]
     [Header("NOTE: After initialization, changes here won't take effect.")]
@@ -59,11 +59,11 @@ public class InventoryController : MonoBehaviour
 
     [SerializeField, HideInInspector]
     private List<GameObject> allInventoryUI = new List<GameObject>(); // Holds all inventory UI instances for each inventory created.
-    private Dictionary<string, Inventory> inventoryManager = new Dictionary<string, Inventory>(); // Dictionary to map inventory names to their objects.
-    private Dictionary<string, GameObject> inventoryUIDict = new Dictionary<string, GameObject>(); // Dictionary to map inventory names to their objects.
+    private Dictionary<string, Inventory> inventoryManager = new Dictionary<string, Inventory>(); // Dictionary to map inventory names to their Inventory object.
+    private Dictionary<string, GameObject> inventoryUIDict = new Dictionary<string, GameObject>(); // Dictionary to map inventory names to their GameObject.
 
     private Dictionary<string, InventoryItem> itemManager = new Dictionary<string, InventoryItem>(); // Dictionary to map item names to their objects.
-    private Dictionary<string, List<GameObject>> EnableDisableDict = new Dictionary<string, List<GameObject>>();
+    private Dictionary<string, List<GameObject>> EnableDisableDict = new Dictionary<string, List<GameObject>>(); // Dictionary to map a key press to which inventory it should enable/disable.
 
     [SerializeField, HideInInspector]
     public static InventoryController instance; // Shared instance of the InventoryController to enforce only one being created.
@@ -112,8 +112,8 @@ public class InventoryController : MonoBehaviour
     }
 
     /// <summary>
-    /// Uses <see cref="TestSetup"/> to check that the user has correctly setup inventory
-    /// If the user has setup inventory correctly, then the initiaization functions are run, loading the new inventories and deleting missing inventories
+    /// Uses <see cref="TestSetup"/> to check that the user has correctly set up the inventory
+    /// If the user has set up inventory correctly, then the initiaization functions are run, loading the new inventories and deleting missing inventories
     /// </summary>
     public void InitializeInventories()
     {
@@ -131,9 +131,8 @@ public class InventoryController : MonoBehaviour
     }
 
     /// <summary>
-    /// Handles the prevInventoryTracker list, allowing it to track the changes made from the previous initialization and stopping it from initializing
-    /// or deleting the unecessary information in the functions running of <see cref="InitializeNewInventories"/>  
-    /// and <see cref="RemoveDeletedInventories"/>
+    /// Handles the prevInventoryTracker list, allowing it to track the changes made from the previous initialization. This stops it from initializing
+    /// or deleting unecessary information when running the functions in <see cref="InitializeNewInventories"/> and <see cref="RemoveDeletedInventories"/>
     /// </summary>
     private void UpdateInventoryTracker()
     {
@@ -148,7 +147,7 @@ public class InventoryController : MonoBehaviour
 
     /// <summary>
     /// Initializes any new inventories, giving the necessary information to the <see cref="Inventory"/> class 
-    /// and the <see cref="InventoryUIManager"/>, allowing them to work together displaying and maintaining the information of the inventory
+    /// and the <see cref="InventoryUIManager"/>. This allows them to work together to display and maintain the information of the inventory
     /// </summary>
     private void InitializeNewInventories()
     {
@@ -185,8 +184,7 @@ public class InventoryController : MonoBehaviour
     }
 
     /// <summary>
-    /// Initializes any new inventories, giving the necessary information to the <see cref="Inventory"/> class 
-    /// and the <see cref="InventoryUIManager"/>, allowing them to work together displaying and maintaining the information of the inventory
+    /// Removes any previously initialized inventories that have been removed. This frees up the space consumed by each inventory
     /// </summary>
     private void RemoveDeletedInventories()
     {
@@ -230,9 +228,8 @@ public class InventoryController : MonoBehaviour
     }
 
     /// <summary>
-    /// Takes in input of two strings, one that is inputted into the <see cref="inventoryManager"/> and a reference to an item in <see cref="itemManager"/>, passing the item to the 
-    /// expected inventory and adding a deep copy of the expected item and adding into the lowest unused possition in the <see cref="Inventory.GetList()"/>
-    /// uses <see cref="Inventory.AddItem(InventoryItem)"/>.
+    /// Adds an InventoryItem object to the specified inventory. Takes the name of the inventory as a string (which must be in <see cref="inventoryManager"/>), the item to be added as an InventoryItem, 
+    /// and the position the item should be added to as an int. Using <see cref = "Inventory.AddItemPos(int, InventoryItem)"/>
     /// </summary>
     public void AddItemPos(string inventoryName, InventoryItem itemType, int position)
     {
@@ -249,9 +246,12 @@ public class InventoryController : MonoBehaviour
         inventory.AddItemPos(position, itemType);
     }
 
+
     /// <summary>
-    /// Adds a new item to a specified inventory, in a specified location. Uses <see cref="Inventory.AddItemPos(int, InventoryItem)"/>
+    /// Adds an item to the specified inventory based on the item's name. Takes the name of the inventory as a string, the item to be added as a string, 
+    /// and the position the item should go in as an int. Uses <see cref="Inventory.AddItemPos(int, InventoryItem)"/>
     /// </summary>
+   
     public void AddItemPos(string inventoryName, string itemType, int position, int amount = 1)
     {
         if(!(TestInventoryDict(inventoryName) && TestItemDict(itemType)))
@@ -310,6 +310,17 @@ public class InventoryController : MonoBehaviour
         inventory.RemoveItemInPosition(item, amount);
     }
 
+    public bool InventoryFull(string inventoryName, string itemType)
+    {
+        if (!TestInventoryDict(inventoryName))
+        {
+            return true;
+        }
+        Inventory inventory = inventoryManager[inventoryName];
+        return inventory.Full(itemType);
+
+
+    }
     /// <summary>
     /// Checks the input string exist in the <see cref="inventoryManager"/> and is not null.
     /// </summary>
@@ -370,9 +381,11 @@ public class InventoryController : MonoBehaviour
         }
         allInventoryUI.Clear();
         inventoryUIDict.Clear();
-        //InventorySaveSystem.Reset(SceneManager.GetActiveScene().GetHashCode());
+        DeleteSaveInformation();
     }
-
+    /// <summary>
+    /// Removes all saved information from scene
+    /// </summary>
     public void DeleteSaveInformation()
     {
         InventorySaveSystem.Reset(SceneManager.GetActiveScene().name);
@@ -485,7 +498,7 @@ public class InventoryController : MonoBehaviour
     }
 
     /// <summary>
-    /// Loads saved file on <see cref="Start"/> 
+    /// Loads saved file on <see cref="Start"/> based on the name of the scene. Adds any saved items back into their respective inventories 
     /// </summary>
     private void LoadSave()
     {
