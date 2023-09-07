@@ -15,6 +15,10 @@ internal class InventoryControllerReact : Editor
 
             EditorApplication.delayCall += script.InitializeInventories;
         }
+        else if (GUILayout.Button("Delete All Saved Information"))
+        {
+            EditorApplication.delayCall += script.DeleteSaveInformation;
+        }
         else if (GUILayout.Button("Delete All Instantiated Inventories"))
         {
             EditorApplication.delayCall += script.ResetInventory;

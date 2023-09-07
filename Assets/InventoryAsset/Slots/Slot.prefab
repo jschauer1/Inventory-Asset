@@ -62,7 +62,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   position: 0
   slotChildPrefab: {fileID: 2957332009402564875, guid: 1c44132505c5b1f42b38381654fa5f6e, type: 3}
-  slotChildInstance: {fileID: 7933237219257899859}
+  SlotItemHolder: {fileID: 7933237219257899859}
 --- !u!114 &1737852865971321178
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -190,27 +190,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8743253911129313168, guid: 1c44132505c5b1f42b38381654fa5f6e, type: 3}
       propertyPath: m_Pivot.x
-      value: 1
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 8743253911129313168, guid: 1c44132505c5b1f42b38381654fa5f6e, type: 3}
       propertyPath: m_Pivot.y
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 8743253911129313168, guid: 1c44132505c5b1f42b38381654fa5f6e, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 1
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 8743253911129313168, guid: 1c44132505c5b1f42b38381654fa5f6e, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 8743253911129313168, guid: 1c44132505c5b1f42b38381654fa5f6e, type: 3}
       propertyPath: m_AnchorMin.x
-      value: 1
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 8743253911129313168, guid: 1c44132505c5b1f42b38381654fa5f6e, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 8743253911129313168, guid: 1c44132505c5b1f42b38381654fa5f6e, type: 3}
       propertyPath: m_SizeDelta.x
@@ -218,11 +218,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8743253911129313168, guid: 1c44132505c5b1f42b38381654fa5f6e, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -0.43240356
+      value: 2.399994
       objectReference: {fileID: 0}
     - target: {fileID: 8743253911129313168, guid: 1c44132505c5b1f42b38381654fa5f6e, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 3.2674274
+      value: -15.799973
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1c44132505c5b1f42b38381654fa5f6e, type: 3}

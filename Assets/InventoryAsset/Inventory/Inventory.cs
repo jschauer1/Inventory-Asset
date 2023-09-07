@@ -1,8 +1,11 @@
-
+   
+using System;
 using System.Collections.Generic;
 using System.Text;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
+
 //Author: Jaxon Schauer
 /// <summary>
 /// This class creates an Inventory that tracks and controls the inventory list. This class tells the InventoryUIManager what objects each slot holds
@@ -10,7 +13,7 @@ using UnityEngine.Events;
 
 
 [System.Serializable]
-internal class Inventory 
+public class Inventory 
 {
     private Dictionary<string, List<int>> itemPositions;//Holds all positions of a given itemType in the list
 
@@ -29,10 +32,9 @@ internal class Inventory
     private bool acceptAll;
     private bool rejectAll;
     private HashSet<string> exceptions;
-    private Dictionary<int, UnityEvent> enterDict;
-    private Dictionary<int, UnityEvent> exitDict;
+    private Dictionary<int, InventoryItemEvent> enterDict;
+    private Dictionary<int, InventoryItemEvent> exitDict;
     private Dictionary<int, bool> itemAction;
-
 
     /// <summary>
     /// Assigns essential variables for the Inventory
@@ -77,13 +79,15 @@ internal class Inventory
                 {
                     InventoryItem item = inventoryList[i];
                     newlist.Add(item);
-                    AddItemPosDict(item, i,false);
+                    AddItemHelper(item, i,false);
 
                 }
                 for (int i = newlist.Count; i < newSize; i++)
                 {
                     InventoryItem filler = new InventoryItem(true);
                     newlist.Add(filler);
+                    AddItemHelper(filler, i, false);
+
                 }
             }
             else
@@ -92,7 +96,7 @@ internal class Inventory
                 {
                     InventoryItem item = inventoryList[i];
                     newlist.Add(item);
-                    AddItemPosDict(item, i,false);
+                    AddItemHelper(item, i,false);
 
                 }
             }
@@ -130,18 +134,15 @@ internal class Inventory
         }
         InventoryItem newItem = new InventoryItem(item, item.GetAmount());
         InventoryItem curItem = inventoryList[index];
-        newItem.SetPosition(index);
-        newItem.SetInventory(inventoryName);
+
         if (curItem.GetIsNull())
         {
-            inventoryList[index] = newItem;
-            AddItemPosDict(newItem, index);
-
-            InventoryUIManagerInstance.UpdateSlot(index);
+            AddItemHelper(newItem, index);
         }
         else
         {
-            if(curItem.GetItemType() == newItem.GetItemType())
+
+            if (curItem.GetItemType() == newItem.GetItemType())
             {
                 if(curItem.GetAmount() + newItem.GetAmount() <= curItem.GetItemStackAmount())
                 {
@@ -198,10 +199,7 @@ internal class Inventory
             if (inventoryList[i].GetIsNull())
             {
                 InventoryItem newItem = new InventoryItem(item, amount);
-                newItem.SetPosition(i);
-                newItem.SetInventory(inventoryName);
-                inventoryList[i] = newItem;
-                AddItemPosDict(newItem, i);
+                AddItemHelper(newItem, i);
                 break;
             }
         }
@@ -209,20 +207,39 @@ internal class Inventory
     /// <summary>
     /// Adds itemstypes into <see cref="itemPositions"/> and tracks their positions for quick add/remove and count functions.
     /// </summary>
-    private void AddItemPosDict(InventoryItem item, int pos, bool invokeEnterExit = true)
+    private void AddItemHelper(InventoryItem item, int pos, bool invokeEnterExit = true)
     {
+        string empty = "Empty";
         if (!item.GetIsNull())
         {
+
+            InventoryItem newItem= new InventoryItem(item, item.GetAmount());
+
+            newItem.SetPosition(pos);
+            newItem.SetInventory(inventoryName);
+
+            inventoryList[pos] = newItem;
+
             if (!itemPositions.ContainsKey(item.GetItemType()))
             {
-                itemPositions.Add(item.GetItemType(), new List<int>() { pos });
+
+                if (itemPositions.ContainsKey(empty))
+                {
+                    itemPositions[empty].Remove(pos);
+                }
+                itemPositions.Add(item.GetItemType(), new List<int>());
+                itemPositions[item.GetItemType()].Add(pos);
+
                 InventoryUIManagerInstance.UpdateSlot(pos);
             }
             else
             {
+                if (itemPositions.ContainsKey(empty))
+                {
+                    itemPositions[empty].Remove(pos);
+                }
                 itemPositions[item.GetItemType()].Add(pos);
                 InventoryUIManagerInstance.UpdateSlot(pos);
-
             }
             if (invokeEnterExit&&enterDict!= null && enterDict.ContainsKey(pos))
             {
@@ -230,36 +247,30 @@ internal class Inventory
                 {
                     item.Selected();
                 }
-                enterDict[pos].Invoke();
+                enterDict[pos].Invoke(inventoryList[pos]);
             }
 
         }
+        else
+        {
+            if (!itemPositions.ContainsKey(empty))
+            {
+                itemPositions.Add(empty, new List<int>() { pos });
+            }
+            else
+            {
+               itemPositions[empty].Add(pos);
+            }
+        }
+
     }
 
     /// <summary>
     /// Takes as input a position, remove the item from the given inventory position.
     /// </summary>
-    public void RemoveItemInPosition(int pos, bool invokeEnterExit = true)
+    public void EraseItemInPosition(int pos, bool invokeEnterExit = true)
     {
-        if (!inventoryList[pos].GetIsNull())
-        {
-            if (itemPositions.ContainsKey(inventoryList[pos].GetItemType()))
-            {
-                itemPositions[inventoryList[pos].GetItemType()].Remove(pos);
-            }
-            else
-            {
-                Debug.LogWarning("ItemPositions Dictitonary Setup Incorrectly");
-            }
-        }
-
-        InventoryItem filler = new InventoryItem(true);
-        inventoryList[pos] = filler;
-        InventoryUIManagerInstance.UpdateSlot(pos);
-        if (invokeEnterExit && exitDict != null && exitDict.ContainsKey(pos))
-        {
-            exitDict[pos].Invoke();
-        }
+        RemoveItemHelper(inventoryList[pos],pos, invokeEnterExit);
     }
 
     /// <summary>
@@ -280,15 +291,7 @@ internal class Inventory
                 }
                 else
                 {
-                    itemPositions[item.GetItemType()].Remove(pos);
-                    InventoryItem filler = new InventoryItem(true);
-                    inventoryList[pos] = filler;
-                    InventoryUIManagerInstance.UpdateSlot(pos);
-                }
-                if (exitDict != null && exitDict.ContainsKey(pos))
-                {
-                    exitDict[pos].Invoke();
-                    InventoryUIManagerInstance.UpdateSlot(pos);
+                    RemoveItemHelper(item,pos);
                 }
             }
             else
@@ -303,7 +306,7 @@ internal class Inventory
     /// </summary>
     public void RemoveItemInPosition(InventoryItem item, int amount)
     {
-        int position = item.GetPosition();
+        int pos = item.GetPosition();
         if (!item.GetIsNull())
         {
             if (itemPositions.ContainsKey(item.GetItemType()))
@@ -314,17 +317,37 @@ internal class Inventory
                 }
                 else
                 {
-                    itemPositions[item.GetItemType()].Remove(position);
-                    InventoryItem filler = new InventoryItem(true);
-                    inventoryList[position] = filler;
+                    RemoveItemHelper(item,item.GetPosition());
                 }
-                InventoryUIManagerInstance.UpdateSlot(position);
             }
             else
             {
                 Debug.LogWarning("ItemPositions Dictitonary Setup Incorrectly");
             }
         }
+    }
+    /// <summary>
+    /// Handles item when it needs to be erased from inventory
+    /// </summary>
+    public void RemoveItemHelper(InventoryItem item, int pos, bool invokeEnterExit = true)
+    {
+        string empty = "Empty";
+        itemPositions[item.GetItemType()].Remove(pos);
+        if (itemPositions.ContainsKey(empty))
+        {
+            itemPositions[empty].Add(pos);
+
+        }
+        InventoryItem filler = new InventoryItem(true);
+
+        inventoryList[pos] = filler;
+        InventoryUIManagerInstance.UpdateSlot(pos);
+        if (invokeEnterExit && exitDict != null && exitDict.ContainsKey(pos))
+        {
+            exitDict[pos].Invoke(inventoryList[pos]);
+        }
+        InventoryUIManagerInstance.UpdateSlot(pos);
+
     }
 
     /// <summary>
@@ -339,7 +362,7 @@ internal class Inventory
         }
         if(!itemPositions.ContainsKey(itemType))
         {
-            Debug.LogError("ItemPositions doesn contain itemType: " + itemType + ". Returning 0");
+            Debug.LogError("ItemPositions does not contain itemType: " + itemType + ". Returning 0");
             return 0;
         }
         List<int> items = itemPositions[itemType];
@@ -349,6 +372,32 @@ internal class Inventory
             itemsTotal+= inventoryList[item].GetAmount();  
         }
         return itemsTotal;
+    }
+    /// <summary>
+    /// takes a string(itemType) as input. Checks whether or not the inventory has room for a item
+    /// </summary>
+    public bool Full(string item)
+    {
+        string empty = "Empty";
+        if(item == null || !itemPositions.ContainsKey(item))
+        {
+            return false;
+        }
+        List<int> itemPos = itemPositions[item];
+        if (itemPositions[empty].Count > 0)
+        {
+            return false;
+        }
+        foreach (int pos in itemPos)
+        {
+            InventoryItem curItem = inventoryList[pos];
+            if (curItem.GetAmount() < curItem.GetItemStackAmount())
+            {
+                return false;
+            }
+
+        }
+        return true;
     }
 
     /// <summary>
@@ -485,7 +534,7 @@ internal class Inventory
     {
         return saveInventory;
     }
-    public void SetExitEntranceDict(Dictionary<int, UnityEvent> enterDict, Dictionary<int, UnityEvent> exitDict, Dictionary<int, bool> itemAction)
+    public void SetExitEntranceDict(Dictionary<int, InventoryItemEvent> enterDict, Dictionary<int, InventoryItemEvent> exitDict, Dictionary<int, bool> itemAction)
     {
         this.enterDict = enterDict;
         this.exitDict = exitDict;

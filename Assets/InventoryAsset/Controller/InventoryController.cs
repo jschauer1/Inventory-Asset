@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 
 //Author: Jaxon Schauer
@@ -14,8 +15,8 @@ public class InventoryController : MonoBehaviour
     [Header("============[ Setup Confirmation ]============")]
     [Header("**********************************************")]
     [Header("Click the \"I Understand The Setup\" to show you understand")]
-    [Header("there should only ever be one InventoryController and the")]
-    [Header("InventoryController needs to be unpacked in the scene")]
+    [Header("there should only ever be one InventoryController and that")]
+    [Header("the InventoryController needs to be unpacked in the scene")]
     [Header("**********************************************")]
     [Tooltip("Toggle to confirm you understand the setup requirements.")]
     [SerializeField]
@@ -25,7 +26,7 @@ public class InventoryController : MonoBehaviour
 
     [Header("============[ Inventory Controller Setup ]============")]
     [Space(20)] 
-    [Tooltip("Assign Main Canvas Here")]
+    [Tooltip("Assign the main UI canvas.")]
     [SerializeField]
     private Transform UI; // UI canvas to build inventories on.
 
@@ -33,7 +34,7 @@ public class InventoryController : MonoBehaviour
 
     [Header("========[ Items Setup ]========")]
     [Header("NOTE: All changes to items must be made here")]
-    [Tooltip("Add templates for each accepted item.")]
+    [Tooltip("Add templates for each allowable inventory item.")]
     [SerializeField]
     public List<ItemInitializer> items; // Accepted items to add to the inventory.
 
@@ -52,7 +53,7 @@ public class InventoryController : MonoBehaviour
     [SerializeField, HideInInspector]
     private List<InventoryInitializer> prevInventoryTracker; // Previously initialized inventories, so they are not initialized again.
 
-
+    [Tooltip("Prefab for the inventory manager that controls each of the inventory UI's.")]
     [SerializeField]
     private GameObject inventoryManagerObj; // Prefab for the inventory manager.
 
@@ -164,7 +165,7 @@ public class InventoryController : MonoBehaviour
                 allInventoryUI.Add(tempinventoryUI);
 
                 string inventoryName = initializer.GetInventoryName();
-                int InventorySize = initializer.GetRow() * initializer.GetCol();
+                int InventorySize = initializer.GetRows() * initializer.GetCols();
                 Inventory curInventory = new Inventory(tempinventoryUI,inventoryName, InventorySize);
 
                 inventoryManager.Add(inventoryName, curInventory);
@@ -172,7 +173,7 @@ public class InventoryController : MonoBehaviour
                 InventoryUIManager inventoryUI = tempinventoryUI.GetComponent<InventoryUIManager>();
                 inventoryUI.SetVarsOnInit();
                 inventoryUI.SetInventory(ref curInventory);
-                inventoryUI.SetRowCol(initializer.GetRow(), initializer.GetCol());
+                inventoryUI.SetRowCol(initializer.GetRows(), initializer.GetCols());
                 inventoryUI.SetInventoryName(initializer.GetInventoryName());
                 inventoryUI.UpdateInventoryUI();
             }
@@ -369,7 +370,12 @@ public class InventoryController : MonoBehaviour
         }
         allInventoryUI.Clear();
         inventoryUIDict.Clear();
-        InventorySaveSystem.Reset();
+        //InventorySaveSystem.Reset(SceneManager.GetActiveScene().GetHashCode());
+    }
+
+    public void DeleteSaveInformation()
+    {
+        InventorySaveSystem.Reset(SceneManager.GetActiveScene().name);
     }
 
     /// <summary>
@@ -483,15 +489,21 @@ public class InventoryController : MonoBehaviour
     /// </summary>
     private void LoadSave()
     {
-        InventorySaveSystem.Create();
-        if (InventorySaveSystem.LoadItem() != null)
+        InventorySaveSystem.Create(SceneManager.GetActiveScene().name);
+        if (InventorySaveSystem.LoadItem(SceneManager.GetActiveScene().name) != null)
         {
-            InventoryData itemData = InventorySaveSystem.LoadItem();
+            InventoryData itemData = InventorySaveSystem.LoadItem(SceneManager.GetActiveScene().name);
             foreach (var pair in itemData.inventories)
             {
-                Inventory inventory = inventoryManager[pair.Key];
                 if (pair.Key == null)
                     continue;
+                if(!inventoryManager.ContainsKey(pair.Key))
+                {
+                    Debug.LogError(pair.Key + "does not exist in inventoryManager. This may be caused by having two scenes with the same name utilizing save mechanism");
+                    continue;
+                }
+                Inventory inventory = inventoryManager[pair.Key];
+
                 if (!inventory.GetSaveInventory())
                 {
                     continue;
@@ -667,7 +679,7 @@ public class InventoryController : MonoBehaviour
         return false;
     }
 
-    internal Inventory GetInventory(string inventoryName)
+    public Inventory GetInventory(string inventoryName)
     {
         return inventoryManager[inventoryName];
     }
@@ -689,6 +701,6 @@ public class InventoryController : MonoBehaviour
 
     private void OnDestroy()
     {
-        InventorySaveSystem.SaveInventory(inventoryManager);
+        InventorySaveSystem.SaveInventory(inventoryManager, SceneManager.GetActiveScene().name);
     }
 }

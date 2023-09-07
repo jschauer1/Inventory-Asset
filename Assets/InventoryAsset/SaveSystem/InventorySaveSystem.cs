@@ -6,18 +6,18 @@ using Unity.VisualScripting;
 
 internal static class InventorySaveSystem
 {
-    public static void SaveInventory(Dictionary<string, Inventory> inventoryManager)
+    public static void SaveInventory(Dictionary<string, Inventory> inventoryManager, string saveLocation)
     {
         BinaryFormatter formatter= new BinaryFormatter();
-        string path = Application.persistentDataPath + "/Item";
+        string path = Application.persistentDataPath + "/" + saveLocation.ToString();
         FileStream fileStream = new FileStream(path, FileMode.Create);
         InventoryData InventoryData = new InventoryData(inventoryManager);
         formatter.Serialize(fileStream, InventoryData);
         fileStream.Close();
     }
-    public static InventoryData LoadItem()
+    public static InventoryData LoadItem(string saveLocation)
     {
-        string path = Application.persistentDataPath + "/Item";
+        string path = Application.persistentDataPath + "/" + saveLocation.ToString();
         if(File.Exists(path))
         {
             FileStream fileStream = new FileStream(path, FileMode.Open);
@@ -37,9 +37,9 @@ internal static class InventorySaveSystem
             return null;
         }
     }
-    public static void Create()
+    public static void Create(string saveLocation)
     {
-        string path = Application.persistentDataPath + "/Item";
+        string path = Application.persistentDataPath + "/" + saveLocation.ToString();
         if (!File.Exists(path))
         {
             FileStream fileStream = new FileStream(path, FileMode.Create);
@@ -47,9 +47,9 @@ internal static class InventorySaveSystem
         }
     }
 
-    public static void Reset()
+    public static void Reset(string saveLocation)
     {
-        string path = Application.persistentDataPath + "/Item";
+        string path = Application.persistentDataPath + "/" + saveLocation.ToString();
         if (File.Exists(path))
         {
             File.Delete(path);

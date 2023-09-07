@@ -18,11 +18,11 @@ public class InventoryInitializer
 
     [Tooltip("Number of rows for the inventory layout.")]
     [SerializeField]
-    private int row;
+    private int rows;
 
     [Tooltip("Number of columns for the inventory layout.")]
     [SerializeField]
-    private int col;
+    private int cols;
 
     [SerializeField, HideInInspector]
     private bool initialized = false;
@@ -30,21 +30,21 @@ public class InventoryInitializer
     {
         return inventoryName;
     }
-    public int GetRow()
+    public int GetRows()
     {
-        return row;
+        return rows;
     }
-    public int GetCol()
+    public int GetCols()
     {
-        return col;
+        return cols;
     }
-    public void SetRow(int row)
+    public void SetRows(int rows)
     {
-        this.row = row;
+        this.rows = rows;
     }
-    public void SetCol(int col)
+    public void SetCols(int cols)
     {
-        this.col = col;
+        this.cols = cols;
     }
     public void SetInventoryName(string inventoryName)
     {
@@ -60,20 +60,26 @@ public class InventoryInitializer
     }
     public override int GetHashCode()
     {
-        return HashCode.Combine(inventoryName, row, col);
+        unchecked 
+        {
+            int hash = 17;
+            hash = hash * 23 + (inventoryName?.GetHashCode() ?? 0);
+            hash = hash * 23 + rows.GetHashCode();
+            hash = hash * 23 + cols.GetHashCode();
+            return hash;
+        }
     }
-
     public override bool Equals(object obj)
     {
         return obj is InventoryInitializer initializer &&
                inventoryName == initializer.inventoryName &&
-               row == initializer.row &&
-               col == initializer.col;
+               rows == initializer.rows &&
+               cols == initializer.cols;
     }
     public void Copy(InventoryInitializer initilizer)
     {
         inventoryName = initilizer.inventoryName;  
-        row = initilizer.row;
-        col = initilizer.col;
+        rows = initilizer.rows;
+        cols = initilizer.cols;
     }
 }

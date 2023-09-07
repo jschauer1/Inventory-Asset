@@ -22,36 +22,38 @@ public class InventoryUIManager : MonoBehaviour
     [SerializeField, HideInInspector]
     private Inventory inventory; // Reference to the associated inventory object.
 
-    [Tooltip("Number of columns for the inventory layout.")]
-    [SerializeField]
-    private int col;
-
     [Tooltip("Number of rows for the inventory layout.")]
     [SerializeField]
-    private int row;
+    private int rows;
+
+    [Tooltip("Number of columns for the inventory layout.")]
+    [SerializeField]
+    private int cols;
 
     [Tooltip("Prefab representing an individual item slot.")]
     [SerializeField]
     private GameObject slot;
 
-    [Tooltip("Sets the slots image, selected image is not necessary")]
+    [Tooltip("Sets the slots image. Selected image is optional.")]
     [SerializeField]
     private slotImages SlotImage;
-
-    [Tooltip("Spacing between individual slots in the inventory.")]
-    [SerializeField]
-    private Vector2 slotGap;
 
     [Tooltip("Size dimensions of each slot.")]
     [SerializeField]
     private Vector2 slotSize;
 
+    [Tooltip("Spacing between individual slots in the inventory. It is recommended to use the same dimensions as slot size.")]
+    [SerializeField]
+    private Vector2 slotGap;
+
     [Tooltip("Size factor for the item image displayed in a slot. Gets multiplied by the slot size.")]
     [SerializeField]
     private Vector2 ItemImageSizeFactor;
 
+    [Tooltip("Size of the text displaying item quantity, if chosen to display.")]
     [SerializeField] private float textSize;
 
+    [Tooltip("Position of the item quantity text relative to the slot.")]
     [SerializeField] private Vector3 textPosition;
 
     [Header("========[Background Settings]========")]
@@ -60,16 +62,16 @@ public class InventoryUIManager : MonoBehaviour
     [SerializeField]
     private GameObject background;
 
-    [Tooltip("Active and deactivate background")]
+    [Tooltip("Activate and deactivate background.")]
     [SerializeField] bool activeBackground;
 
     [Tooltip("Dimensions for adjusting the background size.")]
     [SerializeField]
-    private Vector2 backgroundBoarder;
+    private Vector2 backgroundBorder;
 
     [Tooltip("Offset for positioning slots with respect to the background.")]
     [SerializeField]
-    private Vector2 slotOffSetToBackground;
+    private Vector2 slotOffsetToBackground;
 
     // Item Acceptance Configuration
     [Header("========[ Item Acceptance Configuration ]========")]
@@ -92,28 +94,26 @@ public class InventoryUIManager : MonoBehaviour
     [SerializeField]
     private bool draggable;
 
-    [Tooltip("Allow items to be highlighted when selected. NOTE: Must also be enabled in item.")]
+    [Tooltip("Allow items to be highlighted when selected. NOTE: Pressable must also be enabled in item.")]
     [SerializeField]
     private bool clickable;
     [Tooltip("Enable saving the state of the inventory.")]
     [SerializeField]
     private bool saveInventory;
-    [Tooltip("Invokes item action when item enters inventory")]
-    [SerializeField]
-    bool clickItemOnEnter;
-    [Tooltip("Key that toggles the visibility/enabling of the inventory. Must be a character.")]
+    [Tooltip("Key that toggles the visibility/enabling of the inventory. Must be a char.")]
     [SerializeField]
     private List<char> toggleOnButtonPress;
-    [Tooltip("Connection between keys and inventory slots for slot highlighting.")]
+    [Tooltip("Defines which keys should highlight/press their given slots.")]
     [SerializeField]
-    List<PressableSlot> highLightSlotOnPress;
+    List<PressableSlot> pressSlotOnPress;
     [Tooltip("Sets actions for when an item enter or exits a specific inventory slot.")]
     [SerializeField] 
     List<invokeOnExit> itemEntryExitAction;
-    [Tooltip("Makes test items for setting up how items appear in inventory")]
+    [Tooltip("Makes test items for seeing how items will appear in the inventory. NOTE: these items will not persist once you press play.")]
     [SerializeField]
     List<TestItem> testItems;
-
+    [SerializeField]
+    private onMiss invokeOnMiss;
 
     Dictionary<string, int> slotPress = new Dictionary<string, int>();//Links the string and the position to highlight on press.
 
@@ -124,9 +124,9 @@ public class InventoryUIManager : MonoBehaviour
     //Holds and organizes slots
     [SerializeField, HideInInspector]
     private List<GameObject> slots = new List<GameObject>();
-    private List<Vector2> slotsvec = new List<Vector2>();
-    private Dictionary<Vector2, GameObject> slotPositionsVec = new Dictionary<Vector2, GameObject>();
-    private Dictionary<int, GameObject> slotPos = new Dictionary<int, GameObject>();
+    private List<Vector2> AllSlotVectorPos = new List<Vector2>();
+    private Dictionary<Vector2, GameObject> VectorPositionToSlotDict = new Dictionary<Vector2, GameObject>();
+    private Dictionary<int, GameObject> positionToSlotDict = new Dictionary<int, GameObject>();
 
     public void Awake()
     {
@@ -148,42 +148,44 @@ public class InventoryUIManager : MonoBehaviour
     private void Update()
     {
         HighLightOnButtonPress();
-        if(Input.GetKeyDown(KeyCode.Mouse0))
-        {
-            ResetHighlight();
-        }
+
     }
 
     /// <summary>
-    /// Called only when Initialize Inventories is pressed
+    /// Initializes essential variables only when Initialize Inventory button is pressed. Sets up a default inventoryUI
     /// </summary>
     public void SetVarsOnInit()
     {
         SlotImage.regular = slot.GetComponent<Image>().sprite;
         slotSize = slot.GetComponent<RectTransform>().sizeDelta;
         slotGap = slotSize;
-        GameObject slotChild = slot.GetComponent<Slot>().GetSlotChildInstance();
+
+        GameObject slotChild = slot.GetComponent<Slot>().GetItemHolder();
         RectTransform slotChildRect = slotChild.GetComponent<RectTransform>();
         ItemImageSizeFactor = new Vector2(slotChildRect.sizeDelta.x/slot.GetComponent<RectTransform>().sizeDelta.x, slotChildRect.sizeDelta.y/slot.GetComponent<RectTransform>().sizeDelta.y);
-        textSize = slot.GetComponent<Slot>().GetSlotChildInstance().GetComponent<DragItem>().GetTextSize();
-    }
 
-    public void initializeItems()
+        textSize = slot.GetComponent<Slot>().GetItemHolder().GetComponent<DragItem>().GetTextSize();
+    }
+    /// <summary>
+    /// Creates test reference items to hellp design UI.
+    /// NOTE: Only for reference, will not be added at runtime.
+    /// </summary>
+    public void initializeTestItems()
     {
         if(testItems != null && !Application.isPlaying)
         {
             foreach (TestItem item in testItems)
             {
-                if (slotPos.ContainsKey(item.position))
+                if (positionToSlotDict.ContainsKey(item.position))
                 {
-                    Slot slot = slotPos[item.position].GetComponent<Slot>();
-                    slot.GetSlotChildInstance().GetComponent<DragItem>().SetImage(item.image);
-                    slot.GetSlotChildInstance().GetComponent<DragItem>().SetTextTestImage(item.amount);
-                    slot.GetSlotChildInstance().SetActive(true);
+                    Slot slot = positionToSlotDict[item.position].GetComponent<Slot>();
+                    slot.GetItemHolder().GetComponent<DragItem>().SetImage(item.image);
+                    slot.GetItemHolder().GetComponent<DragItem>().SetTextTestImage(item.amount);
+                    slot.GetItemHolder().SetActive(true);
                 }
                 else
                 {
-                    Debug.LogWarning("Position does not exist");
+                    Debug.LogWarning("Test Position does not exist");
                 }
             }
         }
@@ -201,7 +203,7 @@ public class InventoryUIManager : MonoBehaviour
             inventory.Init();
 
             SetSaveInventory();
-            inventory.Resize(row * col);
+            inventory.Resize(rows * cols);
 
             InventoryUIReset();
 
@@ -218,7 +220,7 @@ public class InventoryUIManager : MonoBehaviour
             {
                 background.SetActive(true);
             }
-            initializeItems();
+            initializeTestItems();
 
         }
     }
@@ -244,9 +246,9 @@ public class InventoryUIManager : MonoBehaviour
             }
         }
         slots.Clear();
-        slotsvec.Clear();
-        slotPositionsVec.Clear();
-        slotPos.Clear();
+        AllSlotVectorPos.Clear();
+        VectorPositionToSlotDict.Clear();
+        positionToSlotDict.Clear();
         slotPress.Clear();
     }
 
@@ -267,18 +269,18 @@ public class InventoryUIManager : MonoBehaviour
         {
             return;
         }
-        if (slotsvec.Count <= 0)
+        if (AllSlotVectorPos.Count <= 0)
         {
             return;
         }
         RectTransform rectTransform = background.GetComponent<RectTransform>();
-        Vector2 backGroundArea = slotsvec[0] - slotsvec[slotsvec.Count - 1];
-        rectTransform.sizeDelta = new Vector2((Mathf.Abs(backGroundArea.x) + backgroundBoarder.x), Mathf.Abs(backGroundArea.y) + backgroundBoarder.y);
-        background.transform.position = new Vector2(transform.position.x + slotOffSetToBackground.x, transform.position.y+slotOffSetToBackground.y);
+        Vector2 backGroundArea = AllSlotVectorPos[0] - AllSlotVectorPos[AllSlotVectorPos.Count - 1];
+        rectTransform.sizeDelta = new Vector2((Mathf.Abs(backGroundArea.x) + backgroundBorder.x), Mathf.Abs(backGroundArea.y) + backgroundBorder.y);
+        background.transform.position = new Vector2(transform.position.x + slotOffsetToBackground.x, transform.position.y+slotOffsetToBackground.y);
     }
 
     /// <summary>
-    /// Creates all slots on the inventory UI, applying the slot gap and other offsets accordingly
+    /// Creates all slots on the inventory UI, applying the slot gap and other offsets accordingly.
     /// Adds the slots into dictionaries and lists to track them
     /// Uses <see cref="SetSlotOrder"/> 
     /// </summary>
@@ -292,9 +294,9 @@ public class InventoryUIManager : MonoBehaviour
         // Start from the top-left corner of the InventoryUI
         Vector2 startPlacementPos = rectTransform.right;
 
-        for (int curRow = 0; curRow < row; curRow++)
+        for (int curRow = 0; curRow < rows; curRow++)
         {
-            for (int curCol = 0; curCol < col; curCol++)
+            for (int curCol = 0; curCol < cols; curCol++)
             {
                 // Calculate the x and y position for each slot using the original slotGap and slotOffset values
                 float placeMentPosX = startPlacementPos.x + (curCol * slotGap.x);
@@ -309,10 +311,10 @@ public class InventoryUIManager : MonoBehaviour
                 slotObjectInstance.GetComponent<Slot>().SetChildImageSize(new Vector2(slotSize.x * ItemImageSizeFactor.x, slotSize.y * ItemImageSizeFactor.y));
                 slotObjectInstance.GetComponent<Slot>().SetTextSize(textSize);
                 slotObjectInstance.GetComponent<Slot>().SetTextOffset(textPosition);
-
-                slotPositionsVec.Add(new Vector2(curRow, curCol), slotObjectInstance);
+                slotObjectInstance.GetComponent<Slot>().SetReturnOnMiss(invokeOnMiss.destroyOnMiss);
+                VectorPositionToSlotDict.Add(new Vector2(curRow, curCol), slotObjectInstance);
                 slots.Add(slotObjectInstance);
-                slotsvec.Add(placeMentPos);
+                AllSlotVectorPos.Add(placeMentPos);
             }
         }
     }
@@ -325,19 +327,19 @@ public class InventoryUIManager : MonoBehaviour
         switch (slotStartPosition)
         {
             case StartPositions.TopRight:
-                SetSlotOrder(new Vector2(0, col-1), "down", "left");
+                SetSlotOrder(new Vector2(0, cols-1), "down", "left");
                 break;
             case StartPositions.TopLeft:
                 SetSlotOrder(new Vector2(0, 0), "down", "right");
                 break;
             case StartPositions.BottomLeft:
-                SetSlotOrder(new Vector2(row - 1, 0), "up", "right");
+                SetSlotOrder(new Vector2(rows - 1, 0), "up", "right");
                 break;
             case StartPositions.BottomRight:
-                SetSlotOrder(new Vector2(row - 1, col - 1), "up", "left");
+                SetSlotOrder(new Vector2(rows - 1, cols - 1), "up", "left");
                 break;
             default:
-                SetSlotOrder(new Vector2(row-1, 0), "up", "right");
+                SetSlotOrder(new Vector2(rows-1, 0), "up", "right");
                 break;
         }
 
@@ -364,14 +366,14 @@ public class InventoryUIManager : MonoBehaviour
     /// </summary>
     private void SetSlotOrder(Vector2 startPosition, string moveVerticle, string moveHorizontal)
     {
-        if (slotPos == null)
+        if (positionToSlotDict == null)
              Debug.LogError("SlotPos Null");
 
 
-        if (slotPositionsVec == null)
+        if (VectorPositionToSlotDict == null)
             Debug.LogError("SlotPositionVec Null");
 
-        slotPos.Clear();
+        positionToSlotDict.Clear();
 
         int rowChange = 0;
         int colChange = 0;
@@ -399,15 +401,15 @@ public class InventoryUIManager : MonoBehaviour
         Vector2 currentPos = startPosition;
         int currentPosition = 0;
 
-        for (int curRow = 0; curRow < row; curRow++)
+        for (int curRow = 0; curRow < rows; curRow++)
         {
-            for (int curCol = 0; curCol < col; curCol++)
+            for (int curCol = 0; curCol < cols; curCol++)
             {
-                if (slotPositionsVec.ContainsKey(currentPos))
+                if (VectorPositionToSlotDict.ContainsKey(currentPos))
                 {
-                    GameObject slot = slotPositionsVec[currentPos];
+                    GameObject slot = VectorPositionToSlotDict[currentPos];
                     slot.GetComponent<Slot>().SetPosition(currentPosition);
-                    slotPos[currentPosition] = slot;
+                    positionToSlotDict[currentPosition] = slot;
                     currentPosition++;
                 }
                 currentPos += new Vector2(0, colChange);  // Move horizontally first
@@ -419,7 +421,7 @@ public class InventoryUIManager : MonoBehaviour
     /// <summary>
     /// Sets slot selected calling <see cref="InventoryItem.Selected"/> when invoked
     /// </summary>
-    public void SetSelected(GameObject slot, bool overRide = false)
+    public void SetPressed(GameObject slot, bool overRide = false)
     {
         Slot slotInstance = slot.GetComponent<Slot>();
         InventoryItem item = slotInstance.GetItem();
@@ -490,7 +492,7 @@ public class InventoryUIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Uses <see cref="SetSelected"/>  to highlight a user defined slot on the press of a user defined button.
+    /// Uses <see cref="SetPressed"/>  to highlight a user defined slot on the press of a user defined button.
     /// </summary>
     private void HighLightOnButtonPress()
     {
@@ -500,7 +502,7 @@ public class InventoryUIManager : MonoBehaviour
             if (slotPress.ContainsKey(input))
             {
                 int position = slotPress[input];
-                SetSelected(slotPos[position],true);
+                SetPressed(positionToSlotDict[position],true);
             }
         }
     }
@@ -510,7 +512,7 @@ public class InventoryUIManager : MonoBehaviour
     /// </summary>
     private void InitSlotPressDict()
     {
-        foreach (PressableSlot press in highLightSlotOnPress)
+        foreach (PressableSlot press in pressSlotOnPress)
         {
             if (!slotPress.ContainsKey(press.buttonPress.ToString()))
             {
@@ -532,8 +534,8 @@ public class InventoryUIManager : MonoBehaviour
 
         if(itemEntryExitAction.Count != 0)
         {
-            Dictionary<int, UnityEvent> enter = new Dictionary<int, UnityEvent>();
-            Dictionary<int, UnityEvent> exit = new Dictionary<int, UnityEvent>();
+            Dictionary<int, InventoryItemEvent> enter = new Dictionary<int, InventoryItemEvent>();
+            Dictionary<int, InventoryItemEvent> exit = new Dictionary<int, InventoryItemEvent>();
             Dictionary<int, bool>actItem = new Dictionary<int, bool>(); 
             foreach(invokeOnExit enterExit in itemEntryExitAction)
             {
@@ -593,7 +595,6 @@ public class InventoryUIManager : MonoBehaviour
         }
         return true;
     }
-    
     /// <summary>
     /// Connects the button press and position values.
     /// </summary>
@@ -611,9 +612,9 @@ public class InventoryUIManager : MonoBehaviour
     [System.Serializable]
     private struct slotImages
     {
-        [Tooltip("Displays regular slot image")]
+        [Tooltip("Displays regular slot image.")]
         public Sprite regular;
-        [Tooltip("OPTIONAL: Displays slot Image when selected")]
+        [Tooltip("OPTIONAL: Displays slot Image when selected.")]
         public Sprite selected;
     }
 
@@ -627,7 +628,7 @@ public class InventoryUIManager : MonoBehaviour
 
         public int slotpos;
 
-        public UnityEvent action;
+        public InventoryItemEvent action;
 
         public bool ItemActOnEnter;
     }
@@ -639,6 +640,20 @@ public class InventoryUIManager : MonoBehaviour
         public int amount;
 
         public int position;
+    }
+    [System.Serializable]
+    private struct onMiss
+    {
+        public bool destroyOnMiss;
+
+        public InventoryItemPosEvent action;
+
+
+    }
+
+    public void InvokeMiss(Vector3 pos,InventoryItem item)
+    {
+        invokeOnMiss.action.Invoke(pos,item);
     }
 
     /// <summary>
@@ -659,10 +674,10 @@ public class InventoryUIManager : MonoBehaviour
         inventory.SetSave(saveInventory);
     }
 
-    public void SetRowCol(int row, int col)
+    public void SetRowCol(int rows, int cols)
     {
-        this.row = row;
-        this.col = col;
+        this.rows = rows;
+        this.cols = cols;
         UpdateInventoryUI();
     }
 
@@ -689,9 +704,9 @@ public class InventoryUIManager : MonoBehaviour
 
     public void UpdateSlot(int location)
     {
-        if(slotPos.ContainsKey(location))
+        if(positionToSlotDict.ContainsKey(location))
         {
-            slotPos[location].GetComponent<Slot>().UpdateSlot();
+            positionToSlotDict[location].GetComponent<Slot>().UpdateSlot();
 
         }
         else
