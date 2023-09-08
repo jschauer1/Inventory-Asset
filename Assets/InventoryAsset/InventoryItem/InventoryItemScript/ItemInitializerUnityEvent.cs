@@ -3,8 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-[System.Serializable]
-public class InventoryItemEvent : UnityEvent<InventoryItem> { }
-[System.Serializable]
-public class InventoryItemPosEvent : UnityEvent<Vector3,InventoryItem> { }
+namespace InventorySystem
+{
+    //Author: Jaxon Schauer
+    /// <summary>
+    /// Allows unity events with an inventoryItem input variable
+    /// </summary>
+    [System.Serializable]
+    public class InventoryItemEvent : UnityEvent<InventoryItem> { }
+    /// <summary>
+    /// Allows unity events with an inventoryItem and vector3 input variable
+    /// </summary>
+    [System.Serializable]
+    public class InventoryItemPosEvent : UnityEvent<Vector3, InventoryItem> { }
+}
 

@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+using InventorySystem;
 using UnityEngine;
 
 internal class FashionApplicator : MonoBehaviour
@@ -36,6 +35,8 @@ internal class FashionApplicator : MonoBehaviour
     }
     public void DropItem(Vector3 pos, InventoryItem item)
     {
-        Instantiate(item.GetRelatedGameObject(), pos, Quaternion.identity);
+        for(int i = 0; i < item.GetAmount(); i++) {
+            Instantiate(item.GetRelatedGameObject(), pos, Quaternion.identity);
+        }
     }
 }

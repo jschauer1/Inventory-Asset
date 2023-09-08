@@ -1,37 +1,43 @@
 using UnityEditor;
 using UnityEngine;
-
-[CustomEditor(typeof(InventoryUIManager))]
-internal class InventoryUIReact : Editor
+namespace InventorySystem
 {
-    private bool needToUpdate = false;
-
-    public override void OnInspectorGUI()
+    //Author: Jaxon Schauer
+    /// <summary>
+    /// This updates the inventory ui when the inspector for the inventorUImanager changes.
+    /// </summary>
+    [CustomEditor(typeof(InventoryUIManager))]
+    internal class InventoryUIReact : Editor
     {
-        EditorGUI.BeginChangeCheck();
+        private bool needToUpdate = false;
 
-        // Draw default inspector content.
-        DrawDefaultInspector();
-
-        // Check if anything was changed.
-        if (EditorGUI.EndChangeCheck())
+        public override void OnInspectorGUI()
         {
-            needToUpdate = true;
-        }
+            EditorGUI.BeginChangeCheck();
 
-        // If any changes in the inspector.
-        if (needToUpdate)
-        {
-            // Reference to the InventoryUI script.
-            InventoryUIManager inventoryUI = (InventoryUIManager)target;
+            // Draw default inspector content.
+            DrawDefaultInspector();
 
-            // Apply changes to inventory display.
-            inventoryUI.UpdateInventoryUI();
+            // Check if anything was changed.
+            if (EditorGUI.EndChangeCheck())
+            {
+                needToUpdate = true;
+            }
 
-            // Mark object as dirty.
-            EditorUtility.SetDirty(inventoryUI);
+            // If any changes in the inspector.
+            if (needToUpdate)
+            {
+                // Reference to the InventoryUI script.
+                InventoryUIManager inventoryUI = (InventoryUIManager)target;
 
-            needToUpdate = false;
+                // Apply changes to inventory display.
+                inventoryUI.UpdateInventoryUI();
+
+                // Mark object as dirty.
+                EditorUtility.SetDirty(inventoryUI);
+
+                needToUpdate = false;
+            }
         }
     }
 }

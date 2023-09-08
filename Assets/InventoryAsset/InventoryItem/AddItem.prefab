@@ -47,7 +47,7 @@ MonoBehaviour:
   items:
   - itemType: RegularHat
     itemImage: {fileID: 21300000, guid: f7073997e01659f42b216b4ccd21d1f7, type: 3}
-    maxStackAmount: 0
+    maxStackAmount: 5
     myEvent:
       m_PersistentCalls:
         m_Calls:
@@ -70,7 +70,7 @@ MonoBehaviour:
     isNull: 0
   - itemType: TurqoiseHat
     itemImage: {fileID: 21300000, guid: 224805dfcadb0454186e72a3cdf63075, type: 3}
-    maxStackAmount: 2
+    maxStackAmount: 5
     myEvent:
       m_PersistentCalls:
         m_Calls:
@@ -87,13 +87,13 @@ MonoBehaviour:
             m_BoolArgument: 0
           m_CallState: 2
     displayItemAmount: 1
-    RelatedGameObject: {fileID: 0}
+    RelatedGameObject: {fileID: 279518529245610320, guid: df4a5c275e2165849b7d7ae60df7548f, type: 3}
     draggable: 1
     pressable: 1
     isNull: 0
   - itemType: RedHat
     itemImage: {fileID: 21300000, guid: 05cab5a2474012d469d761af5b17a79d, type: 3}
-    maxStackAmount: 2
+    maxStackAmount: 5
     myEvent:
       m_PersistentCalls:
         m_Calls:
@@ -110,29 +110,29 @@ MonoBehaviour:
             m_BoolArgument: 0
           m_CallState: 2
     displayItemAmount: 1
-    RelatedGameObject: {fileID: 0}
+    RelatedGameObject: {fileID: 279518529245610320, guid: e0ce371b621dd0f48833c9d5388c97ee, type: 3}
     draggable: 1
     pressable: 1
     isNull: 0
   inventories:
   - inventoryName: Hotbar
-    rows: 0
-    cols: 0
+    rows: 1
+    cols: 9
     initialized: 1
   - inventoryName: Armor
-    rows: 0
-    cols: 0
+    rows: 1
+    cols: 1
     initialized: 1
   - inventoryName: Chest
-    rows: 0
-    cols: 0
+    rows: 3
+    cols: 3
     initialized: 1
   selectedItemIndex: 0
   SelectedInventoryIndex: 0
   item:
     itemType: RegularHat
     itemImage: {fileID: 21300000, guid: f7073997e01659f42b216b4ccd21d1f7, type: 3}
-    maxStackAmount: 0
+    maxStackAmount: 5
     myEvent:
       m_PersistentCalls:
         m_Calls:
@@ -155,7 +155,7 @@ MonoBehaviour:
     isNull: 0
   inventory:
     inventoryName: Hotbar
-    rows: 0
-    cols: 0
+    rows: 1
+    cols: 9
     initialized: 1
   controller: {fileID: 0}

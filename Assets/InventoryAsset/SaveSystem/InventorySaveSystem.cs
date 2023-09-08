@@ -4,55 +4,63 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 
-internal static class InventorySaveSystem
+namespace InventorySystem
 {
-    public static void SaveInventory(Dictionary<string, Inventory> inventoryManager, string saveLocation)
+    //Author Jaxon Schauer
+    /// <summary>
+    /// Static class, takes in inventory data converts it into binary and places into a save location
+    /// </summary>
+    public static class InventorySaveSystem
     {
-        BinaryFormatter formatter= new BinaryFormatter();
-        string path = Application.persistentDataPath + "/" + saveLocation.ToString();
-        FileStream fileStream = new FileStream(path, FileMode.Create);
-        InventoryData InventoryData = new InventoryData(inventoryManager);
-        formatter.Serialize(fileStream, InventoryData);
-        fileStream.Close();
-    }
-    public static InventoryData LoadItem(string saveLocation)
-    {
-        string path = Application.persistentDataPath + "/" + saveLocation.ToString();
-        if(File.Exists(path))
+        public static void SaveInventory(Dictionary<string, Inventory> inventoryManager, string saveLocation)
         {
-            FileStream fileStream = new FileStream(path, FileMode.Open);
-            if (fileStream.Length == 0)
+            BinaryFormatter formatter = new BinaryFormatter();
+            string path = Application.persistentDataPath + "/" + saveLocation.ToString();
+            FileStream fileStream = new FileStream(path, FileMode.Create);
+            InventoryData InventoryData = new InventoryData(inventoryManager);
+            formatter.Serialize(fileStream, InventoryData);
+            fileStream.Close();
+        }
+        public static InventoryData LoadItem(string saveLocation)
+        {
+            string path = Application.persistentDataPath + "/" + saveLocation.ToString();
+            if (File.Exists(path))
             {
+                FileStream fileStream = new FileStream(path, FileMode.Open);
+                if (fileStream.Length == 0)
+                {
+                    fileStream.Close();
+                    return null;
+                }
+                BinaryFormatter formatter = new BinaryFormatter();
+                InventoryData InventoryData = formatter.Deserialize(fileStream) as InventoryData;
                 fileStream.Close();
+                return InventoryData;
+            }
+            else
+            {
+                Debug.LogError("Save File " + path + " does not exist");
                 return null;
             }
-            BinaryFormatter formatter = new BinaryFormatter();
-            InventoryData InventoryData = formatter.Deserialize(fileStream) as InventoryData;
-            fileStream.Close();
-            return InventoryData;
         }
-        else
+        public static void Create(string saveLocation)
         {
-            Debug.LogError("Save File " + path + " does not exist");
-            return null;
+            string path = Application.persistentDataPath + "/" + saveLocation.ToString();
+            if (!File.Exists(path))
+            {
+                FileStream fileStream = new FileStream(path, FileMode.Create);
+                fileStream.Close();
+            }
         }
-    }
-    public static void Create(string saveLocation)
-    {
-        string path = Application.persistentDataPath + "/" + saveLocation.ToString();
-        if (!File.Exists(path))
-        {
-            FileStream fileStream = new FileStream(path, FileMode.Create);
-            fileStream.Close();
-        }
-    }
 
-    public static void Reset(string saveLocation)
-    {
-        string path = Application.persistentDataPath + "/" + saveLocation.ToString();
-        if (File.Exists(path))
+        public static void Reset(string saveLocation)
         {
-            File.Delete(path);
+            string path = Application.persistentDataPath + "/" + saveLocation.ToString();
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
         }
     }
 }
+

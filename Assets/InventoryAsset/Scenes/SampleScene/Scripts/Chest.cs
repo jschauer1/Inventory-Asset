@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
-namespace JaxonSchauer.InventorySystem
+using static System.Net.Mime.MediaTypeNames;
+
+namespace InventorySystem
 {
     internal class Chest : MonoBehaviour
     {
@@ -8,11 +10,13 @@ namespace JaxonSchauer.InventorySystem
         [SerializeField] private RectTransform inventoryRectTransform; // Changed from GameObject to RectTransform
         [SerializeField] private float distance;
         [SerializeField] private Vector3 offset;
+        [SerializeField] GameObject text;
         private Camera mainCamera;
         private Canvas canvas; // The canvas that the inventory is a child of
 
         private void Start()
         {
+            text.SetActive(true);
             mainCamera = Camera.main;
 
             // Assuming the parent of the inventory is the canvas
@@ -33,11 +37,14 @@ namespace JaxonSchauer.InventorySystem
             if ((player.transform.position - transform.position).magnitude < distance)
             {
                 InventoryController.instance.AddToggleKey("Chest", 'e');
+                text.SetActive(true);
+
             }
             else
             {
                 inventoryRectTransform.gameObject.SetActive(false);
                 InventoryController.instance.RemoveToggleKey("Chest", 'e');
+                text.SetActive(false);
             }
         }
     }

@@ -133,27 +133,35 @@ MonoBehaviour:
     InventoryUIManagerInstance: {fileID: 0}
     size: 0
     saveInventory: 0
-  col: 0
-  row: 0
+  rows: 0
+  cols: 0
   slot: {fileID: 8410958526561248465, guid: 430821e15f399204a836c6e0d281640f, type: 3}
-  SlotImage: {fileID: 0}
-  slotGap: {x: 100, y: 100}
-  slotSize: {x: 0, y: 0}
-  ItemImageSize: {x: 0, y: 0}
+  SlotImage:
+    regular: {fileID: 0}
+    selected: {fileID: 0}
+  slotSize: {x: 50, y: 50}
+  slotGap: {x: 50, y: 50}
+  ItemImageSizeFactor: {x: 50, y: 50}
   textSize: 0
   textPosition: {x: 0, y: 0, z: 0}
   background: {fileID: 6115909223194364314}
   activeBackground: 0
-  backgroundBoarder: {x: 0, y: 0}
-  slotOffSetToBackground: {x: 0, y: 0}
-  slotStartPosition: 0
-  draggable: 0
-  highlightable: 0
-  saveInventory: 0
-  clickItemOnEnter: 0
-  toggleOnButtonPress: 
-  highLightSlotOnPress: []
-  itemEntryExitAction: []
+  backgroundBorder: {x: 0, y: 0}
+  slotOffsetToBackground: {x: 0, y: 0}
   acceptance: 0
   exceptions: []
+  slotStartPosition: 0
+  draggable: 0
+  clickable: 0
+  saveInventory: 0
+  toggleOnButtonPress: 
+  pressSlotOnPress: []
+  itemEntryExitAction: []
+  testItems: []
+  invokeOnMiss:
+    destroyOnMiss: 0
+    action:
+      m_PersistentCalls:
+        m_Calls: []
+  moveOnPress: []
   slots: []
