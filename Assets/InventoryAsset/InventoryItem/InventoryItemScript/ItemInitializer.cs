@@ -22,21 +22,11 @@ namespace InventorySystem
         [SerializeField]
         private int maxStackAmount;
 
-        // This event is likely linked to item-specific behavior and isn't meant for direct modification.
-        [Tooltip("Event triggered in relation to this item.")]
-        [SerializeField, HideInInspector]
-        private InventoryItemEvent myEvent;
-
         [Tooltip("Display the quantity/amount of the item on its icon.")]
         [SerializeField]
         private bool displayItemAmount;
         // Optional Item Configurations
         [Header("========[ Optional Configurations ]========")]
-
-        [Tooltip("Game object implementation of the item that can be set up to be affected it.")]
-        [SerializeField]
-        private GameObject RelatedGameObject;
-
         [Tooltip("Determines if the item can be dragged within inventories.")]
         [SerializeField]
         private bool draggable;
@@ -44,6 +34,14 @@ namespace InventorySystem
         [Tooltip("Determines if the item can be highlighted when selected.")]
         [SerializeField]
         private bool pressable;
+
+        [Tooltip("Game object implementation of the item that can be set up to be affected it.")]
+        [SerializeField]
+        private GameObject RelatedGameObject;
+
+        [Tooltip("Event triggered in relation to this item.")]
+        [SerializeField]
+        private InventoryItemEvent itemAction;
 
         [SerializeField, HideInInspector]
         private bool isNull = false;
@@ -90,7 +88,7 @@ namespace InventorySystem
         }
         public InventoryItemEvent GetEvent()
         {
-            return myEvent;
+            return itemAction;
         }
         public GameObject GetRelatedGameObject()
         {

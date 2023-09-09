@@ -22,11 +22,11 @@ namespace InventorySystem
         [SerializeField]
         private TextMeshProUGUI text;
 
+        //determines how item acts on miss;
         private bool returnOnMiss = false;
-
+        private bool dropped = true;
         /// The text UI element for displaying item information
         private GameObject prevslot;
-
         /// Initializes the CurrentSlot on start
         private void Start()
         {
@@ -92,8 +92,9 @@ namespace InventorySystem
         public void OnBeginDrag(PointerEventData eventData)
         {
             if (Draggable()) return;
-            if (CurrentSlot != null)
+            if (CurrentSlot != null && dropped)
             {
+                dropped = false;
                 CurrentSlot.ResetSlot();
                 transform.SetParent(CurrentSlot.GetInventoryUI().GetUI());
             }
@@ -134,7 +135,7 @@ namespace InventorySystem
 
             if (!foundSlot)
             {
-                HandleInvalidPlacement(eventData.position);
+                HandleInvalidPlacement();
             }
         }
 
@@ -147,7 +148,8 @@ namespace InventorySystem
             bool slotNull = slot.GetItem().GetIsNull();
             bool itemStackable = !slot.GetItem().GetIsNull() && (slot.GetItem().GetItemType() == item.GetItemType()) && (slot.GetItem().GetAmount() + item.GetAmount()) <= slot.GetItem().GetItemStackAmount();
             bool itemAcceptedInInventory = slot.GetInventoryUI().GetInventory().CheckAcceptance(item.GetItemType());
-            if (slotNull || itemStackable && itemAcceptedInInventory)
+
+            if ((slotNull || itemStackable) && itemAcceptedInInventory)
             {
                 InventoryController.instance.AddItemPos(slot.GetInventoryUI().GetInventoryName(), item, slot.GetPosition());
                 slot.GetInventoryUI().UnHighlight(result.gameObject);
@@ -156,14 +158,22 @@ namespace InventorySystem
             }
             else
             {
-                HandleInvalidPlacement(new Vector3(0, 0, 0), true);
+                if(itemAcceptedInInventory)
+                {
+                    HandleInvalidPlacementOverInv(slot.GetItem());
+
+                }
+                else
+                {
+                    HandleInvalidPlacement(true);
+                }
             }
         }
 
         /// <summary>
         /// Handles invalid placements based on user input. Can destroy the item, return item to original position, and invoke a user given function with <see cref="InventoryUIManager.InvokeMiss(Vector3, InventoryItem)"/>  
         /// </summary>
-        private void HandleInvalidPlacement(Vector3 position, bool isOverride = false)
+        private void HandleInvalidPlacement(bool isOverride = false)
         {
             Vector3 mousePosition = Input.mousePosition;
             Camera cam = Camera.main;
@@ -176,16 +186,28 @@ namespace InventorySystem
                 {
                     CurrentSlot.GetInventoryUI().InvokeMiss(worldPosition, item);
                 }
+                dropped = true;
                 Destroy(gameObject);
             }
             else
             {
                 CurrentSlot.GetInventoryUI().InvokeMiss(worldPosition, item);
+                dropped = true;
                 Destroy(gameObject);
             }
 
         }
-
+        private void HandleInvalidPlacementOverInv(InventoryItem inSlot)
+        {
+            if(CurrentSlot.GetInventoryUI().InvokeMissOverSlot(item, inSlot))
+            {
+                Destroy(gameObject);
+            }
+            else
+            {
+                HandleInvalidPlacement(true);
+            }
+        }
 
         /// <summary>
         /// Checks if the item is draggable
@@ -217,7 +239,6 @@ namespace InventorySystem
                 }
             }
         }
-
         public void SetTextTestImage(int amount)
         {
             text.SetText(amount.ToString());

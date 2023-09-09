@@ -23,6 +23,7 @@ namespace InventorySystem
         private bool displayAmount;
         private int position;
         private string inventory;
+        private string previousInventory;
         internal InventoryItem(ItemInitializer init)
         {
             this.amount = 1;
@@ -56,6 +57,7 @@ namespace InventorySystem
             this.displayAmount = other.GetDisplayAmount();
             this.inventory = other.inventory;
             this.position = other.position;
+            this.previousInventory= other.previousInventory;
         }
 
         public InventoryItem(bool isNull)
@@ -126,6 +128,7 @@ namespace InventorySystem
         }
         public void SetInventory(string inventory)
         {
+            previousInventory = this.inventory;
             this.inventory = inventory;
         }
         public string GetInventory()
@@ -135,11 +138,12 @@ namespace InventorySystem
         public override string ToString()
         {
             string result = $@"
-        ItemType: {itemType}
-        Inventory: {inventory}
-        Item Position: {position}
-        Item Amount: {amount}
-        Max Item Amount: {maxStackAmount}";
+            ItemType: {itemType}
+            Inventory: {inventory}
+            previousInventory: {previousInventory}
+            Item Position: {position}
+            Item Amount: {amount}
+            Max Item Amount: {maxStackAmount}";
             return result;
 
 

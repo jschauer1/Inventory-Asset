@@ -1,10 +1,10 @@
    
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Events;
+
 namespace InventorySystem
 {
     //Author: Jaxon Schauer
@@ -151,8 +151,12 @@ namespace InventorySystem
                     }
                     else
                     {
-                        AddItemLinearly(newItem, newItem.GetAmount());
+                        AddItemAuto(newItem, newItem.GetAmount());
                     }
+                }
+                else
+                {
+                    AddItemAuto(newItem, newItem.GetAmount());
                 }
             }
         }
@@ -161,29 +165,41 @@ namespace InventorySystem
         /// Takes an item as input
         /// Adds the item at the lowest possible inventory location, adding it into the <see cref="itemPositions"/> to allow for efficient tracking of the inventory items
         /// </summary>
-        public void AddItemLinearly(InventoryItem item, int amount = 1)
+        public void AddItemAuto(InventoryItem item, int amount = 1)
         {
             if (!CheckAcceptance(item.GetItemType()))
             {
                 Debug.LogWarning("Inventory is set to not accept this item. Overruling and adding item.");
             }
-            if (itemPositions.ContainsKey(item.GetItemType()))
+            InventoryItem newItem = new InventoryItem(item, amount);
+            if (itemPositions.ContainsKey(newItem.GetItemType()))
             {
-                for (int i = 0; i < itemPositions[item.GetItemType()].Count; i++)
+                for (int i = 0; i < itemPositions[newItem.GetItemType()].Count; i++)
                 {
-                    int position = itemPositions[item.GetItemType()][i];
-                    if (inventoryList[position].GetItemStackAmount() >= inventoryList[position].GetAmount() + amount)
+                    int position = itemPositions[newItem.GetItemType()][i];
+                    if (inventoryList[position].GetItemStackAmount() >= inventoryList[position].GetAmount())
                     {
-                        inventoryList[position].SetAmount(inventoryList[position].GetAmount() + item.GetAmount());
+                        int diff = inventoryList[position].GetItemStackAmount() - inventoryList[position].GetAmount();
+                        if(newItem.GetAmount() > diff)
+                        {
+                            inventoryList[position].SetAmount(inventoryList[position].GetAmount() + diff);
+                            newItem.SetAmount(newItem.GetAmount() - diff);
+                        }
+                        else
+                        {
+                            inventoryList[position].SetAmount(inventoryList[position].GetAmount() + newItem.GetAmount());
+                            InventoryUIManagerInstance.UpdateSlot(position);
+                            return;
+
+                        }
                         InventoryUIManager.GetComponent<InventoryUIManager>().UpdateSlot(position);
-                        return;
                     }
                 }
-                AddLinearly(item, amount);
+                AddLinearly(newItem, newItem.GetAmount());
             }
             else
             {
-                AddLinearly(item, amount);
+                AddLinearly(newItem, newItem.GetAmount());
             }
 
         }
@@ -193,14 +209,30 @@ namespace InventorySystem
         /// </summary>
         private void AddLinearly(InventoryItem item, int amount = 1)
         {
+            int trackAmount = amount;
             for (int i = 0; i < inventoryList.Count; i++)
             {
 
                 if (inventoryList[i].GetIsNull())
                 {
-                    InventoryItem newItem = new InventoryItem(item, amount);
-                    AddItemHelper(newItem, i);
-                    break;
+                    if(item.GetItemStackAmount() < trackAmount)
+                    {
+                        InventoryItem newItem = new InventoryItem(item, item.GetItemStackAmount());
+                        AddItemHelper(newItem, i);
+                        trackAmount = trackAmount - item.GetItemStackAmount();
+
+                    }
+                    else
+                    {
+                        InventoryItem newItem = new InventoryItem(item, trackAmount);
+                        AddItemHelper(newItem, i);
+                        trackAmount = trackAmount - amount;
+
+                    }
+                    if (trackAmount <= 0)
+                    {
+                        break;
+                    }
                 }
             }
         }
@@ -217,7 +249,6 @@ namespace InventorySystem
 
                 newItem.SetPosition(pos);
                 newItem.SetInventory(inventoryName);
-
                 inventoryList[pos] = newItem;
 
                 if (!itemPositions.ContainsKey(item.GetItemType()))
@@ -245,9 +276,9 @@ namespace InventorySystem
                 {
                     if (itemAction[pos])
                     {
-                        item.Selected();
+                        newItem.Selected();
                     }
-                    enterDict[pos].Invoke(inventoryList[pos]);
+                    enterDict[pos].Invoke(newItem);
                 }
 
             }
@@ -327,6 +358,33 @@ namespace InventorySystem
                 }
             }
         }
+        public void RemoveItemAuto(string itemType, int amount)
+        {
+            if(!itemPositions.ContainsKey(itemType))
+            {
+                Debug.Log("No items of type " + itemType + " in " + inventoryName);
+                return;
+            }
+            List<int> positions = itemPositions[itemType];
+            List<int> delpos = new List<int>();
+            int trackAmount = amount;
+            foreach (int position in positions)
+            {
+                if (trackAmount-inventoryList[position].GetAmount() < 0)
+                {
+                    inventoryList[position].SetAmount(inventoryList[position].GetAmount()-trackAmount);
+                    InventoryUIManagerInstance.UpdateSlot(position);
+                    break;
+                }
+                trackAmount -= inventoryList[position].GetAmount();
+                delpos.Add(position);
+            }
+            foreach(int position in delpos)
+            {
+                RemoveItemHelper(itemType, position);
+            }
+            
+        }
         /// <summary>
         /// Handles item when it needs to be erased from inventory
         /// </summary>
@@ -334,6 +392,29 @@ namespace InventorySystem
         {
             string empty = "Empty";
             itemPositions[item.GetItemType()].Remove(pos);
+            if (itemPositions.ContainsKey(empty))
+            {
+                itemPositions[empty].Add(pos);
+
+            }
+            InventoryItem filler = new InventoryItem(true);
+
+            inventoryList[pos] = filler;
+            InventoryUIManagerInstance.UpdateSlot(pos);
+            if (invokeEnterExit && exitDict != null && exitDict.ContainsKey(pos))
+            {
+                exitDict[pos].Invoke(inventoryList[pos]);
+            }
+            InventoryUIManagerInstance.UpdateSlot(pos);
+
+        }
+        /// <summary>
+        /// Handles item when it needs to be erased from inventory
+        /// </summary>
+        public void RemoveItemHelper(string item, int pos, bool invokeEnterExit = true)
+        {
+            string empty = "Empty";
+            itemPositions[item].Remove(pos);
             if (itemPositions.ContainsKey(empty))
             {
                 itemPositions[empty].Add(pos);

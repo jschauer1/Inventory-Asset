@@ -46,6 +46,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inventoryName: Armor
   position: 2
-  testAmount: 1
+  testAmount: 5
   testToggleKey: 69
   testItem: RedHat

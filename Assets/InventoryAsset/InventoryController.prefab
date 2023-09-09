@@ -47,23 +47,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   iUnderstandTheSetup: 0
   UI: {fileID: 0}
-  items:
-  - itemType: 
-    itemImage: {fileID: 0}
-    maxStackAmount: 0
-    myEvent:
-      m_PersistentCalls:
-        m_Calls: []
-    displayItemAmount: 0
-    GameObjectAction: {fileID: 0}
-    draggable: 0
-    pressable: 0
-    isNull: 0
+  items: []
   initializeInventory: []
   prevInventoryTracker: []
   inventoryManagerObj: {fileID: 786238521913745463}
-  allInventoryUI:
-  - {fileID: 0}
+  allInventoryUI: []
 --- !u!1001 &7470098373698172190
 PrefabInstance:
   m_ObjectHideFlags: 0

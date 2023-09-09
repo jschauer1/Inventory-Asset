@@ -1,8 +1,11 @@
+using System;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using static UnityEditor.PlayerSettings;
+using static UnityEditor.Progress;
 
 namespace InventorySystem
 {
@@ -16,7 +19,7 @@ namespace InventorySystem
         private GameObject previouslyHighlighted;
 
         // Inventory UI Configuration
-        [Header("============[ Inventory UI Setup ]============")]
+        [Header("========[ Inventory UI Setup ]========")]
         [Tooltip("Name of the inventory for identification purposes.")]
         [SerializeField]
         private string inventoryName;
@@ -57,7 +60,7 @@ namespace InventorySystem
         [SerializeField] private float textSize;
 
         [Tooltip("Position of the item quantity text relative to the slot.")]
-        [SerializeField] private Vector3 textPosition;
+        [SerializeField] private Vector2 textPosition;
 
         [Header("========[Background Settings]========")]
 
@@ -103,22 +106,59 @@ namespace InventorySystem
         [Tooltip("Enable saving the state of the inventory.")]
         [SerializeField]
         private bool saveInventory;
+
+        [Space(10)]
+        [Header("***Allows you to choose keys that")]
+        [Space(-10)]
+        [Header("enable and disable the inventory.***")]
+        [Space(5)]
         [Tooltip("Key that toggles the visibility/enabling of the inventory. Must be a char.")]
         [SerializeField]
         private List<char> toggleOnButtonPress;
+
+        [Space(10)]
+        [Header("***Selects a specific slot when playing the")]
+        [Space(-10)]
+        [Header("item action on button press.***")]
+        [Space(5)]
         [Tooltip("Defines which keys should highlight/press their given slots.")]
         [SerializeField]
-        List<PressableSlot> pressSlotOnPress;
+        List<PressableSlot> SelectSlotOnButtonPress;
+
+        [Space(10)]
+        [Header("***Performs a given action when an")]
+        [Space(-10)]
+        [Header("item exits/enters inventory.***")]
+        [Space(5)]
         [Tooltip("Sets actions for when an item enter or exits a specific inventory slot.")]
         [SerializeField]
         List<invokeOnExit> itemEntryExitAction;
+
+        [Space(10)]
+        [Header("***Moves an item to a specified inventory")]
+        [Space(-10)]
+        [Header("when clicked while holding specified button.***")]
+        [Space(5)]
+        [SerializeField]
+        List<ItemMoveOnPress> moveItemOnButtonPress;
+
+        [Space(10)]
+        [Header("***Adds test items to inventory in editor")]
+        [Space(-10)]
+        [Header("helping design the inventory UI.***")]
+        [Space(5)]
         [Tooltip("Makes test items for seeing how items will appear in the inventory. NOTE: these items will not persist once you press play.")]
         [SerializeField]
         List<TestItem> testItems;
+
+        [Space(10)]
+        [Header("***Invokes actions when no valid slot is")]
+        [Space(-10)]
+        [Header("found for an item.***")]
+        [Space(5)]
+        [Tooltip("Sets actions for when an item enter or exits a specific inventory slot.")]
         [SerializeField]
         private ItemMissInfo invokeOnMiss;
-        [SerializeField]
-        List<ItemMoveOnPress> moveOnPress;
 
         Dictionary<string, int> slotPress = new Dictionary<string, int>(); //Links the string and the position to highlight on press.
         Dictionary<KeyCode, string> movePress; //Links the string and the position to highlight on press.
@@ -513,7 +553,7 @@ namespace InventorySystem
                     !InventoryController.instance.InventoryFull(movePress[key], item.GetItemType()))
                 {
                     InventoryController.instance.RemoveItem(inventoryName, item, item.GetAmount());
-                    InventoryController.instance.AddItemLinearly(movePress[key], item.GetItemType(), item.GetAmount());
+                    InventoryController.instance.AddItem(movePress[key], item.GetItemType(), item.GetAmount());
                 }
                 else
                 {
@@ -526,7 +566,7 @@ namespace InventorySystem
         /// </summary>
         private void InitSlotPressDict()
         {
-            foreach (PressableSlot press in pressSlotOnPress)
+            foreach (PressableSlot press in SelectSlotOnButtonPress)
             {
                 if (!slotPress.ContainsKey(press.buttonPress.ToString()))
                 {
@@ -542,7 +582,7 @@ namespace InventorySystem
         public void InitMovePressDict()
         {
             movePress = new Dictionary<KeyCode, string>();
-            foreach (ItemMoveOnPress move in moveOnPress)
+            foreach (ItemMoveOnPress move in moveItemOnButtonPress)
             {
                 switch (move.moveButton)
                 {
@@ -750,17 +790,26 @@ namespace InventorySystem
         {
             public bool destroyOnMiss;
 
-            public InventoryItemPosEvent action;
+            public InventoryItemPosEvent missAction;
+
+            public InventoryItemSwapEvent missOverSlotAction;
         }
 
         public void InvokeMiss(Vector3 pos, InventoryItem item)
         {
-            invokeOnMiss.action.Invoke(pos, item);
+            invokeOnMiss.missAction.Invoke(pos, item);
         }
 
-        /// <summary>
-        /// Returns the item at a given inventory position
-        /// </summary>
+        public bool InvokeMissOverSlot(InventoryItem item1, InventoryItem item2)
+        {
+            if(invokeOnMiss.missOverSlotAction!=null && !(invokeOnMiss.missOverSlotAction.GetPersistentEventCount()==0))
+            {
+                invokeOnMiss.missOverSlotAction.Invoke(item1, item2);
+                return true;
+            }
+            return false;
+        }
+
         public InventoryItem GetInventoryItem(int index)
         {
             return inventory.InventoryGetItem(index);

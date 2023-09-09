@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using InventorySystem;
 
@@ -14,7 +12,7 @@ public class Hat : MonoBehaviour
         {
             if(!InventoryController.instance.InventoryFull("Hotbar",hatName))
             {
-                InventoryController.instance.AddItemLinearly("Hotbar", hatName);
+                InventoryController.instance.AddItem("Hotbar", hatName);
                 Destroy(gameObject);
 
             }

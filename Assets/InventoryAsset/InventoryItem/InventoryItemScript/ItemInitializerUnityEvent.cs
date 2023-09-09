@@ -16,5 +16,8 @@ namespace InventorySystem
     /// </summary>
     [System.Serializable]
     public class InventoryItemPosEvent : UnityEvent<Vector3, InventoryItem> { }
+
+    [System.Serializable]
+    public class InventoryItemSwapEvent : UnityEvent<InventoryItem, InventoryItem> { }
 }
 

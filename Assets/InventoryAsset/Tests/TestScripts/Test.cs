@@ -65,7 +65,6 @@ namespace InventorySystem
             Debug.Log("5. Test Add Item At Position");
             Debug.Log("6. Test Count Items");
             Debug.Log("7. Test Inventory Full");
-
             Debug.Log("0. Print All Tests");
 
         }
@@ -81,7 +80,7 @@ namespace InventorySystem
         }
         public void TestRemoveItem(int pos)
         {
-            InventoryController.instance.RemoveItemPos(inventoryName, pos, testAmount);
+            InventoryController.instance.RemoveItem(inventoryName, testItem, testAmount);
         }
         public void TestInventoryDictPos()
         {
@@ -103,7 +102,7 @@ namespace InventorySystem
         }
         public void TestAddItem()
         {
-            InventoryController.instance.AddItemLinearly(inventoryName, testItem, testAmount);
+            InventoryController.instance.AddItem(inventoryName, testItem, testAmount);
 
         }
         public void TestAddItemPos()
@@ -114,6 +113,10 @@ namespace InventorySystem
         public void TestInventoryFull()
         {
             Debug.Log(InventoryController.instance.GetInventory(inventoryName).Full(testItem));
+        }
+        public void PrintItemData(InventoryItem item)
+        {
+            Debug.Log(item);
         }
     }
 }

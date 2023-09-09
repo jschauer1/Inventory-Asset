@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+
 namespace InventorySystem
 {
     public class AddItem : MonoBehaviour
@@ -53,7 +54,11 @@ namespace InventorySystem
         }
         public void Start()
         {
-            InventoryController.instance.AddItemLinearly(inventory.GetInventoryName(), item.GetItemType());
+            if (InventoryController.instance == null)
+            {
+                Destroy(gameObject);
+            }
+            InventoryController.instance.AddItem(inventory.GetInventoryName(), item.GetItemType());
         }
     }
 }

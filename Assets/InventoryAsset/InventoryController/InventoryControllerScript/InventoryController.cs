@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
 
 namespace InventorySystem
 {
@@ -16,7 +17,7 @@ namespace InventorySystem
         [Header("**********************************************")]
         [Header("Click the \"I Understand The Setup\" to show you understand")]
         [Header("there should only ever be one InventoryController and that")]
-        [Header("the InventoryController needs to be unpacked in the scene")]
+        [Header("the InventoryController prefab must be unpacked in the scene")]
         [Header("**********************************************")]
         [Tooltip("Toggle to confirm you understand the setup requirements.")]
         [SerializeField]
@@ -264,9 +265,9 @@ namespace InventorySystem
         }
 
         /// <summary>
-        /// Adds a new item to a specified inventory, in the lowest possible location. Uses <see cref="Inventory.AddItemLinearly(InventoryItem, int)/>
+        /// Adds a new item to a specified inventory, in the lowest possible location. Uses <see cref="Inventory.AddItemAuto(InventoryItem, int)/>
         /// </summary>
-        public void AddItemLinearly(string inventoryName, string itemType, int amount = 1)
+        public void AddItem(string inventoryName, string itemType, int amount = 1)
         {
             if (!(TestInventoryDict(inventoryName) && TestItemDict(itemType)))
             {
@@ -274,7 +275,7 @@ namespace InventorySystem
             }
             Inventory inventory = inventoryManager[inventoryName];
             InventoryItem item = new InventoryItem(itemManager[itemType], amount);
-            inventory.AddItemLinearly(item, amount);
+            inventory.AddItemAuto(item, amount);
         }
 
         /// <summary>
@@ -282,7 +283,7 @@ namespace InventorySystem
         /// </summary>
         public void RemoveItemPos(string inventoryName, int position, int amount)
         {
-            if (!(TestInventoryDict(inventoryName)))
+            if (!TestInventoryDict(inventoryName))
             {
                 return;
             }
@@ -290,7 +291,15 @@ namespace InventorySystem
             inventory.RemoveItemInPosition(position, amount);
 
         }
-
+        public void RemoveItem(string inventoryName,string itemType, int amount)
+        {
+            if (!(TestInventoryDict(inventoryName) && TestItemDict(itemType)))
+            {
+                return;
+            }
+            Inventory inventory = inventoryManager[inventoryName];
+            inventory.RemoveItemAuto(itemType, amount);
+        }
         /// <summary>
         /// Removes the item passed into the function
         /// </summary>
@@ -309,7 +318,9 @@ namespace InventorySystem
             Inventory inventory = inventoryManager[inventoryName];
             inventory.RemoveItemInPosition(item, amount);
         }
-
+        /// <summary>
+        /// Checks if the given inventory has space for the given itemType. Returns false if space is available 
+        /// </summary>
         public bool InventoryFull(string inventoryName, string itemType)
         {
             if (!TestInventoryDict(inventoryName))
@@ -322,7 +333,7 @@ namespace InventorySystem
 
         }
         /// <summary>
-        /// Checks the input string exist in the <see cref="inventoryManager"/> and is not null.
+        /// Checks the input string exist in the <see cref="inventoryManager"/> and is not null
         /// </summary>
         private bool TestInventoryDict(string inventoryName)
         {
@@ -635,7 +646,7 @@ namespace InventorySystem
                     }
                     if (countInstance > 1)
                     {
-                        Debug.LogError("You Can Only Have One Of Each Inventory Name");
+                        Debug.LogError("There can only be one of each Inventory");
 
                         return false;
                     }
