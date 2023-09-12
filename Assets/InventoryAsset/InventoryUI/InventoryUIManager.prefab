@@ -137,13 +137,14 @@ MonoBehaviour:
   cols: 0
   slot: {fileID: 8410958526561248465, guid: 430821e15f399204a836c6e0d281640f, type: 3}
   SlotImage:
-    regular: {fileID: 0}
+    regular: {fileID: 21300000, guid: c38aea2122dd80c48b08d694d4a7cd02, type: 3}
     selected: {fileID: 0}
   slotSize: {x: 50, y: 50}
   slotGap: {x: 50, y: 50}
   ItemImageSizeFactor: {x: 50, y: 50}
+  ItemImageOffset: {x: 0, y: 0}
   textSize: 0
-  textPosition: {x: 0, y: 0, z: 0}
+  textPosition: {x: 0, y: 0}
   background: {fileID: 6115909223194364314}
   activeBackground: 0
   backgroundBorder: {x: 0, y: 0}
@@ -155,13 +156,16 @@ MonoBehaviour:
   clickable: 0
   saveInventory: 0
   toggleOnButtonPress: 
-  pressSlotOnPress: []
+  SelectSlotOnButtonPress: []
   itemEntryExitAction: []
+  moveItemOnButtonPress: []
   testItems: []
   invokeOnMiss:
     destroyOnMiss: 0
-    action:
+    missAction:
       m_PersistentCalls:
         m_Calls: []
-  moveOnPress: []
+    missOverSlotAction:
+      m_PersistentCalls:
+        m_Calls: []
   slots: []

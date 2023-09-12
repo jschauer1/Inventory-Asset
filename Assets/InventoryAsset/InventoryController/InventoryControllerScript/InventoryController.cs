@@ -62,7 +62,6 @@ namespace InventorySystem
         private List<GameObject> allInventoryUI = new List<GameObject>(); // Holds all inventory UI instances for each inventory created.
         private Dictionary<string, Inventory> inventoryManager = new Dictionary<string, Inventory>(); // Dictionary to map inventory names to their Inventory object.
         private Dictionary<string, GameObject> inventoryUIDict = new Dictionary<string, GameObject>(); // Dictionary to map inventory names to their GameObject.
-
         private Dictionary<string, InventoryItem> itemManager = new Dictionary<string, InventoryItem>(); // Dictionary to map item names to their objects.
         private Dictionary<string, List<GameObject>> EnableDisableDict = new Dictionary<string, List<GameObject>>(); // Dictionary to map a key press to which inventory it should enable/disable.
 
@@ -224,7 +223,14 @@ namespace InventorySystem
             foreach (ItemInitializer item in items)
             {
                 InventoryItem newItem = new InventoryItem(item);
-                itemManager.Add(item.GetItemType(), newItem);
+                if(!itemManager.ContainsKey(newItem.GetItemType()))
+                {
+                    itemManager.Add(item.GetItemType(), newItem);
+                }
+                else
+                {
+                    Debug.LogError("There can only be one of each ItemType");
+                }
             }
         }
 
@@ -329,8 +335,10 @@ namespace InventorySystem
             }
             Inventory inventory = inventoryManager[inventoryName];
             return inventory.Full(itemType);
-
-
+        }
+        public void InventoryClear(string inventoryName)
+        {
+            inventoryManager[inventoryName].Clear();
         }
         /// <summary>
         /// Checks the input string exist in the <see cref="inventoryManager"/> and is not null

@@ -1,11 +1,6 @@
-using System;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
-using static UnityEditor.PlayerSettings;
-using static UnityEditor.Progress;
 
 namespace InventorySystem
 {
@@ -23,7 +18,6 @@ namespace InventorySystem
         [Tooltip("Name of the inventory for identification purposes.")]
         [SerializeField]
         private string inventoryName;
-        Chest test;
 
         [SerializeField, HideInInspector]
         private Inventory inventory; // Reference to the associated inventory object.
@@ -55,6 +49,8 @@ namespace InventorySystem
         [Tooltip("Size factor for the item image displayed in a slot. Gets multiplied by the slot size.")]
         [SerializeField]
         private Vector2 ItemImageSizeFactor;
+        [SerializeField]
+        private Vector2 ItemImageOffset;
 
         [Tooltip("Size of the text displaying item quantity, if chosen to display.")]
         [SerializeField] private float textSize;
@@ -198,13 +194,34 @@ namespace InventorySystem
             HighLightOnButtonPress();
         }
         /// <summary>
+        /// Allows background even when not child object to align activation with slots
+        /// </summary>
+        private void OnEnable()
+        {
+            if(background!=null&&activeBackground)
+            {
+                background.SetActive(true);
+
+            }
+        }
+        /// <summary>
+        /// Allows background even when not child object to align activation with slots
+        /// </summary>
+        private void OnDisable()
+        {
+            if (background != null && activeBackground)
+            {
+                background.SetActive(false);
+            }
+        }
+        /// <summary>
         /// Initializes essential variables only when the Initialize Inventory button is pressed. Sets up a default inventoryUI
         /// </summary>
         public void SetVarsOnInit()
         {
             InventoryUIManager manager = InventoryController.instance.GetInventoryManagerPrefab().GetComponent<InventoryUIManager>();
 
-            SlotImage.regular = slot.GetComponent<Image>().sprite;
+            SlotImage.regular = manager.GetSlotImage();
             slotSize = manager.GetSlotSize();
             slotGap = manager.GetSlotGap();
 
@@ -212,6 +229,7 @@ namespace InventorySystem
             GameObject slotChild = slot.GetComponent<Slot>().GetItemHolder();
             RectTransform slotChildRect = slotChild.GetComponent<RectTransform>();
             ItemImageSizeFactor = new Vector2(slotChildRect.sizeDelta.x / slot.GetComponent<RectTransform>().sizeDelta.x, slotChildRect.sizeDelta.y / slot.GetComponent<RectTransform>().sizeDelta.y);
+            slot.GetComponent<Slot>().GetItemHolder().GetComponent<DragItem>().Initiailize();
 
             textSize = slot.GetComponent<Slot>().GetItemHolder().GetComponent<DragItem>().GetTextSize();
         }
@@ -233,14 +251,7 @@ namespace InventorySystem
             SetBackground();
             UpdateInventory();
             InitSlotEnterExitDict();
-            if (background != null && !activeBackground)
-            {
-                background.SetActive(false);
-            }
-            else if (background != null && activeBackground)
-            {
-                background.SetActive(true);
-            }
+            BackgroundActivity();
             initializeTestItems();
         }
 
@@ -319,10 +330,12 @@ namespace InventorySystem
                     slotObjectInstance.GetComponent<RectTransform>().localPosition = placeMentPos;
                     slotObjectInstance.GetComponent<RectTransform>().sizeDelta = slotSize;
                     slotObjectInstance.GetComponent<Image>().sprite = SlotImage.regular;
-                    slotObjectInstance.GetComponent<Slot>().SetChildImageSize(new Vector2(slotSize.x * ItemImageSizeFactor.x, slotSize.y * ItemImageSizeFactor.y));
-                    slotObjectInstance.GetComponent<Slot>().SetTextSize(textSize);
-                    slotObjectInstance.GetComponent<Slot>().SetTextOffset(textPosition);
-                    slotObjectInstance.GetComponent<Slot>().SetReturnOnMiss(invokeOnMiss.destroyOnMiss);
+                    Slot slotInstance = slotObjectInstance.GetComponent<Slot>();
+                    slotInstance.SetChildImageSize(new Vector2(slotSize.x * ItemImageSizeFactor.x, slotSize.y * ItemImageSizeFactor.y));
+                    slotInstance.SetTextSize(textSize);
+                    slotInstance.SetTextOffset(textPosition);
+                    slotInstance.SetReturnOnMiss(invokeOnMiss.destroyOnMiss);
+                    slotInstance.SetImageOffSet(ItemImageOffset);
                     VectorPositionToSlotDict.Add(new Vector2(curRow, curCol), slotObjectInstance);
                     slots.Add(slotObjectInstance);
                     AllSlotVectorPos.Add(placeMentPos);
@@ -646,6 +659,7 @@ namespace InventorySystem
                         Slot slot = positionToSlotDict[item.position].GetComponent<Slot>();
                         slot.GetItemHolder().GetComponent<DragItem>().SetImage(item.image);
                         slot.GetItemHolder().GetComponent<DragItem>().SetTextTestImage(item.amount);
+                        slot.SetImageOffSet(ItemImageOffset);
                         slot.GetItemHolder().SetActive(true);
                     }
                     else
@@ -655,7 +669,20 @@ namespace InventorySystem
                 }
             }
         }
-
+        /// <summary>
+        /// Allows brackground activity to make all inventory activity
+        /// </summary>
+        public void BackgroundActivity()
+        {
+            if (background != null && !activeBackground)
+            {
+                background.SetActive(false);
+            }
+            else if (background != null && activeBackground)
+            {
+                background.SetActive(true);
+            }
+        }
         /// <summary>
         /// Passes needed information to map enter/exit actions for items 
         /// into <see cref="Inventory.SetExitEntranceDict(Dictionary{int, InventoryItemEvent}, Dictionary{int, InventoryItemEvent}, Dictionary{int, bool})"/>
@@ -907,6 +934,10 @@ namespace InventorySystem
         public Vector3 GetSlotGap()
         {
             return slotGap;
+        }
+        public Sprite GetSlotImage()
+        {
+            return SlotImage.regular;
         }
         private enum StartPositions
         {

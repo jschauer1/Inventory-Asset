@@ -1,42 +1,45 @@
-# Inventory-Asset
-inventorySystem for Unity
-Banner or Logo
-Optional: Insert a banner or logo for your asset here.
+# `inventorySystem` for Unity
 
-Description
-inventorySystem is a comprehensive and customizable inventory management solution designed for Unity developers. Whether you're building an RPG, a strategy game, or any other genre requiring an inventory system, this asset is tailored to meet your needs.
+`inventorySystem` is a robust and adaptable inventory management solution crafted for Unity developers. Whether you're venturing into an RPG, strategizing for a strategy game, or diving into any genre that demands an inventory system,
+this asset is sculpted to cater to your requirements.
 
-Features
-Drag & Drop Interface: Easily move items within the inventory.
-Customizable UI: Style your inventory to match your game's aesthetics.
-Efficient Backend: Optimized for performance, ensuring smooth gameplay.
-Support for Multiple Item Types: Weapons, potions, tools, and more.
-Expandable: Add more features or integrate with other systems seamlessly.
-(Add other features as necessary)
-Installation
-Download the inventorySystem asset from the Unity Asset Store.
-Import the asset into your Unity project.
-Navigate to the inventorySystem folder in your Project pane.
-Follow the setup guide provided in the Documentation folder.
-Quick Start
-Drag the InventoryManager prefab into your scene.
-Connect your player character or other entities to the InventoryManager.
-Start adding items and customize as needed!
-Documentation
-Detailed documentation is provided within the asset package. This includes setup instructions, customization options, and API references.
+## Features
 
-Compatibility
-Unity 2020.3 and newer.
-Supports both 2D and 3D projects.
-Compatible with Unity's URP and HDRP.
-Support
-Having issues or need assistance? Reach out to us:
+- **Drag & Drop Interface**: Effortlessly move items within the inventory.
+- **Customizable UI**: Tailor your inventory to resonate with your game's visual appeal.
+- **Efficient Backend**: Fine-tuned for performance, guaranteeing fluid gameplay.
+- **Support for Multiple Item Types**: From weapons to potions, tools, and beyond.
+- **Expandable**: Enhance with additional features or merge with other systems without a hitch.
+## Installation
 
-Email: support@email.com
-Discord: YourDiscord#1234
-Forum: Link to your support forum
-Changelog
-v1.0.0 - Initial release.
-License
-This asset is licensed under the Unity Asset Store EULA. Please refer to the EULA for terms and conditions.
+1. Procure the `inventorySystem` asset from the Unity Asset Store.
+2. Incorporate the asset into your Unity venture.
+3. Traverse to the `inventorySystem` directory in your Project window.
+4. Adhere to the setup manual located in the `Documentation` directory.
 
+## Quick Start
+
+1. Drag the `InventoryManager` prefab into your scene.
+2. Unpack `InventoryManager` prefab.
+3. Link your player avatar or other entities to the `InventoryManager`.
+4. Commence item addition and tweak as per your preference!
+
+## Compatibility
+
+- Compatible with Unity `2020.3` and subsequent versions.
+- Endorses both 2D and 3D ventures.
+- Harmonizes with Unity's URP and HDRP.
+
+## Support
+
+Encountering dilemmas or in need of guidance? Connect with us:
+
+**Email**: [jbs00026@gmail.com](mailto:jbs00026@gmail.com)
+
+## Changelog
+
+- `v1.0.0` - Maiden release.
+
+## License
+
+This asset abides by the Unity Asset Store EULA. Kindly consult the EULA for detailed terms and stipulations.

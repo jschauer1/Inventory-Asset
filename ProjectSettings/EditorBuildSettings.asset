@@ -8,7 +8,14 @@ EditorBuildSettings:
   - enabled: 0
     path: 
     guid: 00000000000000000000000000000000
+  - enabled: 0
+    path: 
+    guid: 00000000000000000000000000000000
   - enabled: 1
-    path: Assets/InventoryAsset/Scenes/SampleScene/InventorySampleScene.unity
-    guid: af03f73161a17224d937f05350b3e171
+    path: Assets/InventoryAsset/Scenes/SampleScenes/InventoryScene2/InventorySampleScene2.unity
+    guid: 0c2db5eeff4168c48b61aafb066f21a4
+  - enabled: 0
+    path: Assets/InventoryAsset/Scenes/SampleScenes/InventoryScene1/InventorySampleScene
+      1.unity
+    guid: 135c7b78579dc7848a3cf91051ddc77f
   m_configObjects: {}

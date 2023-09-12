@@ -1,7 +1,10 @@
 using UnityEngine;
 namespace InventorySystem
 {
-
+    //Author: Jaxon Schauer
+    /// <summary>
+    /// This class has test functions, can be used to help debug
+    /// </summary>
     public class Test : MonoBehaviour
     {
         [SerializeField]
