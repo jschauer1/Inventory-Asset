@@ -29,7 +29,7 @@ namespace InventorySystem
         [Space(20)]
         [Tooltip("Assign the main UI canvas.")]
         [SerializeField]
-        private Transform UI; // UI canvas to build inventories on.
+        private Transform UI;
 
         [Space(10)] // Add some space/
 
@@ -738,16 +738,15 @@ namespace InventorySystem
         {
             return inventoryManager[inventoryName];
         }
-
+        public Transform GetUI()
+        {
+            return UI;
+        }
         public InventoryItem GetItem(string inventoryName, int index)
         {
             return inventoryManager[inventoryName].InventoryGetItem(index);
         }
 
-        public Transform GetUI()
-        {
-            return UI;
-        }
 
         public List<ItemInitializer> GetItems()
         {

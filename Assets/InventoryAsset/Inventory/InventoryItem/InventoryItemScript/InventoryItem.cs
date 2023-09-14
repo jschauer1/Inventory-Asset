@@ -24,7 +24,7 @@ namespace InventorySystem
         private int position;
         private string inventory;
         private string previousInventory;
-        internal InventoryItem(ItemInitializer init)
+        public InventoryItem(ItemInitializer init)
         {
             this.amount = 1;
             this.itemType = init.GetItemType();

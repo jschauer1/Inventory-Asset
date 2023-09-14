@@ -870,12 +870,12 @@ namespace InventorySystem
 
         }
 
-        internal ref Inventory GetInventory()
+        public ref Inventory GetInventory()
         {
             return ref inventory;
         }
 
-        internal void SetInventory(ref Inventory inventory)
+        public void SetInventory(ref Inventory inventory)
         {
             this.inventory = inventory;
         }

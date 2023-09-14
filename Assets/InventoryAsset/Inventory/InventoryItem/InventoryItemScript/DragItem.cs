@@ -19,7 +19,7 @@ namespace InventorySystem
         private InventoryItem item;
 
         /// The text UI element for displaying item information
-        [SerializeField,HideInInspector]
+        [SerializeField, HideInInspector]
         private TextMeshProUGUI text;
 
         //determines how item acts on miss;
@@ -36,9 +36,9 @@ namespace InventorySystem
         }
         public void Initiailize()
         {
-            if (transform.GetChild(0)!= null)
+            if (transform.GetChild(0) != null)
             {
-                if(transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>()!=null)
+                if (transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>() != null)
                 {
                     text = transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>();
                 }
@@ -59,22 +59,26 @@ namespace InventorySystem
         public void OnDrag(PointerEventData eventData)
         {
             if (Draggable()) return;
-            Vector2 position;
-            Canvas canvas = InventoryController.instance.GetUI().GetComponent<Canvas>();
-            transform.parent.gameObject.transform.SetSiblingIndex(100);
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                (RectTransform)canvas.transform, eventData.position, canvas.worldCamera, out position);
 
-            transform.position = canvas.transform.TransformPoint(position);
+            // Get the canvas and its RectTransform
+            Canvas canvas = InventoryController.instance.GetUI().GetComponent<Canvas>();
+            RectTransform canvasRect = canvas.GetComponent<RectTransform>();
+
+            // Convert the screen point to a point relative to the canvas
+            Vector2 localPointerPosition;
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, eventData.position, eventData.pressEventCamera, out localPointerPosition))
+            {
+                // Update the item's position relative to the canvas
+                transform.localPosition = localPointerPosition;
+            }
+
+            transform.parent.gameObject.transform.SetAsLastSibling(); // Ensure the dragged item is always on top
 
             List<RaycastResult> results = new List<RaycastResult>();
             EventSystem.current.RaycastAll(eventData, results);
             bool foundSlot = false;
 
-            if (prevslot != null)
-            {
-                prevslot.GetComponent<Slot>().GetInventoryUI().UnHighlight(prevslot);
-            }
+
             foreach (RaycastResult result in results)
             {
                 if (result.gameObject.CompareTag("Slot"))
@@ -176,7 +180,7 @@ namespace InventorySystem
             }
             else
             {
-                if(itemAcceptedInInventory)
+                if (itemAcceptedInInventory)
                 {
                     HandleInvalidPlacementOverInv(slot.GetItem());
 
@@ -200,7 +204,7 @@ namespace InventorySystem
             {
                 InventoryController.instance.AddItemPos(CurrentSlot.GetInventoryUI().GetInventoryName(), item, CurrentSlot.GetPosition());
                 CurrentSlot.GetInventoryUI().UnHighlight(CurrentSlot.gameObject);
-                if(!isOverride)
+                if (!isOverride)
                 {
                     CurrentSlot.GetInventoryUI().InvokeMiss(worldPosition, item);
                 }
@@ -217,7 +221,7 @@ namespace InventorySystem
         }
         private void HandleInvalidPlacementOverInv(InventoryItem inSlot)
         {
-            if(CurrentSlot.GetInventoryUI().InvokeMissOverSlot(item, inSlot))
+            if (CurrentSlot.GetInventoryUI().InvokeMissOverSlot(item, inSlot))
             {
                 Destroy(gameObject);
             }
