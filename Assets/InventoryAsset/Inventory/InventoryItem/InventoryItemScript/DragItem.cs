@@ -83,13 +83,19 @@ namespace InventorySystem
             {
                 if (result.gameObject.CompareTag("Slot"))
                 {
-                    prevslot = result.gameObject;
                     Slot slot = result.gameObject.GetComponent<Slot>();
                     if (slot.GetItem().GetIsNull() && slot.GetInventoryUI().GetInventory().CheckAcceptance(item.GetItemType()))
                     {
                         slot.GetInventoryUI().Highlight(result.gameObject);
+
                         foundSlot = true;
                     }
+                    if (prevslot != null && prevslot != result.gameObject)
+                    {
+                        prevslot.GetComponent<Slot>().GetInventoryUI().UnHighlight(prevslot);
+                        prevslot.GetComponent<Slot>().GetInventoryUI().ResetHighlight();
+                    }
+                    prevslot = result.gameObject;
 
                     break;
                 }
