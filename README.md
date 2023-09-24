@@ -1,6 +1,6 @@
 # `inventorySystem` for Unity
 
-`inventorySystem` is a robust and adaptable inventory management solution crafted for Unity developers. Whether you're venturing into an RPG, strategizing for a strategy game, or diving into any genre that demands an inventory system,
+`InventorySystem` is a robust and adaptable inventory management solution crafted for Unity developers. Whether you're venturing into an RPG, strategizing for a strategy game, or diving into any genre that demands an inventory system,
 this asset is sculpted to cater to your requirements.
 
 ## Features
@@ -12,9 +12,9 @@ this asset is sculpted to cater to your requirements.
 - **Expandable**: Enhance with additional features or merge with other systems without a hitch.
 ## Installation
 
-1. Procure the `inventorySystem` asset from the Unity Asset Store.
+1. Procure the `InventorySystem` asset from the Unity Asset Store.
 2. Incorporate the asset into your Unity venture.
-3. Traverse to the `inventorySystem` directory in your Project window.
+3. Traverse to the `InventorySystem` directory in your Project window.
 4. Adhere to the setup manual located in the `Documentation` directory.
 
 ## Quick Start
@@ -28,7 +28,6 @@ this asset is sculpted to cater to your requirements.
 
 - Compatible with Unity `2020.3` and subsequent versions.
 - Endorses both 2D and 3D ventures.
-- Harmonizes with Unity's URP and HDRP.
 
 ## Support
 
