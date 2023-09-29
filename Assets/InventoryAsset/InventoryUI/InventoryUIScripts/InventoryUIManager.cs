@@ -331,6 +331,7 @@ namespace InventorySystem
                     slotObjectInstance.GetComponent<RectTransform>().sizeDelta = slotSize;
                     slotObjectInstance.GetComponent<Image>().sprite = SlotImage.regular;
                     Slot slotInstance = slotObjectInstance.GetComponent<Slot>();
+                    slotInstance.GetItemHolder().GetComponent<DragItem>().Initiailize();
                     slotInstance.SetChildImageSize(new Vector2(slotSize.x * ItemImageSizeFactor.x, slotSize.y * ItemImageSizeFactor.y));
                     slotInstance.SetTextSize(textSize);
                     slotInstance.SetTextOffset(textPosition);
@@ -735,7 +736,7 @@ namespace InventorySystem
         {
             if (!InventoryController.instance.checkUI(gameObject))
             {
-                Debug.LogError("inventoryUIDict does not contain object, this can be caused by not initializing through inventory controller. Destroying: " + gameObject.name);
+                Debug.LogError("inventoryUIDict does not contain object, this can be caused by not initializing through InventoryController or not unpacking InventoryController. Destroying: " + gameObject.name);
                 Destroy(gameObject);
                 return false;
             }

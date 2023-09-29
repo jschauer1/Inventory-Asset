@@ -119,10 +119,7 @@ namespace InventorySystem
         {
 
             if (!TestSetup()) return;
-            if (iUnderstandTheSetup)
-            {
-                instance = this;
-            }
+            instance = this;
             AllignDictionaries();
             RemoveDeletedInventories();
             InitializeNewInventories();
@@ -595,13 +592,26 @@ namespace InventorySystem
         /// </summary>
         private bool TestSetup()
         {
-            return TestinventoryManagerObjSetup()
+
+            return TestIunderstandTheSetup()
+                && TestinventoryManagerObjSetup()
                 && TestInventoryUI()
                 && TestInveInitializerListSetup()
                 && TestUISetup();
 
 
+
         }
+        private bool TestIunderstandTheSetup()
+        {
+            if(!iUnderstandTheSetup)
+            {
+                Debug.LogError("Read instructions and click The I understand The setup bool.");
+                return false;
+            }
+            return true;
+        }
+
 
         /// <summary>
         /// Tests that the inventories in allInventoryUI are correctly instantiated

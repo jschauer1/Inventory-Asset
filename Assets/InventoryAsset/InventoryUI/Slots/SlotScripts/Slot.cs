@@ -96,14 +96,13 @@ namespace InventorySystem
             Vector2 prevTextPos = SlotItemHolder.GetComponent<DragItem>().GetTextPosition();
 
             SlotItemHolder = newInstance;
-
-            SlotItemHolder.GetComponent<DragItem>().SetTextPosition(prevTextPos);
+            DragItem slotDragItem= SlotItemHolder.GetComponent<DragItem>();
+            slotDragItem.Initiailize();
+            slotDragItem.SetTextPosition(prevTextPos);
             inventoryUIManager.GetInventory().EraseItemInPosition(position);
             SetChildImageSize(SlotItemHolderSize);
             SetTextSize(textSize);
-            SlotItemHolder.GetComponent<DragItem>().SetReturnOnMiss(returnOnMiss);
-
-
+            slotDragItem.SetReturnOnMiss(returnOnMiss);
             SlotItemHolder.SetActive(false);
         }
         /// <summary>

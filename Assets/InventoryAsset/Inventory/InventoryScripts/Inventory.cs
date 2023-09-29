@@ -501,6 +501,7 @@ namespace InventorySystem
             {
                 return false;
             }
+            //If inventory has no empty slots and does not yet contain the item
             if (!itemPositions.ContainsKey(item))
             {
                 return true;
