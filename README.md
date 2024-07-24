@@ -3,6 +3,7 @@
 `InventorySystem` is a robust and adaptable inventory management solution crafted for Unity developers. Whether you're venturing into an RPG, strategizing for a strategy game, or diving into any genre that demands an inventory system,
 this asset is sculpted to cater to your requirements.
 
+See on unity asset store: https://assetstore.unity.com/packages/tools/gui/simple-and-powerful-inventory-system-265015
 ## Features
 
 - **Drag & Drop Interface**: Effortlessly move items within the inventory.
