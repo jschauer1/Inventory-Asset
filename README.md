@@ -4,6 +4,7 @@
 this asset is sculpted to cater to your requirements.
 
 See on unity asset store: https://assetstore.unity.com/packages/tools/gui/simple-and-powerful-inventory-system-265015
+Video example of inventory system: https://www.youtube.com/watch?v=VNwcUmXBAb0
 ## Features
 
 - **Drag & Drop Interface**: Effortlessly move items within the inventory.
